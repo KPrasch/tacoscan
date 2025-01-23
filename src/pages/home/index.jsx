@@ -24,7 +24,7 @@ import StakerDetailPage from "./stakerDetail";
 import UserDetailPage from "./userDetail";
 
 const HomePage = () => {
-  const [tab, setTab] = React.useState("1");
+  const [tab, setTab] = React.useState("rituals");
   const [anchorElSetting, setAnchorElSetting] = React.useState(null);
   const [searchInput, setSearchInput] = React.useState("");
   const [isSearch, setIsSearch] = React.useState(false);
@@ -160,6 +160,7 @@ const HomePage = () => {
             >
               <Tab sx={{ padding: 2 }} label="DKG Rituals" value="rituals" />
               <Tab sx={{ padding: 2 }} label="Stakers" value="stakers" />
+              <Tab sx={{ padding: 2 }} label="About" value="about" />
             </TabList>
             <div style={{ flex: "1 1 0%" }}></div>
             <div className={styles.search}>
@@ -174,21 +175,12 @@ const HomePage = () => {
                 }}
                 InputProps={{
                   endAdornment: (
-                    <IconButton>
-                      <SearchIcon onClick={() => submitSearch()} />
+                    <IconButton onClick={() => submitSearch()}>
+                      <SearchIcon />
                     </IconButton>
                   ),
                 }}
               />
-            </div>
-            <div className={styles.about}>
-              <TabList
-                className={styles.tab}
-                onChange={handleChange}
-                aria-label=""
-              >
-                <Tab sx={{ padding: 0 }} label="About" value="about" />
-              </TabList>
             </div>
           </Box>
           <TabPanel value="rituals">{rituals()}</TabPanel>
