@@ -6,14 +6,13 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 const theme = createTheme({
     typography: {
         allVariants: {
-            fontSize:"0.875rem",
+            fontSize: "0.875rem",
             fontFamily: `Work Sans`,
-            "-webkit-font-smoothing":"antialiased",
-            "-moz-osx-font-smoothing":"grayscale"
+            WebkitFontSmoothing: "antialiased",
+            MozOsxFontSmoothing: "grayscale"
         },
     },
 });
-
 
 function App() {
   return (
@@ -22,6 +21,5 @@ function App() {
     </ThemeProvider>
   );
 }
-
 
 export default App;
