@@ -301,61 +301,57 @@ export function convertToLittleEndian(txHash) {
 }
 
 export const formatRitualsData = (rawData, timeout) => {
+  if (rawData === undefined) {
+    return [];
+  }
+
   const timeoutMs = parseFloat(timeout) * 1000;
 
-  const formattedData = rawData.map((item) => {
-    const currentTimestampMs = Date.now();
-    const initTimeStampMs = item.initTimestamp * 1000;
-    const timeoutStamp = initTimeStampMs + timeoutMs;
-    const transactionsLength = item.transactions.length;
-
-    if (item.dkgStatus === "DKG_AWAITING_AGGREGATIONS" || item.dkgStatus === "DKG_AWAITING_TRANSCRIPTS") {
-      const isTimedOut = timeoutStamp < currentTimestampMs;
-      if (isTimedOut) {
-        item.dkgStatus = "TIME_OUT";
-        item.transactions.unshift({
-          timestamp: timeoutStamp / 1000,
-          description: "Time Out"
-        });
+  return rawData
+    .map((ritual) => {
+      // Calculate status
+      const currentTimestampMs = Date.now();
+      const initTimeStampMs = ritual.initTimestamp * 1000;
+      const timeoutStamp = initTimeStampMs + timeoutMs;
+      
+      let status = ritual.dkgStatus.replaceAll("_", " ");
+      
+      if ((ritual.dkgStatus === "DKG_AWAITING_AGGREGATIONS" || 
+           ritual.dkStatus === "DKG_AWAITING_TRANSCRIPTS") && 
+          timeoutStamp < currentTimestampMs) {
+        status = "TIME OUT";
       }
-    }
 
-    const participantsLower = item.participants.map((participant) => participant.toLowerCase());
-    const postedTranscriptsLower = item.postedTranscripts.map((transcript) => transcript.toLowerCase());
-    const postedAggregationsLower = item.postedAggregations.map((aggregation) => aggregation.toLowerCase());
-
-    const pendingTranscripts = participantsLower.filter(
-      (participant) => !postedTranscriptsLower.includes(participant)
-    );
-
-    const pendingAggregations = participantsLower.filter(
-      (participant) => !postedAggregationsLower.includes(participant)
-    );
-    return {
-      id: parseFloat(item.id),
-      status: item.dkgStatus.replaceAll("_", " "),
-      initiator: item.initiator,
-      authority: item.authority,
-      aggregations: item.postedAggregations,
-      transcripts: item.postedTranscripts,
-      participants: item.participants,
-      publicKey: item.publicKey,
-      initTimeStamp: item.initTimeStamp * 1000,
-      endTimeStamp: item.endTimestamp * 1000,
-      threshold: item.threshold,
-      dkgSize: item.dkgSize,
-      accessController: item.accessController,
-      transactions: item.transactions,
-      updateTime: item.transactions[transactionsLength - 1].timestamp * 1000,
-      totalParticipants: item.participants.length,
-      totalPostedAggregations: item.postedAggregations.length,
-      totalPostedTranscripts: item.postedTranscripts.length,
-      pendingTranscripts: pendingTranscripts,
-      pendingAggregations: pendingAggregations,
-  }});
-
-  return formattedData.sort((a, b) => b.id - a.id);
-}
+      return {
+        id: ritual.id,
+        status: status,
+        initiator: ritual.initiator,
+        authority: ritual.authority,
+        aggregations: ritual.postedAggregations,
+        transcripts: ritual.postedTranscripts,
+        participants: ritual.participants,
+        publicKey: ritual.publicKey,
+        initTimeStamp: ritual.initTimestamp * 1000,
+        endTimeStamp: ritual.endTimestamp * 1000,
+        threshold: ritual.threshold,
+        dkgSize: ritual.dkgSize,
+        accessController: ritual.accessController,
+        transactions: ritual.transactions,
+        updateTime: ritual.transactions[ritual.transactions.length - 1].timestamp * 1000,
+        totalParticipants: ritual.participants.length,
+        totalPostedAggregations: ritual.postedAggregations.length,
+        totalPostedTranscripts: ritual.postedTranscripts.length,
+        pendingTranscripts: ritual.participants.filter(
+          (participant) => !ritual.postedTranscripts.includes(participant)
+        ),
+        pendingAggregations: ritual.participants.filter(
+          (participant) => !ritual.postedAggregations.includes(participant)
+        ),
+        operatorAddresses: ritual.operatorAddresses || {} // Preserve operator addresses
+      };
+    })
+    .sort((a, b) => b.id - a.id);
+};
 
 export const formatStakers = (rawData) => {
   const stakers = rawData.map((item) => ({
@@ -456,26 +452,55 @@ export const formatUserDetail = (user) => ({
 });
 
 export const getRituals = async (isSearch, searchInput) => {
-  const emptyData = JSON.parse(`[]`);
-  try {
-    let data;
-    if (!isSearch) {
-      data = await client.execute(client.GetAllRitualsQueryDocument, {});
-    } else {
-      const fundingTxHashHex = convertToLittleEndian(searchInput.toLowerCase());
-      data = await client.execute(client.GetRitualsQueryByUserDocument, {
-        authority: searchInput.toLowerCase(),
-        id: searchInput.toLowerCase(),
-        txHash: fundingTxHashHex,
-      });
+    const emptyData = JSON.parse(`[]`);
+    try {
+        let data;
+        if (!isSearch) {
+            data = await client.execute(client.GetAllRitualsQueryDocument, {});
+        } else {
+            const fundingTxHashHex = convertToLittleEndian(searchInput.toLowerCase());
+            data = await client.execute(client.GetRitualsQueryByUserDocument, {
+                authority: searchInput.toLowerCase(),
+                id: searchInput.toLowerCase(),
+                txHash: fundingTxHashHex,
+            });
+        }
+        
+        if (data.data !== undefined) {
+            // Fetch operator addresses for all participants
+            const stakersData = await client.execute(client.GetAllStakersQueryDocument, {});
+            const operatorMap = {};
+            
+            if (stakersData.data?.appAuthorizations) {
+                stakersData.data.appAuthorizations.forEach(auth => {
+                    if (auth.tacoOperator) {
+                        const stakerId = auth.id.split('-')[0].toLowerCase();
+                        operatorMap[stakerId] = {
+                            operator: auth.tacoOperator.operator,
+                            confirmed: auth.tacoOperator.confirmed
+                        };
+                    }
+                });
+            }
+            
+            // Add operatorMap to each ritual
+            if (data.data.rituals) {
+                data.data.rituals = data.data.rituals.map(ritual => ({
+                    ...ritual,
+                    operatorAddresses: ritual.participants.reduce((acc, participant) => {
+                        const operatorInfo = operatorMap[participant.toLowerCase()];
+                        acc[participant] = operatorInfo && operatorInfo.confirmed ? operatorInfo.operator : "-";
+                        return acc;
+                    }, {})
+                }));
+            }
+            
+            return data.data;
+        }
+    } catch (e) {
+        console.log("error to fetch ritual data " + e);
     }
-    if (data.data !== undefined) {
-      return data.data;
-    }
-  } catch (e) {
-    console.log("error to fetch ritual data " + e);
-  }
-  return emptyData;
+    return emptyData;
 };
 
 export const getRitualsByStakingProvider = async (searchInput) => {
@@ -487,6 +512,34 @@ export const getRitualsByStakingProvider = async (searchInput) => {
     });
 
     if (data.data !== undefined) {
+      // Fetch operator addresses for all participants
+      const stakersData = await client.execute(client.GetAllStakersQueryDocument, {});
+      const operatorMap = {};
+      
+      if (stakersData.data?.appAuthorizations) {
+        stakersData.data.appAuthorizations.forEach(auth => {
+          if (auth.tacoOperator) {
+            const stakerId = auth.id.split('-')[0].toLowerCase();
+            operatorMap[stakerId] = {
+              operator: auth.tacoOperator.operator,
+              confirmed: auth.tacoOperator.confirmed
+            };
+          }
+        });
+      }
+      
+      // Add operatorMap to each ritual
+      if (data.data.rituals) {
+        data.data.rituals = data.data.rituals.map(ritual => ({
+          ...ritual,
+          operatorAddresses: ritual.participants.reduce((acc, participant) => {
+            const operatorInfo = operatorMap[participant.toLowerCase()];
+            acc[participant] = operatorInfo && operatorInfo.confirmed ? operatorInfo.operator : "-";
+            return acc;
+          }, {})
+        }));
+      }
+
       return data.data;
     }
   } catch (e) {

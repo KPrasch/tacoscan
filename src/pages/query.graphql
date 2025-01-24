@@ -17,6 +17,7 @@ query GetRitualsQueryByUser($authority:Bytes,$id:ID,$txHash:Bytes){
         dkgStatus
         authority
         accessController
+        feeModel
         participants
         postedAggregations
         postedTranscripts
@@ -52,6 +53,7 @@ query GetRitualsQueryByStakingProvider($id:Bytes!){
         dkgStatus
         authority
         accessController
+        feeModel
         participants
         postedAggregations
         postedTranscripts
@@ -76,6 +78,7 @@ query GetAllRitualsQuery{
         endTimestamp
         authority
         accessController
+        feeModel
         dkgSize
         dkgStatus
         participants

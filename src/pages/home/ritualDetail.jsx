@@ -87,6 +87,7 @@ const RitualDetailPage = () => {
         const hasPendingTranscript = ritual.pendingTranscripts?.includes(participant);
         const hasSubmittedAggregation = ritual.aggregations.includes(participant);
         const hasPendingAggregation = ritual.pendingAggregations?.includes(participant);
+        const operatorAddress = ritual.operatorAddresses?.[participant] || "-";
 
         const getStatusIcon = (isSubmitted, isPending) => {
             if (isSubmitted) return <CheckCircleIcon sx={{ color: "#4CAF50", fontSize: "1.2rem" }} />;
@@ -96,7 +97,7 @@ const RitualDetailPage = () => {
 
         return (
             <TableRow>
-                <TableCell colSpan={3} sx={{ padding: 0, border: 'none' }}>
+                <TableCell colSpan={4} sx={{ padding: 0, border: 'none' }}>
                     <Accordion sx={{ 
                         boxShadow: 'none', 
                         '&:before': { display: 'none' },
@@ -120,7 +121,7 @@ const RitualDetailPage = () => {
                                 borderBottom: '1px solid rgba(0,0,0,0.12)'
                             }}>
                                 <div style={{ 
-                                    width: '60%', 
+                                    width: '35%', 
                                     padding: '12px 16px',
                                     display: 'flex',
                                     alignItems: 'center'
@@ -144,7 +145,37 @@ const RitualDetailPage = () => {
                                     />
                                 </div>
                                 <div style={{ 
-                                    width: '20%', 
+                                    width: '35%', 
+                                    padding: '12px 16px',
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                }}>
+                                    {operatorAddress !== "-" ? (
+                                        <>
+                                            <Link
+                                                target="_blank"
+                                                underline="hover"
+                                                href={Utils.getPolygonScanAddressLink() + operatorAddress}
+                                                className={styles.link}
+                                                sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                                            >
+                                                {operatorAddress}
+                                                <ShareLink style={{ marginLeft: "4px" }}/>
+                                            </Link>
+                                            <Copy
+                                                style={{ cursor: "pointer", marginLeft: "4px" }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    copyToClipBoard(operatorAddress);
+                                                }}
+                                            />
+                                        </>
+                                    ) : (
+                                        <span style={{ color: 'rgba(0,0,0,0.38)' }}>Not registered</span>
+                                    )}
+                                </div>
+                                <div style={{ 
+                                    width: '15%', 
                                     padding: '12px 16px',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -153,7 +184,7 @@ const RitualDetailPage = () => {
                                     {getStatusIcon(hasSubmittedTranscript, hasPendingTranscript)}
                                 </div>
                                 <div style={{ 
-                                    width: '20%', 
+                                    width: '15%', 
                                     padding: '12px 16px',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -212,87 +243,102 @@ const RitualDetailPage = () => {
                     <span>Status: {ritual.status}</span>
                 </div>
             </div>
-            <Box sx={{ margin: "20px" }}>
+            <Box sx={{ margin: "16px" }}>
                 <div className={styles.detail_item} style={{ flexDirection: "column" }}>
-                    <div style={{ width: "100%" }}>
+                    {/* Timeline Section */}
+                    <div style={{ 
+                        width: "100%",
+                        marginBottom: "16px"
+                    }}>
                         <TransactionTimeline
                             transactions={ritual.transactions}
                             network={ritual.network}
                         />
                     </div>
+                    
+                    {/* Stats Boxes Section */}
                     <div style={{ 
                         width: "100%", 
-                        marginTop: "20px", 
-                        display: "grid", 
-                        gridTemplateColumns: "minmax(100px, 1fr) minmax(auto, max-content) minmax(100px, 1fr) minmax(100px, 1fr) minmax(auto, max-content) minmax(auto, max-content)", 
-                        gap: "20px" 
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "8px",
+                        margin: "-4px",
+                        marginBottom: "16px"
                     }}>
                         <Box sx={{
-                            padding: "8px",
+                            padding: "12px",
+                            margin: "4px",
                             backgroundColor: "white",
                             borderRadius: "12px",
                             boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                             display: "flex",
                             flexDirection: "column",
-                            height: "100px"
+                            height: "80px",
+                            flex: "0 0 200px"
                         }}>
-                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>DKG ID</div>
-                            <div style={{ fontSize: "3.5rem", fontWeight: "500", lineHeight: 1, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>{ritual.id}</div>
+                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>DKG ID</div>
+                            <div style={{ fontSize: "2.5rem", fontWeight: "500", lineHeight: 1, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>{ritual.id}</div>
                         </Box>
 
                         <Box sx={{
-                            padding: "8px",
+                            padding: "12px",
+                            margin: "4px",
                             backgroundColor: "white",
                             borderRadius: "12px",
                             boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                             display: "flex",
                             flexDirection: "column",
-                            height: "100px",
-                            width: "max-content"
+                            height: "80px",
+                            flex: "0 0 240px"
                         }}>
-                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Status</div>
-                            <div style={{ fontSize: "2.25rem", fontWeight: "500", lineHeight: 1.2, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end", color: getColorByStatus(ritual.status) }}>{ritual.status}</div>
+                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Status</div>
+                            <div style={{ fontSize: "1.75rem", fontWeight: "500", lineHeight: 1.2, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end", color: getColorByStatus(ritual.status) }}>{ritual.status}</div>
                         </Box>
 
                         <Box sx={{
-                            padding: "8px",
+                            padding: "12px",
+                            margin: "4px",
                             backgroundColor: "white",
                             borderRadius: "12px",
                             boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                             display: "flex",
                             flexDirection: "column",
-                            height: "100px"
+                            height: "80px",
+                            flex: "0 0 200px"
                         }}>
-                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Threshold</div>
-                            <div style={{ fontSize: "3.5rem", fontWeight: "500", lineHeight: 1, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>{ritual.threshold}</div>
+                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Threshold</div>
+                            <div style={{ fontSize: "2.5rem", fontWeight: "500", lineHeight: 1, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>{ritual.threshold}</div>
                         </Box>
 
                         <Box sx={{
-                            padding: "8px",
+                            padding: "12px",
+                            margin: "4px",
                             backgroundColor: "white",
                             borderRadius: "12px",
                             boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                             display: "flex",
                             flexDirection: "column",
-                            height: "100px"
+                            height: "80px",
+                            flex: "0 0 200px"
                         }}>
-                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>DKG Size</div>
-                            <div style={{ fontSize: "3.5rem", fontWeight: "500", lineHeight: 1, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>{ritual.dkgSize}</div>
+                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>DKG Size</div>
+                            <div style={{ fontSize: "2.5rem", fontWeight: "500", lineHeight: 1, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>{ritual.dkgSize}</div>
                         </Box>
 
                         <Box sx={{
-                            padding: "8px",
+                            padding: "12px",
+                            margin: "4px",
                             backgroundColor: "white",
                             borderRadius: "12px",
                             boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                             display: "flex",
                             flexDirection: "column",
-                            height: "100px",
-                            width: "max-content"
+                            height: "80px",
+                            flex: "1 1 400px"
                         }}>
                             <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Public Key</div>
-                            <div style={{ fontSize: "1.1rem", fontWeight: "500", wordBreak: "break-all", display: "flex", alignItems: "flex-start", gap: "8px", flex: 1, alignItems: "center" }}>
-                                {ritual.publicKey}
+                            <div style={{ fontSize: "1.1rem", fontWeight: "500", display: "flex", alignItems: "center", gap: "8px", flex: 1 }}>
+                                <span style={{ flex: "1 1 auto" }}>{ritual.publicKey}</span>
                                 <Copy
                                     style={{ cursor: "pointer", flexShrink: 0 }}
                                     onClick={(e) => copyToClipBoard(ritual.publicKey)}
@@ -301,80 +347,181 @@ const RitualDetailPage = () => {
                         </Box>
 
                         <Box sx={{
-                            padding: "8px",
+                            padding: "12px",
+                            margin: "4px",
                             backgroundColor: "white",
                             borderRadius: "12px",
                             boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                             display: "flex",
                             flexDirection: "column",
-                            height: "100px",
-                            width: "max-content"
+                            height: "80px",
+                            flex: "1 1 400px"
                         }}>
                             <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Initiator</div>
-                            <div style={{ fontSize: "1.1rem", fontWeight: "500", wordBreak: "break-all", flex: 1, display: "flex", alignItems: "center" }}>
+                            <div style={{ fontSize: "1.1rem", fontWeight: "500", display: "flex", alignItems: "center", padding: "8px 0", flex: 1 }}>
                                 <Link
                                     target="_blank"
                                     underline="hover"
                                     href={Utils.getPolygonScanAddressLink() + ritual.initiator}
                                     className={styles.link}
+                                    sx={{ flex: "1 1 auto" }}
                                 >
                                     {ritual.initiator}
-                                    <ShareLink style={{ marginLeft: "4px" }}/>
+                                    <ShareLink style={{ marginLeft: "4px", flexShrink: 0 }}/>
                                 </Link>
                                 <Copy
-                                    style={{ cursor: "pointer", marginLeft: "4px" }}
+                                    style={{ cursor: "pointer", marginLeft: "4px", flexShrink: 0 }}
                                     onClick={(e) => copyToClipBoard(ritual.initiator)}
                                 />
                             </div>
                         </Box>
 
                         <Box sx={{
-                            padding: "20px",
+                            padding: "12px",
+                            margin: "4px",
                             backgroundColor: "white",
-                            borderRadius: "8px",
-                            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-                            gridColumn: "1 / -1"
+                            borderRadius: "12px",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                            display: "flex",
+                            flexDirection: "column",
+                            height: "80px",
+                            flex: "1 1 400px"
                         }}>
-                            <div style={{ fontSize: "0.875rem", color: "rgba(0,0,0,0.6)", marginBottom: "12px" }}>Participants ({ritual.participants.length})</div>
-                            <TableContainer sx={{ width: '100%' }}>
-                                <Table sx={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell width="60%" sx={{ 
-                                                color: 'rgba(0,0,0,0.6)', 
-                                                fontSize: '0.75rem',
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.5px',
-                                                padding: '12px 16px',
-                                                borderBottom: '1px solid rgba(0,0,0,0.12)'
-                                            }}>Node Address</TableCell>
-                                            <TableCell width="20%" align="center" sx={{ 
-                                                color: 'rgba(0,0,0,0.6)', 
-                                                fontSize: '0.75rem',
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.5px',
-                                                padding: '12px 16px',
-                                                borderBottom: '1px solid rgba(0,0,0,0.12)'
-                                            }}>Transcript</TableCell>
-                                            <TableCell width="20%" align="center" sx={{ 
-                                                color: 'rgba(0,0,0,0.6)', 
-                                                fontSize: '0.75rem',
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.5px',
-                                                padding: '12px 16px',
-                                                borderBottom: '1px solid rgba(0,0,0,0.12)'
-                                            }}>Aggregation</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {ritual.participants.map((participant, index) => (
-                                            <ParticipantRow key={participant} participant={participant} ritual={ritual} />
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
+                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Authority</div>
+                            <div style={{ fontSize: "1.1rem", fontWeight: "500", display: "flex", alignItems: "center", padding: "8px 0", flex: 1 }}>
+                                <Link
+                                    target="_blank"
+                                    underline="hover"
+                                    href={Utils.getPolygonScanAddressLink() + ritual.authority}
+                                    className={styles.link}
+                                    sx={{ flex: "1 1 auto" }}
+                                >
+                                    {ritual.authority}
+                                    <ShareLink style={{ marginLeft: "4px", flexShrink: 0 }}/>
+                                </Link>
+                                <Copy
+                                    style={{ cursor: "pointer", marginLeft: "4px", flexShrink: 0 }}
+                                    onClick={(e) => copyToClipBoard(ritual.authority)}
+                                />
+                            </div>
+                        </Box>
+
+                        <Box sx={{
+                            padding: "12px",
+                            margin: "4px",
+                            backgroundColor: "white",
+                            borderRadius: "12px",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                            display: "flex",
+                            flexDirection: "column",
+                            height: "80px",
+                            flex: "1 1 400px"
+                        }}>
+                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Access Controller</div>
+                            <div style={{ fontSize: "1.1rem", fontWeight: "500", display: "flex", alignItems: "center", padding: "8px 0", flex: 1 }}>
+                                <Link
+                                    target="_blank"
+                                    underline="hover"
+                                    href={Utils.getPolygonScanAddressLink() + ritual.accessController}
+                                    className={styles.link}
+                                    sx={{ flex: "1 1 auto" }}
+                                >
+                                    {ritual.accessController}
+                                    <ShareLink style={{ marginLeft: "4px", flexShrink: 0 }}/>
+                                </Link>
+                                <Copy
+                                    style={{ cursor: "pointer", marginLeft: "4px", flexShrink: 0 }}
+                                    onClick={(e) => copyToClipBoard(ritual.accessController)}
+                                />
+                            </div>
+                        </Box>
+
+                        <Box sx={{
+                            padding: "12px",
+                            margin: "4px",
+                            backgroundColor: "white",
+                            borderRadius: "12px",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                            display: "flex",
+                            flexDirection: "column",
+                            height: "80px",
+                            flex: "1 1 400px"
+                        }}>
+                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Fee Model</div>
+                            <div style={{ fontSize: "1.1rem", fontWeight: "500", display: "flex", alignItems: "center", padding: "8px 0", flex: 1 }}>
+                                <Link
+                                    target="_blank"
+                                    underline="hover"
+                                    href={Utils.getPolygonScanAddressLink() + ritual.feeModel}
+                                    className={styles.link}
+                                    sx={{ flex: "1 1 auto" }}
+                                >
+                                    {ritual.feeModel}
+                                    <ShareLink style={{ marginLeft: "4px", flexShrink: 0 }}/>
+                                </Link>
+                                <Copy
+                                    style={{ cursor: "pointer", marginLeft: "4px", flexShrink: 0 }}
+                                    onClick={(e) => copyToClipBoard(ritual.feeModel)}
+                                />
+                            </div>
                         </Box>
                     </div>
+
+                    {/* Participants Table Section */}
+                    <Box sx={{
+                        width: "100%",
+                        padding: "20px",
+                        backgroundColor: "white",
+                        borderRadius: "8px",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+                    }}>
+                        <div style={{ fontSize: "0.875rem", color: "rgba(0,0,0,0.6)", marginBottom: "12px" }}>Participants ({ritual.participants.length})</div>
+                        <TableContainer sx={{ width: '100%' }}>
+                            <Table sx={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell width="35%" sx={{ 
+                                            color: 'rgba(0,0,0,0.6)', 
+                                            fontSize: '0.75rem',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.5px',
+                                            padding: '12px 16px',
+                                            borderBottom: '1px solid rgba(0,0,0,0.12)'
+                                        }}>Node Address</TableCell>
+                                        <TableCell width="35%" sx={{ 
+                                            color: 'rgba(0,0,0,0.6)', 
+                                            fontSize: '0.75rem',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.5px',
+                                            padding: '12px 16px',
+                                            borderBottom: '1px solid rgba(0,0,0,0.12)'
+                                        }}>Operator Address</TableCell>
+                                        <TableCell width="15%" align="center" sx={{ 
+                                            color: 'rgba(0,0,0,0.6)', 
+                                            fontSize: '0.75rem',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.5px',
+                                            padding: '12px 16px',
+                                            borderBottom: '1px solid rgba(0,0,0,0.12)'
+                                        }}>Transcript</TableCell>
+                                        <TableCell width="15%" align="center" sx={{ 
+                                            color: 'rgba(0,0,0,0.6)', 
+                                            fontSize: '0.75rem',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.5px',
+                                            padding: '12px 16px',
+                                            borderBottom: '1px solid rgba(0,0,0,0.12)'
+                                        }}>Aggregation</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {ritual.participants.map((participant, index) => (
+                                        <ParticipantRow key={participant} participant={participant} ritual={ritual} />
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Box>
                 </div>
             </Box>
         </div>
