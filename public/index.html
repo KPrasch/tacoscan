@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#121212" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>React App</title>
+    <style>
+      html {
+        background-color: #121212;
+      }
+      html, body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background-color: #121212;
+      }
+      #root {
+        min-height: 100vh;
+        background-color: #121212;
+      }
+      /* Prevent flash of white content during load */
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #121212;
+        z-index: -1;
+      }
+    </style>
+    <script>
+      (function() {
+        try {
+          // Set dark theme immediately
+          document.documentElement.style.backgroundColor = '#121212';
+          document.body.style.backgroundColor = '#121212';
+          
+          // Prevent any white flash
+          const style = document.createElement('style');
+          style.textContent = `
+            html, body, #root {
+              background-color: #121212 !important;
+              color: #ffffff;
+            }
+          `;
+          document.head.appendChild(style);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html> 

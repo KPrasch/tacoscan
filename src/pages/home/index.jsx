@@ -104,6 +104,8 @@ const HomePage = () => {
           return browserHistory.push("/stakers");
         case "about":
           return browserHistory.push("/about");
+        case "ritualDetail":
+          return;
         default:
           return browserHistory.push("/");
       }
@@ -164,6 +166,7 @@ const HomePage = () => {
               onChange={handleChange}
               aria-label=""
               sx={{ display: "flex", paddingLeft: "20px", minWidth: "500px" }}
+              value={tab === "ritualDetail" ? "rituals" : tab}
             >
               <Tab sx={{ padding: 2 }} label="DKG Rituals" value="rituals" />
               <Tab sx={{ padding: 2 }} label="Stakers" value="stakers" />

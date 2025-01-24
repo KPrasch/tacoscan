@@ -14,6 +14,15 @@ import TableRow from "@mui/material/TableRow";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Loader from "../../components/loader";
+import { getColorByStatus } from "../../components/table/view_utils";
+import TableHead from "@mui/material/TableHead";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import PendingIcon from "@mui/icons-material/Pending";
+import ErrorIcon from "@mui/icons-material/Error";
 
 const RitualDetailPage = () => {
     const [pageData, setPageData] = useState({
@@ -73,6 +82,118 @@ const RitualDetailPage = () => {
         ));
     };
 
+    const ParticipantRow = ({ participant, ritual }) => {
+        const hasSubmittedTranscript = ritual.transcripts.includes(participant);
+        const hasPendingTranscript = ritual.pendingTranscripts?.includes(participant);
+        const hasSubmittedAggregation = ritual.aggregations.includes(participant);
+        const hasPendingAggregation = ritual.pendingAggregations?.includes(participant);
+
+        const getStatusIcon = (isSubmitted, isPending) => {
+            if (isSubmitted) return <CheckCircleIcon sx={{ color: "#4CAF50", fontSize: "1.2rem" }} />;
+            if (isPending) return <PendingIcon sx={{ color: "#FF9800", fontSize: "1.2rem" }} />;
+            return <ErrorIcon sx={{ color: "#F44336", fontSize: "1.2rem" }} />;
+        };
+
+        return (
+            <TableRow>
+                <TableCell colSpan={3} sx={{ padding: 0, border: 'none' }}>
+                    <Accordion sx={{ 
+                        boxShadow: 'none', 
+                        '&:before': { display: 'none' },
+                        backgroundColor: 'transparent',
+                        width: '100%',
+                        margin: '0 !important'
+                    }}>
+                        <AccordionSummary 
+                            expandIcon={<ExpandMoreIcon />}
+                            sx={{ 
+                                padding: 0,
+                                '& .MuiAccordionSummary-content': { 
+                                    margin: '0 !important',
+                                    width: '100%'
+                                }
+                            }}
+                        >
+                            <div style={{ 
+                                display: 'flex', 
+                                width: '100%', 
+                                borderBottom: '1px solid rgba(0,0,0,0.12)'
+                            }}>
+                                <div style={{ 
+                                    width: '60%', 
+                                    padding: '12px 16px',
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                }}>
+                                    <Link
+                                        target="_blank"
+                                        underline="hover"
+                                        href={Utils.getPolygonScanAddressLink() + participant}
+                                        className={styles.link}
+                                        sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                                    >
+                                        {participant}
+                                        <ShareLink style={{ marginLeft: "4px" }}/>
+                                    </Link>
+                                    <Copy
+                                        style={{ cursor: "pointer", marginLeft: "4px" }}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            copyToClipBoard(participant);
+                                        }}
+                                    />
+                                </div>
+                                <div style={{ 
+                                    width: '20%', 
+                                    padding: '12px 16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    {getStatusIcon(hasSubmittedTranscript, hasPendingTranscript)}
+                                </div>
+                                <div style={{ 
+                                    width: '20%', 
+                                    padding: '12px 16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    {getStatusIcon(hasSubmittedAggregation, hasPendingAggregation)}
+                                </div>
+                            </div>
+                        </AccordionSummary>
+                        <AccordionDetails sx={{ padding: '0 16px 16px' }}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                flexDirection: 'column', 
+                                gap: '12px',
+                                padding: '16px',
+                                backgroundColor: 'rgba(0,0,0,0.02)',
+                                borderRadius: '8px'
+                            }}>
+                                <div>
+                                    <div style={{ fontSize: '0.75rem', color: 'rgba(0,0,0,0.6)', marginBottom: '4px' }}>Transcript Status</div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        {getStatusIcon(hasSubmittedTranscript, hasPendingTranscript)}
+                                        <span>{hasSubmittedTranscript ? 'Submitted' : hasPendingTranscript ? 'Pending' : 'Not Submitted'}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: '0.75rem', color: 'rgba(0,0,0,0.6)', marginBottom: '4px' }}>Aggregation Status</div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        {getStatusIcon(hasSubmittedAggregation, hasPendingAggregation)}
+                                        <span>{hasSubmittedAggregation ? 'Submitted' : hasPendingAggregation ? 'Pending' : 'Not Submitted'}</span>
+                                    </div>
+                                </div>
+                            </Box>
+                        </AccordionDetails>
+                    </Accordion>
+                </TableCell>
+            </TableRow>
+        );
+    };
+
     if (pageData.isLoading) {
         return <Loader />;
     }
@@ -99,82 +220,160 @@ const RitualDetailPage = () => {
                             network={ritual.network}
                         />
                     </div>
-                    <div style={{ width: "100%", marginTop: "20px" }}>
-                        <TableContainer component={Paper} className={styles.timeline}>
-                            <Table
-                                className={styles.table_detail}
-                                sx={{ minWidth: 750 }}
-                                aria-labelledby="tableTitle"
-                                size={"small"}
-                            >
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell>DKG Id</TableCell>
-                                        <TableCell>{ritual.id}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Public key</TableCell>
-                                        <TableCell>
-                                            {Data.formatString(ritual.publicKey)}
-                                            <Copy
-                                                style={{ cursor: "pointer" }}
-                                                onClick={(e) => copyToClipBoard(ritual.publicKey)}
-                                            />
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Threshold</TableCell>
-                                        <TableCell>{ritual.threshold}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>DKG Size</TableCell>
-                                        <TableCell>{ritual.dkgSize}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Initiator</TableCell>
-                                        <TableCell>
-                                            <Link
-                                                target="_blank"
-                                                underline="hover"
-                                                href={Utils.getPolygonScanAddressLink() + ritual.initiator}
-                                                className={styles.link}
-                                            >
-                                                {Data.formatString(ritual.initiator)}
-                                                <ShareLink />
-                                            </Link>
-                                            <Copy
-                                                style={{ cursor: "pointer" }}
-                                                onClick={(e) => copyToClipBoard(ritual.initiator)}
-                                            />
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell style={{ verticalAlign: "top" }}>Participants</TableCell>
-                                        <TableCell>{formatAddresses({ addresses: ritual.participants })}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell style={{ verticalAlign: "top" }}>Transcripts</TableCell>
-                                        <TableCell>{formatAddresses({ addresses: ritual.transcripts })}</TableCell>
-                                    </TableRow>
-                                    {ritual.pendingTranscripts && ritual.pendingTranscripts.length > 0 && (
+                    <div style={{ 
+                        width: "100%", 
+                        marginTop: "20px", 
+                        display: "grid", 
+                        gridTemplateColumns: "minmax(100px, 1fr) minmax(auto, max-content) minmax(100px, 1fr) minmax(100px, 1fr) minmax(auto, max-content) minmax(auto, max-content)", 
+                        gap: "20px" 
+                    }}>
+                        <Box sx={{
+                            padding: "8px",
+                            backgroundColor: "white",
+                            borderRadius: "12px",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                            display: "flex",
+                            flexDirection: "column",
+                            height: "100px"
+                        }}>
+                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>DKG ID</div>
+                            <div style={{ fontSize: "3.5rem", fontWeight: "500", lineHeight: 1, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>{ritual.id}</div>
+                        </Box>
+
+                        <Box sx={{
+                            padding: "8px",
+                            backgroundColor: "white",
+                            borderRadius: "12px",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                            display: "flex",
+                            flexDirection: "column",
+                            height: "100px",
+                            width: "max-content"
+                        }}>
+                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Status</div>
+                            <div style={{ fontSize: "2.25rem", fontWeight: "500", lineHeight: 1.2, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end", color: getColorByStatus(ritual.status) }}>{ritual.status}</div>
+                        </Box>
+
+                        <Box sx={{
+                            padding: "8px",
+                            backgroundColor: "white",
+                            borderRadius: "12px",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                            display: "flex",
+                            flexDirection: "column",
+                            height: "100px"
+                        }}>
+                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Threshold</div>
+                            <div style={{ fontSize: "3.5rem", fontWeight: "500", lineHeight: 1, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>{ritual.threshold}</div>
+                        </Box>
+
+                        <Box sx={{
+                            padding: "8px",
+                            backgroundColor: "white",
+                            borderRadius: "12px",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                            display: "flex",
+                            flexDirection: "column",
+                            height: "100px"
+                        }}>
+                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>DKG Size</div>
+                            <div style={{ fontSize: "3.5rem", fontWeight: "500", lineHeight: 1, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>{ritual.dkgSize}</div>
+                        </Box>
+
+                        <Box sx={{
+                            padding: "8px",
+                            backgroundColor: "white",
+                            borderRadius: "12px",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                            display: "flex",
+                            flexDirection: "column",
+                            height: "100px",
+                            width: "max-content"
+                        }}>
+                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Public Key</div>
+                            <div style={{ fontSize: "1.1rem", fontWeight: "500", wordBreak: "break-all", display: "flex", alignItems: "flex-start", gap: "8px", flex: 1, alignItems: "center" }}>
+                                {ritual.publicKey}
+                                <Copy
+                                    style={{ cursor: "pointer", flexShrink: 0 }}
+                                    onClick={(e) => copyToClipBoard(ritual.publicKey)}
+                                />
+                            </div>
+                        </Box>
+
+                        <Box sx={{
+                            padding: "8px",
+                            backgroundColor: "white",
+                            borderRadius: "12px",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                            display: "flex",
+                            flexDirection: "column",
+                            height: "100px",
+                            width: "max-content"
+                        }}>
+                            <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Initiator</div>
+                            <div style={{ fontSize: "1.1rem", fontWeight: "500", wordBreak: "break-all", flex: 1, display: "flex", alignItems: "center" }}>
+                                <Link
+                                    target="_blank"
+                                    underline="hover"
+                                    href={Utils.getPolygonScanAddressLink() + ritual.initiator}
+                                    className={styles.link}
+                                >
+                                    {ritual.initiator}
+                                    <ShareLink style={{ marginLeft: "4px" }}/>
+                                </Link>
+                                <Copy
+                                    style={{ cursor: "pointer", marginLeft: "4px" }}
+                                    onClick={(e) => copyToClipBoard(ritual.initiator)}
+                                />
+                            </div>
+                        </Box>
+
+                        <Box sx={{
+                            padding: "20px",
+                            backgroundColor: "white",
+                            borderRadius: "8px",
+                            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                            gridColumn: "1 / -1"
+                        }}>
+                            <div style={{ fontSize: "0.875rem", color: "rgba(0,0,0,0.6)", marginBottom: "12px" }}>Participants ({ritual.participants.length})</div>
+                            <TableContainer sx={{ width: '100%' }}>
+                                <Table sx={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+                                    <TableHead>
                                         <TableRow>
-                                            <TableCell style={{ verticalAlign: "top" }}>Pending Transcripts</TableCell>
-                                            <TableCell>{formatAddresses({ addresses: ritual.pendingTranscripts })}</TableCell>
+                                            <TableCell width="60%" sx={{ 
+                                                color: 'rgba(0,0,0,0.6)', 
+                                                fontSize: '0.75rem',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.5px',
+                                                padding: '12px 16px',
+                                                borderBottom: '1px solid rgba(0,0,0,0.12)'
+                                            }}>Node Address</TableCell>
+                                            <TableCell width="20%" align="center" sx={{ 
+                                                color: 'rgba(0,0,0,0.6)', 
+                                                fontSize: '0.75rem',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.5px',
+                                                padding: '12px 16px',
+                                                borderBottom: '1px solid rgba(0,0,0,0.12)'
+                                            }}>Transcript</TableCell>
+                                            <TableCell width="20%" align="center" sx={{ 
+                                                color: 'rgba(0,0,0,0.6)', 
+                                                fontSize: '0.75rem',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.5px',
+                                                padding: '12px 16px',
+                                                borderBottom: '1px solid rgba(0,0,0,0.12)'
+                                            }}>Aggregation</TableCell>
                                         </TableRow>
-                                    )}
-                                    <TableRow>
-                                        <TableCell style={{ verticalAlign: "top" }}>Aggregations</TableCell>
-                                        <TableCell>{formatAddresses({ addresses: ritual.aggregations })}</TableCell>
-                                    </TableRow>
-                                    {ritual.pendingAggregations && ritual.pendingAggregations.length > 0 && (
-                                        <TableRow>
-                                            <TableCell style={{ verticalAlign: "top" }}>Pending Aggregations</TableCell>
-                                            <TableCell>{formatAddresses({ addresses: ritual.pendingAggregations })}</TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                                    </TableHead>
+                                    <TableBody>
+                                        {ritual.participants.map((participant, index) => (
+                                            <ParticipantRow key={participant} participant={participant} ritual={ritual} />
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </Box>
                     </div>
                 </div>
             </Box>
