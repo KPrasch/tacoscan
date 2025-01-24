@@ -358,7 +358,7 @@ const RitualDetailPage = () => {
                             flex: "1 1 400px"
                         }}>
                             <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Initiator</div>
-                            <div style={{ fontSize: "1.1rem", fontWeight: "500", display: "flex", alignItems: "center", padding: "8px 0", flex: 1 }}>
+                            <div style={{ fontSize: "1.1rem", fontWeight: "400", display: "flex", alignItems: "center", padding: "8px 0", flex: 1 }}>
                                 <Link
                                     target="_blank"
                                     underline="hover"
@@ -388,7 +388,7 @@ const RitualDetailPage = () => {
                             flex: "1 1 400px"
                         }}>
                             <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Authority</div>
-                            <div style={{ fontSize: "1.1rem", fontWeight: "500", display: "flex", alignItems: "center", padding: "8px 0", flex: 1 }}>
+                            <div style={{ fontSize: "1.1rem", fontWeight: "400", display: "flex", alignItems: "center", padding: "8px 0", flex: 1 }}>
                                 <Link
                                     target="_blank"
                                     underline="hover"
@@ -418,7 +418,7 @@ const RitualDetailPage = () => {
                             flex: "1 1 400px"
                         }}>
                             <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Access Controller</div>
-                            <div style={{ fontSize: "1.1rem", fontWeight: "500", display: "flex", alignItems: "center", padding: "8px 0", flex: 1 }}>
+                            <div style={{ fontSize: "1.1rem", fontWeight: "400", display: "flex", alignItems: "center", padding: "8px 0", flex: 1 }}>
                                 <Link
                                     target="_blank"
                                     underline="hover"
@@ -448,7 +448,7 @@ const RitualDetailPage = () => {
                             flex: "1 1 400px"
                         }}>
                             <div style={{ fontSize: "0.75rem", color: "rgba(0,0,0,0.6)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Fee Model</div>
-                            <div style={{ fontSize: "1.1rem", fontWeight: "500", display: "flex", alignItems: "center", padding: "8px 0", flex: 1 }}>
+                            <div style={{ fontSize: "1.1rem", fontWeight: "400", display: "flex", alignItems: "center", padding: "8px 0", flex: 1 }}>
                                 <Link
                                     target="_blank"
                                     underline="hover"
