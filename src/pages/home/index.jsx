@@ -9,6 +9,7 @@ import Button from "@mui/material/Button";
 import { browserHistory } from "react-router";
 import styles from "./styles.module.css";
 import RitualPage from "./ritual";
+import RitualDetailPage from "./ritualDetail";
 import { ReactComponent as Logo } from "../../logo.svg";
 import { ReactComponent as PowerThreshold} from '../../assets/power-threshold.svg';
 
@@ -45,6 +46,8 @@ const HomePage = () => {
         setTab("stakers");
       } else if (pathName.startsWith("/about")) {
         setTab("about");
+      } else if (pathName.startsWith("/rituals/")) {
+        setTab("ritualDetail");
       } else {
         setTab("rituals");
       }
@@ -61,6 +64,10 @@ const HomePage = () => {
         />
       </div>
     );
+  }
+
+  function ritualDetail() {
+    return <RitualDetailPage />;
   }
 
   function stakers() {
@@ -188,6 +195,7 @@ const HomePage = () => {
           <TabPanel value="stakerDetail">{stakerDetail()}</TabPanel>
           <TabPanel value="userDetail">{userDetail()}</TabPanel>
           <TabPanel value="about">{about()}</TabPanel>
+          <TabPanel value="ritualDetail">{ritualDetail()}</TabPanel>
         </TabContext>
       </Box>
     );

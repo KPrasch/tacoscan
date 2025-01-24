@@ -32,25 +32,9 @@ import {getColorByStatus} from "./view_utils"
 import TransactionTimeline from "./timeline";
 
 const formatAddresses = ({ addresses }) => {
-  if (addresses.length <= 3) {
-    return addresses.map((address, index) => (
-      <div key={index}>
-        <Link
-          underline="hover"
-          href={Utils.getDomain() + "?staker=" + address}
-          className={styles.link}
-        >
-          {Data.formatString(address)}
-        </Link>
-        <Copy
-          style={{ cursor: "pointer" }}
-          onClick={(e) => copyToClipBoard(address)}
-        />
-      </div>
-    ));
-  }
-
-  const displayedAddresses = addresses.slice(0, 3).map((address, index) => (
+  if (addresses.length === 0) return "-";
+  
+  return addresses.map((address, index) => (
     <div key={index}>
       <Link
         target="_blank"
@@ -58,7 +42,7 @@ const formatAddresses = ({ addresses }) => {
         href={Utils.getPolygonScanAddressLink() + address}
         className={styles.link}
       >
-        {Data.formatString(address)}
+        {address}
       </Link>
       <Copy
         style={{ cursor: "pointer" }}
@@ -66,15 +50,6 @@ const formatAddresses = ({ addresses }) => {
       />
     </div>
   ));
-
-  return (
-    <>
-      {displayedAddresses}
-      <Tooltip title={addresses.join(", ")}>
-        <span>more...</span>
-      </Tooltip>
-    </>
-  );
 };
 
 export const RitualTable = ({ columns, data, isLoading, network }) => {
@@ -214,7 +189,13 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
             </IconButton>
           </TableCell>
           <TableCell align="left" style={{ width: "10%" }}>
-            <span className={styles.numbers}>{row.id}</span>
+            <Link
+              underline="hover"
+              href={`/rituals/${row.id}`}
+              className={styles.link}
+            >
+              <span className={styles.numbers}>{row.id}</span>
+            </Link>
           </TableCell>
           <TableCell align="left" style={{ width: "10%" }}>
             <Tooltip title={Data.formatDate(row.updateTime)}>
