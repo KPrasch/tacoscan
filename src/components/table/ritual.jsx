@@ -234,15 +234,15 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
           <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
             <Collapse in={open} timeout="auto" unmountOnExit>
               <Box sx={{ margin: 1 }}>
-                <div className={styles.detail_item}>
-                  <div style={{ flex: "1 1 0%" }}>
+                <div className={styles.detail_item} style={{ flexDirection: 'column' }}>
+                  <div style={{ marginBottom: '20px', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', paddingBottom: '20px' }}>
                     <TransactionTimeline
                       className={styles.timeline}
                       transactions={row.transactions}
                       network={network}
                     />
                   </div>
-                  <div style={{ flex: "1 1 0%" }}>
+                  <div>
                     <TableContainer className={styles.timeline}>
                       <Table
                         className={styles.table_detail}
@@ -251,37 +251,22 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                         size={"small"}
                       >
                         <TableBody>
-                          <TableRow>
-                            <TableCell>DKG Id</TableCell>
-                            <TableCell>
-                              {row.id}
+                          <TableRow sx={{ '& td': { paddingY: '16px', borderBottom: '1px solid rgba(224, 224, 224, 1)' } }}>
+                            <TableCell style={{ width: '15%' }}>
+                              <Typography variant="body2" component="span" sx={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>DKG Id:</Typography>
+                              {' '}{row.id}
                             </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Public key</TableCell>
-                            <TableCell>
-                              {Data.formatString(row.publicKey)}
-                              <Copy
-                                style={{ cursor: "pointer" }}
-                                onClick={(e) => copyToClipBoard(row.publicKey)}
-                              />
+                            <TableCell style={{ width: '12%' }}>
+                              <Typography variant="body2" component="span" sx={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>Threshold:</Typography>
+                              {' '}{row.threshold}
                             </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Threshold</TableCell>
-                            <TableCell>
-                              {row.threshold}
+                            <TableCell style={{ width: '12%' }}>
+                              <Typography variant="body2" component="span" sx={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>DKG Size:</Typography>
+                              {' '}{row.dkgSize}
                             </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>DKG Size</TableCell>
-                            <TableCell>
-                              {row.dkgSize}
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Initiator</TableCell>
-                            <TableCell>
+                            <TableCell style={{ width: '25%' }}>
+                              <Typography variant="body2" component="span" sx={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>Initiator:</Typography>
+                              {' '}
                               <Link
                                 target="_blank"
                                 underline="hover"
@@ -296,51 +281,76 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                                 onClick={(e) => copyToClipBoard(row.initiator)}
                               />
                             </TableCell>
+                            <TableCell style={{ width: '25%' }}>
+                              <Typography variant="body2" component="span" sx={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>Access Controller:</Typography>
+                              {' '}
+                              <Link
+                                target="_blank"
+                                underline="hover"
+                                href={Utils.getPolygonScanAddressLink() + row.accessController}
+                                className={styles.link}
+                              >
+                                {Data.formatString(row.accessController)}
+                                <ShareLink />
+                              </Link>
+                              <Copy
+                                style={{ cursor: "pointer" }}
+                                onClick={(e) => copyToClipBoard(row.accessController)}
+                              />
+                            </TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableCell style={{ verticalAlign: "top" }}>Participants</TableCell>
-                            <TableCell>{
-                              row.participants.length == 0 
-                                ? "-" 
-                                : formatAddresses({addresses: row.participants})
-                              }</TableCell>
+                            <TableCell colSpan={5} sx={{ pt: 2 }}>
+                              <Table size="small">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>Participant</TableCell>
+                                    <TableCell>Operator</TableCell>
+                                    <TableCell>Transcript Status</TableCell>
+                                    <TableCell>Aggregation Status</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {row.participants.map((participant) => (
+                                    <TableRow key={participant}>
+                                      <TableCell>
+                                        <Link
+                                          target="_blank"
+                                          underline="hover"
+                                          href={Utils.getPolygonScanAddressLink() + participant}
+                                          className={styles.link}
+                                        >
+                                          {Data.formatString(participant)}
+                                          <ShareLink />
+                                        </Link>
+                                        <Copy
+                                          style={{ cursor: "pointer" }}
+                                          onClick={(e) => copyToClipBoard(participant)}
+                                        />
+                                      </TableCell>
+                                      <TableCell>
+                                        {row.operatorAddresses[participant] || "-"}
+                                      </TableCell>
+                                      <TableCell>
+                                        {row.transcripts && row.transcripts.includes(participant) ? (
+                                          <span style={{ color: "#4caf50" }}>Posted</span>
+                                        ) : (
+                                          <span style={{ color: "#ff9800" }}>Pending</span>
+                                        )}
+                                      </TableCell>
+                                      <TableCell>
+                                        {row.aggregations && row.aggregations.includes(participant) ? (
+                                          <span style={{ color: "#4caf50" }}>Posted</span>
+                                        ) : (
+                                          <span style={{ color: "#ff9800" }}>Pending</span>
+                                        )}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </TableCell>
                           </TableRow>
-                          <TableRow>
-                            <TableCell style={{ verticalAlign: "top" }}>Transcripts</TableCell>
-                            <TableCell>{
-                              row.transcripts.length == 0 
-                                ? "-" 
-                                : formatAddresses({addresses: row.transcripts})
-                              }</TableCell>
-                          </TableRow>
-                          {row.pendingTranscripts.length > 0 &&
-                            <TableRow>
-                              <TableCell style={{ verticalAlign: "top" }}>Pending Transcripts</TableCell>
-                              <TableCell>
-                                {
-                                  formatAddresses({addresses: row.pendingTranscripts})
-                                }
-                              </TableCell>
-                            </TableRow>
-                          }
-                          <TableRow>
-                            <TableCell style={{ verticalAlign: "top" }}>Aggregations</TableCell>
-                            <TableCell>{
-                              row.aggregations.length == 0 
-                                ? "-" 
-                                : formatAddresses({addresses: row.aggregations})
-                              }</TableCell>
-                          </TableRow>
-                          {row.pendingAggregations.length > 0 &&
-                            <TableRow>
-                              <TableCell style={{ verticalAlign: "top" }}>Pending Aggregations</TableCell>
-                              <TableCell>
-                                {
-                                  formatAddresses({addresses: row.pendingAggregations})
-                                }
-                              </TableCell>
-                            </TableRow>
-                          }
                         </TableBody>
                       </Table>
                     </TableContainer>
