@@ -2,6 +2,9 @@ import "./App.css";
 import HomePage from "./pages/home";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { BrowserRouter } from 'react-router-dom';
+import { WagmiProvider } from 'wagmi'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { config } from './config/wagmi'
 
 const theme = createTheme({
     typography: {
@@ -14,13 +17,19 @@ const theme = createTheme({
     },
 });
 
+const queryClient = new QueryClient()
+
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
-    </ThemeProvider>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <BrowserRouter>
+            <HomePage />
+          </BrowserRouter>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
 

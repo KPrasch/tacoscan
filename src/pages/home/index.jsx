@@ -23,6 +23,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import StakerPage from "./staker";
 import StakerDetailPage from "./stakerDetail";
 import UserDetailPage from "./userDetail";
+import { useWeb3Modal } from '@web3modal/wagmi/react'
+import { useAccount } from 'wagmi'
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -30,6 +33,8 @@ const HomePage = () => {
   const [anchorElSetting, setAnchorElSetting] = React.useState(null);
   const [searchInput, setSearchInput] = React.useState("");
   const [isSearch, setIsSearch] = React.useState(false);
+  const { open } = useWeb3Modal()
+  const { address, isConnected } = useAccount()
 
   const openSetting = Boolean(anchorElSetting);
 
@@ -93,6 +98,28 @@ const HomePage = () => {
 
   function about() {
     return <About />;
+  }
+
+  function renderWalletButton() {
+    return (
+      <Button
+        variant="outlined"
+        onClick={() => open()}
+        startIcon={<AccountBalanceWalletIcon />}
+        sx={{
+          marginLeft: '20px',
+          marginRight: '20px',
+          borderColor: '#7850cd',
+          color: '#7850cd',
+          '&:hover': {
+            borderColor: '#6340b0',
+            backgroundColor: 'rgba(120, 80, 205, 0.04)',
+          },
+        }}
+      >
+        {isConnected ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connect Wallet'}
+      </Button>
+    );
   }
 
   function tabs() {
@@ -191,6 +218,7 @@ const HomePage = () => {
                 }}
               />
             </div>
+            {renderWalletButton()}
           </Box>
           <TabPanel value="rituals">
             {tab === "ritualDetail" ? ritualDetail() : rituals()}
