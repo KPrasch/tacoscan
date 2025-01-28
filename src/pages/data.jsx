@@ -470,8 +470,6 @@ export const getRituals = async (isSearch, searchInput) => {
         }
         
         if (data.data !== undefined) {
-            console.log("Raw ritual data:", data.data.rituals[0]);
-            
             // Fetch operator addresses for all participants
             const stakersData = await client.execute(client.GetAllStakersQueryDocument, {});
             const operatorMap = {};
@@ -500,7 +498,6 @@ export const getRituals = async (isSearch, searchInput) => {
                 // Fetch feeModel for each ritual
                 data.data.rituals = await Promise.all(data.data.rituals.map(async ritual => {
                     try {
-                        console.log(`Fetching ritual data for ID: ${ritual.id}`);
                         // Verify ritual ID is valid
                         if (!ritual.id || isNaN(ritual.id)) {
                             console.error(`Invalid ritual ID: ${ritual.id}`);
@@ -508,9 +505,7 @@ export const getRituals = async (isSearch, searchInput) => {
                         }
 
                         // Get ritual data from contract
-                        console.log(`Calling contract for ritual ${ritual.id} at address ${CoordinatorAddress}`);
                         const ritualData = await coordinatorContract.methods.rituals(ritual.id).call();
-                        console.log(`Received ritual data from contract:`, ritualData);
                         
                         const enrichedRitual = {
                             ...ritual,
@@ -519,13 +514,10 @@ export const getRituals = async (isSearch, searchInput) => {
                                 const operatorInfo = operatorMap[participant.toLowerCase()];
                                 acc[participant] = operatorInfo && operatorInfo.confirmed ? operatorInfo.operator : "-";
                                 return acc;
-                            }, {})
+                            }, {}),
                         };
-                        console.log("Enriched ritual data:", enrichedRitual);
                         return enrichedRitual;
                     } catch (error) {
-                        console.error(`Error fetching ritual ${ritual.id} data from contract:`, error);
-                        console.error('Contract address:', CoordinatorAddress);
                         // Return ritual without feeModel if contract call fails
                         return {
                             ...ritual,

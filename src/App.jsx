@@ -1,7 +1,7 @@
 import "./App.css";
 import HomePage from "./pages/home";
-
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { BrowserRouter } from 'react-router-dom';
 
 const theme = createTheme({
     typography: {
@@ -17,7 +17,9 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
+      <BrowserRouter>
         <HomePage />
+      </BrowserRouter>
     </ThemeProvider>
   );
 }

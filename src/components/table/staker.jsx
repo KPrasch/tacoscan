@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { useTable } from "react-table";
 import Loader from "../loader";
 import styles from "./styles.module.css";
-import { ReactComponent as Copy } from "../../assets/copy.svg";
+import CopyButton from "../CopyButton";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
@@ -155,8 +155,7 @@ export const StakerTable = ({ columns, data, isLoading, network }) => {
               {Data.formatString(row.id)}
             </Link>
             <Tooltip title="Copied">
-              <Copy
-                style={{ cursor: "pointer" }}
+              <CopyButton
                 onClick={(e) => copyToClipBoard(row.id)}
               />
             </Tooltip>
@@ -170,8 +169,7 @@ export const StakerTable = ({ columns, data, isLoading, network }) => {
               {Data.formatString(row.registeredOperatorAddress)}
             </Link>
             <Tooltip title="Copied">
-              <Copy
-                style={{ cursor: "pointer" }}
+              <CopyButton
                 onClick={(e) => copyToClipBoard(row.registeredOperatorAddress)}
               />
             </Tooltip>

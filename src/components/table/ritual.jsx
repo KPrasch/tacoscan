@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { useTable } from "react-table";
 import Loader from "../loader";
 import styles from "./styles.module.css";
-import { ReactComponent as Copy } from "../../assets/copy.svg";
+import CopyButton from "../CopyButton";
 import Tooltip from "@mui/material/Tooltip";
 import Button from "@mui/material/Button";
 import ReportOutlinedIcon from "@mui/icons-material/ReportOutlined";
@@ -24,6 +24,7 @@ import Collapse from "@mui/material/Collapse";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
+import { Link as RouterLink } from "react-router-dom";
 import { ReactComponent as ShareLink } from "../../assets/link.svg";
 import * as Data from "../../pages/data";
 import * as Const from "../../utils/Cons";
@@ -44,8 +45,7 @@ const formatAddresses = ({ addresses }) => {
       >
         {address}
       </Link>
-      <Copy
-        style={{ cursor: "pointer" }}
+      <CopyButton
         onClick={(e) => copyToClipBoard(address)}
       />
     </div>
@@ -189,13 +189,12 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
             </IconButton>
           </TableCell>
           <TableCell align="left" style={{ width: "10%" }}>
-            <Link
-              underline="hover"
-              href={`/rituals/${row.id}`}
+            <RouterLink
+              to={`/rituals/${row.id}`}
               className={styles.link}
             >
               <span className={styles.numbers}>{row.id}</span>
-            </Link>
+            </RouterLink>
           </TableCell>
           <TableCell align="left" style={{ width: "10%" }}>
             <Tooltip title={Data.formatDate(row.updateTime)}>
@@ -211,8 +210,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
               {Data.formatString(row.authority)}
             </Link>
             <Tooltip title="Copied">
-              <Copy
-                style={{ cursor: "pointer" }}
+              <CopyButton
                 onClick={(e) => copyToClipBoard(row.authority)}
               />
             </Tooltip>
@@ -276,10 +274,11 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                                 {Data.formatString(row.initiator)}
                                 <ShareLink />
                               </Link>
-                              <Copy
-                                style={{ cursor: "pointer" }}
-                                onClick={(e) => copyToClipBoard(row.initiator)}
-                              />
+                              <Tooltip title="Copied">
+                                <CopyButton
+                                  onClick={(e) => copyToClipBoard(row.initiator)}
+                                />
+                              </Tooltip>
                             </TableCell>
                             <TableCell style={{ width: '25%' }}>
                               <Typography variant="body2" component="span" sx={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>Access Controller:</Typography>
@@ -293,10 +292,11 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                                 {Data.formatString(row.accessController)}
                                 <ShareLink />
                               </Link>
-                              <Copy
-                                style={{ cursor: "pointer" }}
-                                onClick={(e) => copyToClipBoard(row.accessController)}
-                              />
+                              <Tooltip title="Copied">
+                                <CopyButton
+                                  onClick={(e) => copyToClipBoard(row.accessController)}
+                                />
+                              </Tooltip>
                             </TableCell>
                           </TableRow>
                           <TableRow>
@@ -323,10 +323,11 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                                           {Data.formatString(participant)}
                                           <ShareLink />
                                         </Link>
-                                        <Copy
-                                          style={{ cursor: "pointer" }}
-                                          onClick={(e) => copyToClipBoard(participant)}
-                                        />
+                                        <Tooltip title="Copied">
+                                          <CopyButton
+                                            onClick={(e) => copyToClipBoard(participant)}
+                                          />
+                                        </Tooltip>
                                       </TableCell>
                                       <TableCell>
                                         {row.operatorAddresses[participant] || "-"}

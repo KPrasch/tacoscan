@@ -6,7 +6,7 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import Button from "@mui/material/Button";
-import { browserHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 import styles from "./styles.module.css";
 import RitualPage from "./ritual";
 import RitualDetailPage from "./ritualDetail";
@@ -25,6 +25,7 @@ import StakerDetailPage from "./stakerDetail";
 import UserDetailPage from "./userDetail";
 
 const HomePage = () => {
+  const navigate = useNavigate();
   const [tab, setTab] = React.useState("rituals");
   const [anchorElSetting, setAnchorElSetting] = React.useState(null);
   const [searchInput, setSearchInput] = React.useState("");
@@ -52,7 +53,7 @@ const HomePage = () => {
         setTab("rituals");
       }
     }
-  }, []);
+  }, [window.location.pathname, window.location.search]);
 
   function rituals() {
     return (
@@ -99,15 +100,13 @@ const HomePage = () => {
       setTab(newValue);
       switch (newValue) {
         case "rituals":
-          return browserHistory.push("/rituals");
+          return navigate("/rituals");
         case "stakers":
-          return browserHistory.push("/stakers");
+          return navigate("/stakers");
         case "about":
-          return browserHistory.push("/about");
-        case "ritualDetail":
-          return;
+          return navigate("/about");
         default:
-          return browserHistory.push("/");
+          return navigate("/");
       }
     };
 
@@ -141,7 +140,7 @@ const HomePage = () => {
             </p>
           </div>
         </div>
-        <TabContext value={tab}>
+        <TabContext value={tab === "ritualDetail" ? "rituals" : tab}>
           <Box
             sx={{
               mb: 0,
@@ -193,12 +192,13 @@ const HomePage = () => {
               />
             </div>
           </Box>
-          <TabPanel value="rituals">{rituals()}</TabPanel>
+          <TabPanel value="rituals">
+            {tab === "ritualDetail" ? ritualDetail() : rituals()}
+          </TabPanel>
           <TabPanel value="stakers">{stakers()}</TabPanel>
           <TabPanel value="stakerDetail">{stakerDetail()}</TabPanel>
           <TabPanel value="userDetail">{userDetail()}</TabPanel>
           <TabPanel value="about">{about()}</TabPanel>
-          <TabPanel value="ritualDetail">{ritualDetail()}</TabPanel>
         </TabContext>
       </Box>
     );

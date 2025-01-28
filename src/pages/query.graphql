@@ -2,12 +2,21 @@ query GetRitualsQueryByUser($authority:Bytes,$id:ID,$txHash:Bytes){
     rituals(
         first:1000
         where:{
-            or:[
-                {authority:$authority},
-                {id:$id},
-                {transactions_:{txHash:$txHash}}
+            and: [
+                {
+                    or:[
+                        {authority:$authority},
+                        {id:$id},
+                        {transactions_:{txHash:$txHash}}
+                    ]
+                },
+                {
+                    id_not_in: ["1", "2", "3", "4", "5", "6"]
+                }
             ]
         }
+        orderBy: id
+        orderDirection: asc
     ) {
         id
         initiator
@@ -17,7 +26,6 @@ query GetRitualsQueryByUser($authority:Bytes,$id:ID,$txHash:Bytes){
         dkgStatus
         authority
         accessController
-        feeModel
         participants
         postedAggregations
         postedTranscripts
@@ -43,7 +51,14 @@ query GetRitualsQueryByUser($authority:Bytes,$id:ID,$txHash:Bytes){
 query GetRitualsQueryByStakingProvider($id:Bytes!){
     rituals(
         first:1000
-        where: { participants_contains: [$id]}
+        where: {
+            and: [
+                { participants_contains: [$id] },
+                { id_not_in: ["1", "2", "3", "4", "5", "6"] }
+            ]
+        }
+        orderBy: id
+        orderDirection: asc
     ) {
         id
         initiator
@@ -53,7 +68,6 @@ query GetRitualsQueryByStakingProvider($id:Bytes!){
         dkgStatus
         authority
         accessController
-        feeModel
         participants
         postedAggregations
         postedTranscripts
@@ -71,14 +85,18 @@ query GetRitualsQueryByStakingProvider($id:Bytes!){
 }
 
 query GetAllRitualsQuery{
-    rituals(first:1000) {
+    rituals(
+        first:1000
+        where: { id_not_in: ["1", "2", "3", "4", "5", "6"] }
+        orderBy: id
+        orderDirection: asc
+    ) {
         id
         initiator
         initTimestamp
         endTimestamp
         authority
         accessController
-        feeModel
         dkgSize
         dkgStatus
         participants

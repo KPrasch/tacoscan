@@ -40,9 +40,9 @@
   text-align: center;
 }
 
-.link{
-  color: "#7850cd";
-  underline: none;
+.link {
+  color: #7850cd;
+  text-decoration: none;
   font-family: Helvetica Neue;
 }
 
