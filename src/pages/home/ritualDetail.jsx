@@ -5,6 +5,7 @@ import Link from "@mui/material/Link";
 import { ReactComponent as Copy } from "../../assets/copy.svg";
 import { ReactComponent as ShareLink } from "../../assets/link.svg";
 import TransactionTimeline from "../../components/table/timeline";
+import { RitualManagement } from "../../components/RitualManagement";
 import * as Utils from "../../utils/utils";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -466,6 +467,9 @@ const RitualDetailPage = () => {
                             </div>
                         </Box>
                     </div>
+
+                    {/* Management Section */}
+                    <RitualManagement ritual={ritual} feeModelAddress={ritual.feeModel} />
 
                     {/* Participants Table Section */}
                     <Box sx={{
