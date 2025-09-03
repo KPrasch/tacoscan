@@ -255,130 +255,311 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
         <TableRow className={styles.container_detail}>
           <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
             <Collapse in={open} timeout="auto" unmountOnExit>
-              <Box style={{ margin: '8px' }}>
+              <Box style={{ 
+                backgroundColor: '#F8F9FA',
+                padding: '24px',
+                borderTop: '2px solid #E5E7EB'
+              }}>
                 <div className={styles.detail_item} style={{ flexDirection: 'column' }}>
-                  <div style={{ marginBottom: '20px', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', paddingBottom: '20px' }}>
+                  <div style={{ 
+                    marginBottom: '24px', 
+                    padding: '20px',
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '8px',
+                    border: '1px solid #E5E7EB'
+                  }}>
                     <TransactionTimeline
                       className={styles.timeline}
                       transactions={row.transactions}
                       network={network}
                     />
                   </div>
-                  <div>
-                    <TableContainer className={styles.timeline}>
-                      <Table
-                        className={styles.table_detail}
-                        style={{ minWidth: 750 }}
-                        aria-labelledby="tableTitle"
-                        size={"small"}
-                      >
-                        <TableBody>
-                          <TableRow style={{ borderBottom: '1px solid rgba(224, 224, 224, 1)' }}>
-                            <TableCell style={{ width: '15%' }}>
-                              <Typography variant="body2" component="span" style={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>DKG Id:</Typography>
-                              {' '}{row.id}
-                            </TableCell>
-                            <TableCell style={{ width: '12%' }}>
-                              <Typography variant="body2" component="span" style={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>Threshold:</Typography>
-                              {' '}{row.threshold}
-                            </TableCell>
-                            <TableCell style={{ width: '12%' }}>
-                              <Typography variant="body2" component="span" style={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>DKG Size:</Typography>
-                              {' '}{row.dkgSize}
-                            </TableCell>
-                            <TableCell style={{ width: '25%' }}>
-                              <Typography variant="body2" component="span" style={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>Initiator:</Typography>
-                              {' '}
-                              <Link
-                                target="_blank"
-                                underline="hover"
-                                href={Utils.getPolygonScanAddressLink() + row.initiator}
-                                className={styles.link}
-                              >
-                                {Data.formatString(row.initiator)}
-                                <ShareLink />
-                              </Link>
-                              <Tooltip title="Copied">
-                                <CopyButton
-                                  onClick={(e) => copyToClipBoard(row.initiator)}
-                                />
-                              </Tooltip>
-                            </TableCell>
-                            <TableCell style={{ width: '25%' }}>
-                              <Typography variant="body2" component="span" style={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>Access Controller:</Typography>
-                              {' '}
-                              <Link
-                                target="_blank"
-                                underline="hover"
-                                href={Utils.getPolygonScanAddressLink() + row.accessController}
-                                className={styles.link}
-                              >
-                                {Data.formatString(row.accessController)}
-                                <ShareLink />
-                              </Link>
-                              <Tooltip title="Copied">
-                                <CopyButton
-                                  onClick={(e) => copyToClipBoard(row.accessController)}
-                                />
-                              </Tooltip>
-                            </TableCell>
-                          </TableRow>
+                  <div style={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '8px',
+                    border: '1px solid #E5E7EB',
+                    padding: '20px'
+                  }}>
+                    <div style={{ marginBottom: '20px' }}>
+                      <h3 style={{ 
+                        margin: '0 0 16px 0', 
+                        fontSize: '1.125rem',
+                        fontWeight: 600,
+                        color: '#0A0A0A'
+                      }}>
+                        Ritual Details
+                      </h3>
+                      <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                        gap: '16px'
+                      }}>
+                        <div>
+                          <div style={{ 
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            color: '#6B7280',
+                            marginBottom: '4px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
+                          }}>
+                            DKG ID
+                          </div>
+                          <div style={{ fontSize: '1rem', color: '#0A0A0A' }}>{row.id}</div>
+                        </div>
+                        <div>
+                          <div style={{ 
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            color: '#6B7280',
+                            marginBottom: '4px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
+                          }}>
+                            Threshold
+                          </div>
+                          <div style={{ fontSize: '1rem', color: '#0A0A0A' }}>{row.threshold}</div>
+                        </div>
+                        <div>
+                          <div style={{ 
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            color: '#6B7280',
+                            marginBottom: '4px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
+                          }}>
+                            DKG Size
+                          </div>
+                          <div style={{ fontSize: '1rem', color: '#0A0A0A' }}>{row.dkgSize}</div>
+                        </div>
+                        <div>
+                          <div style={{ 
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            color: '#6B7280',
+                            marginBottom: '4px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
+                          }}>
+                            Initiator
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Link
+                              target="_blank"
+                              underline="hover"
+                              href={Utils.getPolygonScanAddressLink() + row.initiator}
+                              className={styles.link}
+                              style={{ fontSize: '0.875rem' }}
+                            >
+                              {Data.formatString(row.initiator)}
+                              <ShareLink style={{ marginLeft: '4px', width: '14px', height: '14px' }} />
+                            </Link>
+                            <CopyButton
+                              onClick={(e) => copyToClipBoard(row.initiator)}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ 
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            color: '#6B7280',
+                            marginBottom: '4px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
+                          }}>
+                            Access Controller
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Link
+                              target="_blank"
+                              underline="hover"
+                              href={Utils.getPolygonScanAddressLink() + row.accessController}
+                              className={styles.link}
+                              style={{ fontSize: '0.875rem' }}
+                            >
+                              {Data.formatString(row.accessController)}
+                              <ShareLink style={{ marginLeft: '4px', width: '14px', height: '14px' }} />
+                            </Link>
+                            <CopyButton
+                              onClick={(e) => copyToClipBoard(row.accessController)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div style={{ marginTop: '24px' }}>
+                      <h3 style={{ 
+                        margin: '0 0 16px 0', 
+                        fontSize: '1.125rem',
+                        fontWeight: 600,
+                        color: '#0A0A0A'
+                      }}>
+                        Participants
+                      </h3>
+                      <Table size="small" style={{ backgroundColor: '#FFFFFF' }}>
+                        <TableHead>
                           <TableRow>
-                            <TableCell colSpan={5} style={{ paddingTop: '16px' }}>
-                              <Table size="small">
-                                <TableHead>
-                                  <TableRow>
-                                    <TableCell>Participant</TableCell>
-                                    <TableCell>Operator</TableCell>
-                                    <TableCell>Transcript Status</TableCell>
-                                    <TableCell>Aggregation Status</TableCell>
-                                  </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                  {row.participants.map((participant) => (
-                                    <TableRow key={participant}>
-                                      <TableCell>
-                                        <Link
-                                          target="_blank"
-                                          underline="hover"
-                                          href={Utils.getPolygonScanAddressLink() + participant}
-                                          className={styles.link}
-                                        >
-                                          {Data.formatString(participant)}
-                                          <ShareLink />
-                                        </Link>
-                                        <Tooltip title="Copied">
-                                          <CopyButton
-                                            onClick={(e) => copyToClipBoard(participant)}
-                                          />
-                                        </Tooltip>
-                                      </TableCell>
-                                      <TableCell>
-                                        {row.operatorAddresses[participant] || "-"}
-                                      </TableCell>
-                                      <TableCell>
-                                        {row.transcripts && row.transcripts.includes(participant) ? (
-                                          <span style={{ color: "#4caf50" }}>Posted</span>
-                                        ) : (
-                                          <span style={{ color: "#ff9800" }}>Pending</span>
-                                        )}
-                                      </TableCell>
-                                      <TableCell>
-                                        {row.aggregations && row.aggregations.includes(participant) ? (
-                                          <span style={{ color: "#4caf50" }}>Posted</span>
-                                        ) : (
-                                          <span style={{ color: "#ff9800" }}>Pending</span>
-                                        )}
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
+                            <TableCell style={{
+                              fontWeight: 600,
+                              fontSize: '0.75rem',
+                              letterSpacing: '0.5px',
+                              color: '#6B7280',
+                              textTransform: 'uppercase',
+                              borderBottom: '2px solid #E5E7EB',
+                              padding: '12px 16px'
+                            }}>
+                              Participant
+                            </TableCell>
+                            <TableCell style={{
+                              fontWeight: 600,
+                              fontSize: '0.75rem',
+                              letterSpacing: '0.5px',
+                              color: '#6B7280',
+                              textTransform: 'uppercase',
+                              borderBottom: '2px solid #E5E7EB',
+                              padding: '12px 16px'
+                            }}>
+                              Operator
+                            </TableCell>
+                            <TableCell style={{
+                              fontWeight: 600,
+                              fontSize: '0.75rem',
+                              letterSpacing: '0.5px',
+                              color: '#6B7280',
+                              textTransform: 'uppercase',
+                              borderBottom: '2px solid #E5E7EB',
+                              padding: '12px 16px'
+                            }}>
+                              Transcript Status
+                            </TableCell>
+                            <TableCell style={{
+                              fontWeight: 600,
+                              fontSize: '0.75rem',
+                              letterSpacing: '0.5px',
+                              color: '#6B7280',
+                              textTransform: 'uppercase',
+                              borderBottom: '2px solid #E5E7EB',
+                              padding: '12px 16px'
+                            }}>
+                              Aggregation Status
                             </TableCell>
                           </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {row.participants.map((participant) => (
+                            <TableRow key={participant} style={{ 
+                              borderBottom: '1px solid #E5E7EB'
+                            }}>
+                              <TableCell style={{ padding: '12px 16px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <Link
+                                    target="_blank"
+                                    underline="hover"
+                                    href={Utils.getPolygonScanAddressLink() + participant}
+                                    className={styles.link}
+                                    style={{ fontSize: '0.875rem' }}
+                                  >
+                                    {Data.formatString(participant)}
+                                    <ShareLink style={{ marginLeft: '4px', width: '14px', height: '14px' }} />
+                                  </Link>
+                                  <CopyButton
+                                    onClick={(e) => copyToClipBoard(participant)}
+                                  />
+                                </div>
+                              </TableCell>
+                              <TableCell style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#0A0A0A' }}>
+                                {row.operatorAddresses && row.operatorAddresses[participant] ? (
+                                  row.operatorAddresses[participant] !== "-" ? (
+                                    Data.formatString(row.operatorAddresses[participant])
+                                  ) : (
+                                    <span style={{ color: '#9CA3AF' }}>-</span>
+                                  )
+                                ) : (
+                                  <span style={{ color: '#9CA3AF' }}>-</span>
+                                )}
+                              </TableCell>
+                              <TableCell style={{ padding: '12px 16px' }}>
+                                {row.transcripts && row.transcripts.includes(participant) ? (
+                                  <span style={{ 
+                                    color: "#10B981",
+                                    fontWeight: 500,
+                                    fontSize: '0.875rem',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                  }}>
+                                    <span style={{ 
+                                      width: '8px', 
+                                      height: '8px', 
+                                      borderRadius: '50%',
+                                      backgroundColor: '#10B981'
+                                    }}></span>
+                                    Posted
+                                  </span>
+                                ) : (
+                                  <span style={{ 
+                                    color: "#F59E0B",
+                                    fontWeight: 500,
+                                    fontSize: '0.875rem',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                  }}>
+                                    <span style={{ 
+                                      width: '8px', 
+                                      height: '8px', 
+                                      borderRadius: '50%',
+                                      backgroundColor: '#F59E0B'
+                                    }}></span>
+                                    Pending
+                                  </span>
+                                )}
+                              </TableCell>
+                              <TableCell style={{ padding: '12px 16px' }}>
+                                {row.aggregations && row.aggregations.includes(participant) ? (
+                                  <span style={{ 
+                                    color: "#10B981",
+                                    fontWeight: 500,
+                                    fontSize: '0.875rem',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                  }}>
+                                    <span style={{ 
+                                      width: '8px', 
+                                      height: '8px', 
+                                      borderRadius: '50%',
+                                      backgroundColor: '#10B981'
+                                    }}></span>
+                                    Posted
+                                  </span>
+                                ) : (
+                                  <span style={{ 
+                                    color: "#F59E0B",
+                                    fontWeight: 500,
+                                    fontSize: '0.875rem',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                  }}>
+                                    <span style={{ 
+                                      width: '8px', 
+                                      height: '8px', 
+                                      borderRadius: '50%',
+                                      backgroundColor: '#F59E0B'
+                                    }}></span>
+                                    Pending
+                                  </span>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
                         </TableBody>
                       </Table>
-                    </TableContainer>
+                    </div>
                   </div>
                 </div>
               </Box>
