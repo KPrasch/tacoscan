@@ -33,8 +33,8 @@
   },
   "scripts": {
     "start": "export PORT=4001 && vite",
-    "build-prod": "vite build --mode production",
-    "build": "vite build",
+    "build-prod": "yarn codegen && vite build --mode production",
+    "build": "yarn codegen && vite build",
     "preview": "vite preview --port 4001",
     "prod": "npm run build && PORT=4001 serve -s build ",
     "codegen": "graphclient build",
