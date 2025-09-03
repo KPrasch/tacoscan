@@ -107,23 +107,32 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
     return (
       <TableHead>
         <TableRow>
-          <TableCell />
+          <TableCell style={{ width: "50px", padding: "16px 8px" }} />
           {columns.map((headCell) => (
             <TableCell
               className={styles.th}
               key={headCell.accessor}
               align={"left"}
               sortDirection={orderBy === headCell.accessor ? order : false}
+              style={{ 
+                fontWeight: 600, 
+                fontSize: "0.75rem",
+                letterSpacing: "0.5px",
+                color: "#666",
+                padding: "16px 8px",
+                whiteSpace: "nowrap"
+              }}
             >
               {headCell.accessor == "id" ||
               headCell.accessor == "updateTime" ||
               headCell.accessor == "totalPostedAggregations" ||
-              headCell.accessor == "totalTranscripts" ||
+              headCell.accessor == "totalPostedTranscripts" ||
               headCell.accessor == "totalParticipants" ||
               headCell.accessor == "status" ? (
                 <TableSortLabel
                   direction={orderBy === headCell.accessor ? order : "desc"}
                   onClick={createSortHandler(headCell.accessor)}
+                  style={{ fontWeight: 600 }}
                 >
                   {headCell.header}
                 </TableSortLabel>
@@ -194,7 +203,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
           className={open ? styles.rowSeleted : null}
           onClick={() => setOpen(!open)}
         >
-          <TableCell className={styles.td_selected}>
+          <TableCell className={styles.td_selected} style={{ width: "50px", padding: "8px" }}>
             <IconButton
               aria-label="expand row"
               size="small"
@@ -203,7 +212,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
               {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </IconButton>
           </TableCell>
-          <TableCell align="left" style={{ width: "10%" }}>
+          <TableCell align="left" style={{ padding: "8px" }}>
             <RouterLink
               to={`/rituals/${row.id}`}
               className={styles.link}
@@ -211,12 +220,12 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
               <span className={styles.numbers}>{row.id}</span>
             </RouterLink>
           </TableCell>
-          <TableCell align="left" style={{ width: "10%" }}>
+          <TableCell align="left" style={{ padding: "8px", whiteSpace: "nowrap" }}>
             <Tooltip title={Data.formatDate(row.updateTime)}>
               <span>{Data.calculateTimeMoment(row.updateTime)}</span>
             </Tooltip>
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" style={{ padding: "8px" }}>
             <Link
               underline="hover"
               href={Utils.getDomain() + "?user=" + row.authority}
@@ -230,16 +239,16 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
               />
             </Tooltip>
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" style={{ padding: "8px" }}>
             <span className={styles.numbers} >{row.totalParticipants}</span>
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" style={{ padding: "8px" }}>
             <span className={styles.numbers} >{row.totalPostedTranscripts}</span>
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" style={{ padding: "8px" }}>
             <span className={styles.numbers}>{row.totalPostedAggregations}</span>
           </TableCell>
-          <TableCell align="left" style={{ color:getColorByStatus(row.status) }}>
+          <TableCell align="left" style={{ color:getColorByStatus(row.status), padding: "8px" }}>
             {row.status}
           </TableCell>
         </TableRow>

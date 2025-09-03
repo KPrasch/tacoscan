@@ -10,37 +10,37 @@ import BatchProcessor from "../utils/batchProcessor";
 const tacoAddr = "0x347cc7ede7e5517bd47d20620b2cf1b406edcf07"
 export const ritual_columns = [
   {
-    header: "Id",
+    header: "ID",
     accessor: "id",
     numeric: true,
   },
   {
-    header: "Updated",
+    header: "UPDATED",
     accessor: "updateTime",
     numeric: false,
   },
   {
-    header: "Authority",
+    header: "AUTHORITY",
     accessor: "authority",
     numeric: false,
   },
   {
-    header: "Participants",
+    header: "PARTICIPANTS",
     accessor: "totalParticipants",
     numeric: true,
   },
   {
-    header: "Transcripts",
+    header: "TRANSCRIPTS",
     accessor: "totalPostedTranscripts",
     numeric: true,
   },
   {
-    header: "Aggregations",
+    header: "AGGREGATIONS",
     accessor: "totalPostedAggregations",
     numeric: true,
   },
   {
-    header: "Current State",
+    header: "CURRENT STATE",
     accessor: "status",
     numeric: false,
   },
