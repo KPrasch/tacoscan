@@ -42,6 +42,11 @@ const RitualDetailPage = () => {
             if (data?.rituals && data.rituals.length > 0) {
                 const timeout = await Data.getTimeout();
                 const formattedRitual = Data.formatRitualsData(data.rituals, timeout)[0];
+                
+                // Fetch feeModel for the specific ritual detail view
+                const feeModel = await Data.getRitualFeeModel(ritualId);
+                formattedRitual.feeModel = feeModel;
+                
                 setPageData({
                     ritual: formattedRitual,
                     isLoading: false

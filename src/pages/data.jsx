@@ -500,67 +500,18 @@ export const getRituals = async (isSearch, searchInput) => {
                 });
             }
             
-            // Add operatorMap to each ritual
+            // Add operatorMap to each ritual WITHOUT fetching feeModel
+            // feeModel will be fetched on-demand when ritual details are expanded
             if (data.data.rituals) {
-                // Create Web3 instance with Polygon RPC provider
-                const web3 = getWeb3Instance();
-                const coordinatorContract = new web3.eth.Contract(
-                    CoordinatorABI,
-                    CoordinatorAddress
-                );
-
-                // Create batch processor to limit concurrent RPC calls
-                const batchProcessor = new BatchProcessor(3, 200); // Max 3 concurrent calls, 200ms delay
-                
-                // Process rituals in batches to avoid overwhelming the RPC endpoint
-                const processedRituals = await batchProcessor.processBatch(
-                    data.data.rituals,
-                    async (ritual) => {
-                        try {
-                            // Verify ritual ID is valid
-                            if (!ritual.id || isNaN(ritual.id)) {
-                                console.error(`Invalid ritual ID: ${ritual.id}`);
-                                throw new Error('Invalid ritual ID');
-                            }
-
-                            // Check cache first
-                            const cachedFeeModel = await web3Cache.get(
-                                `ritual-feeModel-${ritual.id}`,
-                                async () => {
-                                    // Get ritual data from contract
-                                    const ritualData = await coordinatorContract.methods.rituals(ritual.id).call();
-                                    return ritualData.feeModel;
-                                },
-                                600000 // Cache for 10 minutes
-                            );
-                            
-                            const enrichedRitual = {
-                                ...ritual,
-                                feeModel: cachedFeeModel,
-                                operatorAddresses: ritual.participants.reduce((acc, participant) => {
-                                    const operatorInfo = operatorMap[participant.toLowerCase()];
-                                    acc[participant] = operatorInfo && operatorInfo.confirmed ? operatorInfo.operator : "-";
-                                    return acc;
-                                }, {}),
-                            };
-                            return enrichedRitual;
-                        } catch (error) {
-                            console.error(`Failed to fetch feeModel for ritual ${ritual.id}:`, error);
-                            // Return ritual without feeModel if contract call fails
-                            return {
-                                ...ritual,
-                                feeModel: null,
-                                operatorAddresses: ritual.participants.reduce((acc, participant) => {
-                                    const operatorInfo = operatorMap[participant.toLowerCase()];
-                                    acc[participant] = operatorInfo && operatorInfo.confirmed ? operatorInfo.operator : "-";
-                                    return acc;
-                                }, {})
-                            };
-                        }
-                    }
-                );
-                
-                data.data.rituals = processedRituals;
+                data.data.rituals = data.data.rituals.map(ritual => ({
+                    ...ritual,
+                    feeModel: null, // Will be fetched lazily when needed
+                    operatorAddresses: ritual.participants.reduce((acc, participant) => {
+                        const operatorInfo = operatorMap[participant.toLowerCase()];
+                        acc[participant] = operatorInfo && operatorInfo.confirmed ? operatorInfo.operator : "-";
+                        return acc;
+                    }, {})
+                }));
             }
             
             return data.data;
@@ -727,6 +678,33 @@ const getWeb3Instance = () => {
     web3Instance = new Web3(Const.RPC_ETH_POLYGON);
   }
   return web3Instance;
+};
+
+export const getRitualFeeModel = async (ritualId) => {
+  if (!ritualId || isNaN(ritualId)) {
+    console.error(`Invalid ritual ID: ${ritualId}`);
+    return null;
+  }
+
+  try {
+    // Use cache with longer TTL for fee models
+    return await web3Cache.get(
+      `ritual-feeModel-${ritualId}`,
+      async () => {
+        const web3 = getWeb3Instance();
+        const coordinatorContract = new web3.eth.Contract(
+          CoordinatorABI,
+          CoordinatorAddress
+        );
+        const ritualData = await coordinatorContract.methods.rituals(ritualId).call();
+        return ritualData.feeModel;
+      },
+      3600000 // Cache for 1 hour
+    );
+  } catch (error) {
+    console.error(`Failed to fetch feeModel for ritual ${ritualId}:`, error);
+    return null;
+  }
 };
 
 export const getTimeout = async () => {

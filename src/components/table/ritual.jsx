@@ -172,6 +172,19 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
   function Row(props) {
     const { row } = props;
     const [open, setOpen] = React.useState(false);
+    const [feeModel, setFeeModel] = React.useState(row.feeModel);
+    
+    // Fetch feeModel when row is expanded for the first time
+    React.useEffect(() => {
+      if (open && !feeModel) {
+        Data.getRitualFeeModel(row.id).then(model => {
+          if (model) {
+            setFeeModel(model);
+          }
+        });
+      }
+    }, [open, row.id, feeModel]);
+    
     return (
       <React.Fragment>
         <TableRow

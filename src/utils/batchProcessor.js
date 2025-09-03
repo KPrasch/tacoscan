@@ -1,6 +1,6 @@
 // Batch processor for Web3 calls to prevent overwhelming the RPC endpoint
 class BatchProcessor {
-  constructor(maxConcurrent = 5, delayBetweenBatches = 100) {
+  constructor(maxConcurrent = 2, delayBetweenBatches = 500) {
     this.maxConcurrent = maxConcurrent;
     this.delayBetweenBatches = delayBetweenBatches;
   }
