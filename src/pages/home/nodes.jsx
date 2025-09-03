@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import * as Data from "../data";
 import NodesTable from "../../components/table/nodes";
+import { StatsCard } from "../../components/ui";
 import styles from "./styles.module.css";
 
 const NodesPage = ({ network, isSearch, searchInput }) => {
@@ -53,60 +54,59 @@ const NodesPage = ({ network, isSearch, searchInput }) => {
 
   return (
     <div>
-      <div className={styles.node_detail_header}>
-        <div className={styles.node_detail_header_address}>
-          {isSearch ? (
+      <div style={{ padding: "24px 40px" }}>
+        {isSearch ? (
+          <h3 style={{ margin: 0, color: "#0A0A0A" }}>Search Results: {searchInput}</h3>
+        ) : (
+          <h1 style={{ 
+            margin: 0, 
+            fontSize: "2.5rem", 
+            fontWeight: 700, 
+            color: "#0A0A0A",
+            marginBottom: "8px"
+          }}>
+            Nodes
+          </h1>
+        )}
+      </div>
+      
+      <div style={{ 
+        padding: "0 40px 24px 40px",
+        display: "flex",
+        gap: "16px",
+        flexWrap: "wrap"
+      }}>
+        <StatsCard 
+          title="Total Nodes"
+          value={pageData.totalNodes || 0}
+          subtitle="nodes"
+          loading={pageData.isLoading}
+        />
+        <StatsCard 
+          title="Confirmed Operators"
+          value={stats?.numBondedOperators || 0}
+          loading={pageData.isLoading}
+        />
+        <StatsCard 
+          title="Total Authorized"
+          value={
             <>
-              <h4>Search : {searchInput}</h4>
-              <span>{pageData.totalNodes} node</span>
+              {Data.formatWeiDecimalNoSurplus(stats?.totalAuthorizedAmount || 0)}
+              <span style={{ fontSize: "1rem", marginLeft: "4px", color: "#6B7280" }}>T</span>
             </>
-          ) : (
+          }
+          loading={pageData.isLoading}
+        />
+        <StatsCard 
+          title="Total Staked"
+          value={
             <>
-              <h3>Nodes</h3>
-              <span>{pageData.totalNodes} nodes</span>
+              {Data.formatWeiDecimalNoSurplus(stats?.totalStaked || 0)}
+              <span style={{ fontSize: "1rem", marginLeft: "4px", color: "#6B7280" }}>T</span>
             </>
-          )}
-        </div>
-        <div className={styles.node_detail_header_value}>
-          <div className={styles.node_detail_header_value_item}>
-            <div className={styles.node_detail_header_value_item_lable}>
-              Confirmed Operators
-            </div>
-            <div>
-              <div>{stats?.numBondedOperators}</div>
-            </div>
-          </div>
-        </div>
-        <div className={styles.node_detail_header_value}>
-          <div className={styles.node_detail_header_value_item}>
-            <div className={styles.node_detail_header_value_item_lable_sub}>
-              Total Authorized
-            </div>
-            <div>
-              <div>
-                {Data.formatWeiDecimalNoSurplus(
-                  stats?.totalAuthorizedAmount
-                )}
-                <span className={styles.span_t_token}>{" T"}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className={styles.node_detail_header_value}>
-          <div className={styles.node_detail_header_value_item}>
-            <div className={styles.node_detail_header_value_item_lable_sub}>
-              Total Staked
-            </div>
-            <div>
-              <div>
-                {Data.formatWeiDecimalNoSurplus(
-                  stats?.totalStaked
-                )}
-                <span className={styles.span_t_token}>{" T"}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+          }
+          loading={pageData.isLoading}
+        />
       </div>
       <div className={styles.table_content}>
         <NodesTable

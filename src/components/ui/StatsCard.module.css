@@ -1,0 +1,53 @@
+.statsCard {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.statsCard:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.cardTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6B7280;
+  margin-bottom: 8px;
+}
+
+.cardValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0A0A0A;
+  line-height: 1.2;
+  font-family: var(--font-mono, "Space Mono", monospace);
+}
+
+.cardSubtitle {
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin-top: 4px;
+}
+
+.loading {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #9CA3AF;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}

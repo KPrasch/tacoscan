@@ -7,6 +7,7 @@ export { default as IconButton } from './IconButton';
 export { default as Link } from './Link';
 export { default as Paper } from './Paper';
 export { default as Stack } from './Stack';
+export { default as StatsCard } from './StatsCard';
 export { default as TextField } from './TextField';
 export { default as Tooltip } from './Tooltip';
 export { default as Typography } from './Typography';
