@@ -254,12 +254,12 @@ function Overview(node) {
             </div>
             <div style={{flex: "1 1 0%"}}>
                 <h4><strong>Log</strong></h4>
-                {node?.events?.map(eventEntity => {
+                {node?.events?.map((eventEntity, index) => {
                     const event = eventEntity.eventType;
                     const timestamp = eventEntity.timestamp;
                     const amount = eventEntity.weiDecimalEventAmount;
                     return (
-                        <div className={styles.log_item}>
+                        <div key={`event-${index}-${timestamp}`} className={styles.log_item}>
                             <div className={styles.log_item_lable}>
                                 <Tooltip title={Data.formatDate(timestamp)}>
                                     <span>{Data.formatTimeToText(timestamp)}</span>
