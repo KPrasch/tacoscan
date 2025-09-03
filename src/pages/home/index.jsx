@@ -1,31 +1,21 @@
 import React, { useEffect } from "react";
-import About from "./about";
-import Box from "@mui/material/Box";
-import Tab from "@mui/material/Tab";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
-import TabPanel from "@mui/lab/TabPanel";
-import Button from "@mui/material/Button";
+import { Box, Tab, TabContext, TabList, TabPanel, Button } from "../../components/ui";
 import { useNavigate } from "react-router-dom";
 import styles from "./styles.module.css";
 import RitualPage from "./ritual";
 import RitualDetailPage from "./ritualDetail";
-import { ReactComponent as Logo } from "../../logo.svg";
-import { ReactComponent as PowerThreshold} from '../../assets/power-threshold.svg';
+import TacoLogo from "../../components/TacoLogo";
 
 import * as Const from "../../utils/Cons";
-import IconButton from "@mui/material/IconButton";
-import SettingsIcon from "@mui/icons-material/Settings";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import TextField from "@mui/material/TextField";
-import SearchIcon from "@mui/icons-material/Search";
-import StakerPage from "./staker";
-import StakerDetailPage from "./stakerDetail";
+import { IconButton, TextField } from "../../components/ui";
+import { SettingsIcon, SearchIcon } from "../../components/ui";
+import { Menu, MenuItem } from "../../components/ui";
+import NodesPage from "./nodes";
+import NodeDetailPage from "./nodeDetail";
 import UserDetailPage from "./userDetail";
 import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { useAccount } from 'wagmi'
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import { AccountBalanceWalletIcon } from '../../components/ui';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -50,8 +40,6 @@ const HomePage = () => {
         setTab("stakerDetail");
       } else if (pathName.startsWith("/stakers")) {
         setTab("stakers");
-      } else if (pathName.startsWith("/about")) {
-        setTab("about");
       } else if (pathName.startsWith("/rituals/")) {
         setTab("ritualDetail");
       } else {
@@ -76,10 +64,10 @@ const HomePage = () => {
     return <RitualDetailPage />;
   }
 
-  function stakers() {
+  function nodes() {
     return (
       <div>
-        <StakerPage
+        <NodesPage
           network={Const.DEFAULT_NETWORK}
           isSearch={isSearch}
           searchInput={searchInput}
@@ -88,34 +76,28 @@ const HomePage = () => {
     );
   }
 
-  function stakerDetail() {
-    return <StakerDetailPage />;
+  function nodeDetail() {
+    return <NodeDetailPage />;
   }
 
   function userDetail() {
     return <UserDetailPage />;
   }
 
-  function about() {
-    return <About />;
-  }
-
   function renderWalletButton() {
     return (
       <Button
-        variant="outlined"
+        variant="contained"
         onClick={() => open()}
         startIcon={<AccountBalanceWalletIcon />}
-        sx={{
+        style={{
           marginLeft: '20px',
           marginRight: '20px',
-          borderColor: '#7850cd',
-          color: '#7850cd',
-          '&:hover': {
-            borderColor: '#6340b0',
-            backgroundColor: 'rgba(120, 80, 205, 0.04)',
-          },
+          backgroundColor: '#0A0A0A',
+          color: '#FFFFFF',
+          border: 'none'
         }}
+        className={styles.walletButton}
       >
         {isConnected ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connect Wallet'}
       </Button>
@@ -130,8 +112,6 @@ const HomePage = () => {
           return navigate("/rituals");
         case "stakers":
           return navigate("/stakers");
-        case "about":
-          return navigate("/about");
         default:
           return navigate("/");
       }
@@ -151,57 +131,62 @@ const HomePage = () => {
     };
 
     return (
-      <Box sx={{ width: "100%", typography: "body" }}>
-        <div>
-          <div className={styles.top_banner}>
-            <div style={{paddingRight:"20px" , fill:"white"}}>
-              <a href="https://threshold.network/" target="_blank" rel="noopener noreferrer">
-                <PowerThreshold/>
-              </a>
-            </div>
-            <p>
-              Powered by Threshold Network
-              <a href="https://threshold.network/" target="_blank" rel="noopener noreferrer">
-                {" Learn More ↗"}
-              </a>
-            </p>
-          </div>
-        </div>
+      <Box style={{ width: "100%", background: "#F8F9FA", minHeight: "100vh" }}>
         <TabContext value={tab === "ritualDetail" ? "rituals" : tab}>
           <Box
-            sx={{
-              mb: 0,
-              borderBottom: 1,
-              borderColor: "divider",
+            style={{
+              marginBottom: 0,
+              borderBottom: "1px solid #E5E7EB",
               textAlign: "left",
-              marginLeft: "20px",
-              paddingTop: "20px",
+              padding: "20px 40px",
               display: "flex",
               flexDirection: "row",
-              overflowX: "scroll",
+              overflowX: "auto",
               overflowY: "hidden",
-              height: "90px",
+              height: "70px",
+              alignItems: "center",
+              backgroundColor: "#FFFFFF",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+              position: "sticky",
+              top: 0,
+              zIndex: 100
             }}
           >
             <div className={styles.logo_header}>
-              <a href="/">
-                <Logo height={60} />
+              <a href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+                <TacoLogo width={108} height={28} />
+                <span style={{ 
+                  fontFamily: 'var(--font-mono, "Space Mono", monospace)', 
+                  fontSize: '18px', 
+                  fontWeight: '700',
+                  color: '#0A0A0A',
+                  letterSpacing: '-0.5px'
+                }}>
+                  SCAN
+                </span>
               </a>
             </div>
             <TabList
               onChange={handleChange}
               aria-label=""
-              sx={{ display: "flex", paddingLeft: "20px", minWidth: "500px" }}
+              style={{ 
+                display: "flex", 
+                paddingLeft: "20px", 
+                minWidth: "500px",
+                alignItems: "center",
+                height: "100%",
+                borderBottom: "none",
+                marginBottom: 0
+              }}
               value={tab === "ritualDetail" ? "rituals" : tab}
             >
-              <Tab sx={{ padding: 2 }} label="DKG Rituals" value="rituals" />
-              <Tab sx={{ padding: 2 }} label="Stakers" value="stakers" />
-              <Tab sx={{ padding: 2 }} label="About" value="about" />
+              <Tab style={{ padding: "16px", alignSelf: "stretch", display: "flex", alignItems: "center" }} label="DKG Rituals" value="rituals" />
+              <Tab style={{ padding: "16px", alignSelf: "stretch", display: "flex", alignItems: "center" }} label="Nodes" value="stakers" />
             </TabList>
             <div style={{ flex: "1 1 0%" }}></div>
-            <div className={styles.search}>
+            <div className={styles.search} style={{ display: 'flex', alignItems: 'center' }}>
               <TextField
-                label="key / addresses / txhash"
+                placeholder="key / addresses / txhash"
                 variant="outlined"
                 fullWidth
                 value={searchInput}
@@ -209,13 +194,12 @@ const HomePage = () => {
                 onKeyUp={(event) => {
                   if (event.key == "Enter") submitSearch();
                 }}
-                InputProps={{
-                  endAdornment: (
-                    <IconButton onClick={() => submitSearch()}>
-                      <SearchIcon />
-                    </IconButton>
-                  ),
-                }}
+                endAdornment={
+                  <IconButton onClick={() => submitSearch()}>
+                    <SearchIcon />
+                  </IconButton>
+                }
+                style={{ margin: 0 }}
               />
             </div>
             {renderWalletButton()}
@@ -223,10 +207,9 @@ const HomePage = () => {
           <TabPanel value="rituals">
             {tab === "ritualDetail" ? ritualDetail() : rituals()}
           </TabPanel>
-          <TabPanel value="stakers">{stakers()}</TabPanel>
-          <TabPanel value="stakerDetail">{stakerDetail()}</TabPanel>
+          <TabPanel value="stakers">{nodes()}</TabPanel>
+          <TabPanel value="stakerDetail">{nodeDetail()}</TabPanel>
           <TabPanel value="userDetail">{userDetail()}</TabPanel>
-          <TabPanel value="about">{about()}</TabPanel>
         </TabContext>
       </Box>
     );

@@ -3,27 +3,29 @@ import { useTable } from "react-table";
 import Loader from "../loader";
 import styles from "./styles.module.css";
 import CopyButton from "../CopyButton";
-import Tooltip from "@mui/material/Tooltip";
-import Button from "@mui/material/Button";
-import ReportOutlinedIcon from "@mui/icons-material/ReportOutlined";
 import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Paper from "@mui/material/Paper";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import Collapse from "@mui/material/Collapse";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Link from "@mui/material/Link";
+import {
+  Tooltip,
+  Button,
+  ReportOutlinedIcon,
+  Box,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  Paper,
+  KeyboardArrowDownIcon,
+  KeyboardArrowUpIcon,
+  Collapse,
+  IconButton,
+  Typography,
+  Link
+} from "../ui";
 import { Link as RouterLink } from "react-router-dom";
 import { ReactComponent as ShareLink } from "../../assets/link.svg";
 import * as Data from "../../pages/data";
@@ -224,14 +226,14 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
           <TableCell align="left">
             <span className={styles.numbers}>{row.totalPostedAggregations}</span>
           </TableCell>
-          <TableCell align="left" sx={{ color:getColorByStatus(row.status) }}>
+          <TableCell align="left" style={{ color:getColorByStatus(row.status) }}>
             {row.status}
           </TableCell>
         </TableRow>
         <TableRow className={styles.container_detail}>
           <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
             <Collapse in={open} timeout="auto" unmountOnExit>
-              <Box sx={{ margin: 1 }}>
+              <Box style={{ margin: '8px' }}>
                 <div className={styles.detail_item} style={{ flexDirection: 'column' }}>
                   <div style={{ marginBottom: '20px', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', paddingBottom: '20px' }}>
                     <TransactionTimeline
@@ -244,26 +246,26 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                     <TableContainer className={styles.timeline}>
                       <Table
                         className={styles.table_detail}
-                        sx={{ minWidth: 750 }}
+                        style={{ minWidth: 750 }}
                         aria-labelledby="tableTitle"
                         size={"small"}
                       >
                         <TableBody>
-                          <TableRow sx={{ '& td': { paddingY: '16px', borderBottom: '1px solid rgba(224, 224, 224, 1)' } }}>
+                          <TableRow style={{ borderBottom: '1px solid rgba(224, 224, 224, 1)' }}>
                             <TableCell style={{ width: '15%' }}>
-                              <Typography variant="body2" component="span" sx={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>DKG Id:</Typography>
+                              <Typography variant="body2" component="span" style={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>DKG Id:</Typography>
                               {' '}{row.id}
                             </TableCell>
                             <TableCell style={{ width: '12%' }}>
-                              <Typography variant="body2" component="span" sx={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>Threshold:</Typography>
+                              <Typography variant="body2" component="span" style={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>Threshold:</Typography>
                               {' '}{row.threshold}
                             </TableCell>
                             <TableCell style={{ width: '12%' }}>
-                              <Typography variant="body2" component="span" sx={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>DKG Size:</Typography>
+                              <Typography variant="body2" component="span" style={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>DKG Size:</Typography>
                               {' '}{row.dkgSize}
                             </TableCell>
                             <TableCell style={{ width: '25%' }}>
-                              <Typography variant="body2" component="span" sx={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>Initiator:</Typography>
+                              <Typography variant="body2" component="span" style={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>Initiator:</Typography>
                               {' '}
                               <Link
                                 target="_blank"
@@ -281,7 +283,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                               </Tooltip>
                             </TableCell>
                             <TableCell style={{ width: '25%' }}>
-                              <Typography variant="body2" component="span" sx={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>Access Controller:</Typography>
+                              <Typography variant="body2" component="span" style={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.87)' }}>Access Controller:</Typography>
                               {' '}
                               <Link
                                 target="_blank"
@@ -300,7 +302,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                             </TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableCell colSpan={5} sx={{ pt: 2 }}>
+                            <TableCell colSpan={5} style={{ paddingTop: '16px' }}>
                               <Table size="small">
                                 <TableHead>
                                   <TableRow>
@@ -376,7 +378,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
               <TableContainer>
                 <Table
                   className={styles.table}
-                  sx={{ minWidth: 750 }}
+                  style={{ minWidth: 750 }}
                   aria-labelledby="tableTitle"
                   size={"small"}
                 >

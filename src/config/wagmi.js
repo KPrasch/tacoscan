@@ -13,15 +13,18 @@ console.log('All Vite Env Variables:', {
 });
 
 // Get projectId from environment variables
-const projectId = import.meta.env.VITE_REACT_APP_WALLET_CONNECT_PROJECT_ID
+const projectId = import.meta.env.VITE_REACT_APP_WALLET_CONNECT_PROJECT_ID || 'dummy_project_id_for_development'
 
-if (!projectId) {
-  throw new Error('WalletConnect Project ID is required');
+if (!projectId || projectId === 'your_project_id_here' || projectId === 'dummy_project_id_for_development') {
+  console.warn('⚠️ WalletConnect Project ID is not configured properly.');
+  console.warn('To enable wallet connections, please:');
+  console.warn('1. Get a free Project ID from https://cloud.walletconnect.com/sign-in');
+  console.warn('2. Add it to your .env file as VITE_REACT_APP_WALLET_CONNECT_PROJECT_ID=your_actual_id');
 }
 
 const metadata = {
-  name: 'TacoScan',
-  description: 'DKG Ritual Scanner',
+  name: 'TACo Scan',
+  description: 'TACo DKG Ritual Explorer',
   url: 'https://tacoscan.io',
   icons: ['https://avatars.githubusercontent.com/u/37784886']
 }
@@ -73,6 +76,6 @@ createWeb3Modal({
   enableAnalytics: true,
   themeMode: 'light',
   themeVariables: {
-    '--w3m-accent': '#7850cd',
+    '--w3m-accent': '#96FF5E',
   }
 }) 

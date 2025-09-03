@@ -30,11 +30,9 @@ export const getEtherBlockLink = () => {
 }
 
 export const getDomain = () => {
-    if (Const.DEFAULT_NETWORK == Const.NETWORK_MAINNET) {
-        return "https://tacoscan.com"
-    } else {
-        return "https://testnet.tacoscan.com"
-    }
+    // Use relative path for internal navigation
+    // This ensures we stay on the same domain (localhost in dev, production URL in prod)
+    return ""
 }
 
 export const getBlockStreamInfo = () => {

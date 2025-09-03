@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import * as Data from "../data";
-import StakersTable from "../../components/table/staker";
+import NodesTable from "../../components/table/nodes";
 import styles from "./styles.module.css";
 
-const StakersPage = ({ network, isSearch, searchInput }) => {
+const NodesPage = ({ network, isSearch, searchInput }) => {
   const [pageData, setPageData] = useState({
     rowData: [],
     isLoading: false,
@@ -23,41 +23,53 @@ const StakersPage = ({ network, isSearch, searchInput }) => {
       isLoading: true,
     }));
 
-    Data.getStakers(isSearch, searchInput).then((info) => {
-      const {stakers, statsRecord} = Data.formatStakers(info?.appAuthorizations);
-      const totalStakers = stakers.length;
+    Data.getNodes(isSearch, searchInput).then((info) => {
+      const {nodes, statsRecord} = Data.formatNodes(info?.appAuthorizations || []);
+      const totalNodes = nodes.length;
 
       setPageData({
         isLoading: false,
-        rowData: stakers,
-        totalStakers: totalStakers,
+        rowData: nodes,
+        totalNodes: totalNodes,
       });
 
       if (!isSearch) {
         setStats(statsRecord);
       }
+    }).catch((error) => {
+      console.error("Error loading nodes:", error);
+      setPageData({
+        isLoading: false,
+        rowData: [],
+        totalNodes: 0,
+      });
+      setStats({
+        numBondedOperators: 0,
+        totalAuthorizedAmount: 0,
+        totalStaked: 0,
+      });
     });
   }, [isSearch]);
 
   return (
     <div>
-      <div className={styles.staker_detail_header}>
-        <div className={styles.staker_detail_header_address}>
+      <div className={styles.node_detail_header}>
+        <div className={styles.node_detail_header_address}>
           {isSearch ? (
             <>
               <h4>Search : {searchInput}</h4>
-              <span>{pageData.totalStakers} staker</span>
+              <span>{pageData.totalNodes} node</span>
             </>
           ) : (
             <>
-              <h3>Stakers</h3>
-              <span>{pageData.totalStakers} stakers</span>
+              <h3>Nodes</h3>
+              <span>{pageData.totalNodes} nodes</span>
             </>
           )}
         </div>
-        <div className={styles.staker_detail_header_value}>
-          <div className={styles.staker_detail_header_value_item}>
-            <div className={styles.staker_detail_header_value_item_lable}>
+        <div className={styles.node_detail_header_value}>
+          <div className={styles.node_detail_header_value_item}>
+            <div className={styles.node_detail_header_value_item_lable}>
               Confirmed Operators
             </div>
             <div>
@@ -65,9 +77,9 @@ const StakersPage = ({ network, isSearch, searchInput }) => {
             </div>
           </div>
         </div>
-        <div className={styles.staker_detail_header_value}>
-          <div className={styles.staker_detail_header_value_item}>
-            <div className={styles.staker_detail_header_value_item_lable_sub}>
+        <div className={styles.node_detail_header_value}>
+          <div className={styles.node_detail_header_value_item}>
+            <div className={styles.node_detail_header_value_item_lable_sub}>
               Total Authorized
             </div>
             <div>
@@ -80,9 +92,9 @@ const StakersPage = ({ network, isSearch, searchInput }) => {
             </div>
           </div>
         </div>
-        <div className={styles.staker_detail_header_value}>
-          <div className={styles.staker_detail_header_value_item}>
-            <div className={styles.staker_detail_header_value_item_lable_sub}>
+        <div className={styles.node_detail_header_value}>
+          <div className={styles.node_detail_header_value_item}>
+            <div className={styles.node_detail_header_value_item_lable_sub}>
               Total Staked
             </div>
             <div>
@@ -97,8 +109,8 @@ const StakersPage = ({ network, isSearch, searchInput }) => {
         </div>
       </div>
       <div className={styles.table_content}>
-        <StakersTable
-          columns={Data.staker_columns}
+        <NodesTable
+          columns={Data.node_columns}
           data={pageData.rowData}
           isLoading={pageData.isLoading}
           network={network}
@@ -108,4 +120,4 @@ const StakersPage = ({ network, isSearch, searchInput }) => {
   );
 };
 
-export default StakersPage;
+export default NodesPage;

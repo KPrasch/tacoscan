@@ -1,29 +1,31 @@
 import React, { useState, useEffect } from "react";
 import * as Data from "../data";
 import styles from "./styles.module.css";
-import Link from "@mui/material/Link";
 import { ReactComponent as Copy } from "../../assets/copy.svg";
 import { ReactComponent as ShareLink } from "../../assets/link.svg";
 import TransactionTimeline from "../../components/table/timeline";
 import { RitualManagement } from "../../components/RitualManagement";
 import * as Utils from "../../utils/utils";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableRow from "@mui/material/TableRow";
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
 import Loader from "../../components/loader";
 import { getColorByStatus } from "../../components/table/view_utils";
-import TableHead from "@mui/material/TableHead";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import PendingIcon from "@mui/icons-material/Pending";
-import ErrorIcon from "@mui/icons-material/Error";
+import {
+  Link,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Box,
+  Paper,
+  TableHead,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  ExpandMoreIcon,
+  CheckCircleIcon,
+  PendingIcon,
+  ErrorIcon
+} from "../../components/ui";
 
 const RitualDetailPage = () => {
     const [pageData, setPageData] = useState({
@@ -91,29 +93,24 @@ const RitualDetailPage = () => {
         const operatorAddress = ritual.operatorAddresses?.[participant] || "-";
 
         const getStatusIcon = (isSubmitted, isPending) => {
-            if (isSubmitted) return <CheckCircleIcon sx={{ color: "#4CAF50", fontSize: "1.2rem" }} />;
-            if (isPending) return <PendingIcon sx={{ color: "#FF9800", fontSize: "1.2rem" }} />;
-            return <ErrorIcon sx={{ color: "#F44336", fontSize: "1.2rem" }} />;
+            if (isSubmitted) return <CheckCircleIcon style={{ color: "#4CAF50", fontSize: "1.2rem" }} />;
+            if (isPending) return <PendingIcon style={{ color: "#FF9800", fontSize: "1.2rem" }} />;
+            return <ErrorIcon style={{ color: "#F44336", fontSize: "1.2rem" }} />;
         };
 
         return (
             <TableRow>
-                <TableCell colSpan={4} sx={{ padding: 0, border: 'none' }}>
-                    <Accordion sx={{ 
-                        boxShadow: 'none', 
-                        '&:before': { display: 'none' },
+                <TableCell colSpan={4} style={{ padding: 0, border: 'none' }}>
+                    <Accordion style={{ 
+                        boxShadow: 'none',
                         backgroundColor: 'transparent',
                         width: '100%',
-                        margin: '0 !important'
+                        margin: '0'
                     }}>
                         <AccordionSummary 
                             expandIcon={<ExpandMoreIcon />}
-                            sx={{ 
-                                padding: 0,
-                                '& .MuiAccordionSummary-content': { 
-                                    margin: '0 !important',
-                                    width: '100%'
-                                }
+                            style={{ 
+                                padding: 0
                             }}
                         >
                             <div style={{ 
@@ -132,7 +129,7 @@ const RitualDetailPage = () => {
                                         underline="hover"
                                         href={Utils.getPolygonScanAddressLink() + participant}
                                         className={styles.link}
-                                        sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
                                     >
                                         {participant}
                                         <ShareLink style={{ marginLeft: "4px" }}/>
@@ -158,7 +155,7 @@ const RitualDetailPage = () => {
                                                 underline="hover"
                                                 href={Utils.getPolygonScanAddressLink() + operatorAddress}
                                                 className={styles.link}
-                                                sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                                                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
                                             >
                                                 {operatorAddress}
                                                 <ShareLink style={{ marginLeft: "4px" }}/>
@@ -195,8 +192,8 @@ const RitualDetailPage = () => {
                                 </div>
                             </div>
                         </AccordionSummary>
-                        <AccordionDetails sx={{ padding: '0 16px 16px' }}>
-                            <Box sx={{ 
+                        <AccordionDetails style={{ padding: '0 16px 16px' }}>
+                            <Box style={{ 
                                 display: 'flex', 
                                 flexDirection: 'column', 
                                 gap: '12px',
@@ -244,7 +241,7 @@ const RitualDetailPage = () => {
                     <span>Status: {ritual.status}</span>
                 </div>
             </div>
-            <Box sx={{ margin: "16px" }}>
+            <Box style={{ margin: "16px" }}>
                 <div className={styles.detail_item} style={{ flexDirection: "column" }}>
                     {/* Timeline Section */}
                     <div style={{ 
@@ -266,7 +263,7 @@ const RitualDetailPage = () => {
                         margin: "-4px",
                         marginBottom: "16px"
                     }}>
-                        <Box sx={{
+                        <Box style={{
                             padding: "12px",
                             margin: "4px",
                             backgroundColor: "white",
@@ -281,7 +278,7 @@ const RitualDetailPage = () => {
                             <div style={{ fontSize: "2.5rem", fontWeight: "500", lineHeight: 1, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>{ritual.id}</div>
                         </Box>
 
-                        <Box sx={{
+                        <Box style={{
                             padding: "12px",
                             margin: "4px",
                             backgroundColor: "white",
@@ -296,7 +293,7 @@ const RitualDetailPage = () => {
                             <div style={{ fontSize: "1.75rem", fontWeight: "500", lineHeight: 1.2, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end", color: getColorByStatus(ritual.status) }}>{ritual.status}</div>
                         </Box>
 
-                        <Box sx={{
+                        <Box style={{
                             padding: "12px",
                             margin: "4px",
                             backgroundColor: "white",
@@ -311,7 +308,7 @@ const RitualDetailPage = () => {
                             <div style={{ fontSize: "2.5rem", fontWeight: "500", lineHeight: 1, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>{ritual.threshold}</div>
                         </Box>
 
-                        <Box sx={{
+                        <Box style={{
                             padding: "12px",
                             margin: "4px",
                             backgroundColor: "white",
@@ -326,7 +323,7 @@ const RitualDetailPage = () => {
                             <div style={{ fontSize: "2.5rem", fontWeight: "500", lineHeight: 1, flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>{ritual.dkgSize}</div>
                         </Box>
 
-                        <Box sx={{
+                        <Box style={{
                             padding: "12px",
                             margin: "4px",
                             backgroundColor: "white",
@@ -347,7 +344,7 @@ const RitualDetailPage = () => {
                             </div>
                         </Box>
 
-                        <Box sx={{
+                        <Box style={{
                             padding: "12px",
                             margin: "4px",
                             backgroundColor: "white",
@@ -365,7 +362,7 @@ const RitualDetailPage = () => {
                                     underline="hover"
                                     href={Utils.getPolygonScanAddressLink() + ritual.initiator}
                                     className={styles.link}
-                                    sx={{ flex: "1 1 auto" }}
+                                    style={{ flex: "1 1 auto" }}
                                 >
                                     {ritual.initiator}
                                     <ShareLink style={{ marginLeft: "4px", flexShrink: 0 }}/>
@@ -377,7 +374,7 @@ const RitualDetailPage = () => {
                             </div>
                         </Box>
 
-                        <Box sx={{
+                        <Box style={{
                             padding: "12px",
                             margin: "4px",
                             backgroundColor: "white",
@@ -395,7 +392,7 @@ const RitualDetailPage = () => {
                                     underline="hover"
                                     href={Utils.getPolygonScanAddressLink() + ritual.authority}
                                     className={styles.link}
-                                    sx={{ flex: "1 1 auto" }}
+                                    style={{ flex: "1 1 auto" }}
                                 >
                                     {ritual.authority}
                                     <ShareLink style={{ marginLeft: "4px", flexShrink: 0 }}/>
@@ -407,7 +404,7 @@ const RitualDetailPage = () => {
                             </div>
                         </Box>
 
-                        <Box sx={{
+                        <Box style={{
                             padding: "12px",
                             margin: "4px",
                             backgroundColor: "white",
@@ -425,7 +422,7 @@ const RitualDetailPage = () => {
                                     underline="hover"
                                     href={Utils.getPolygonScanAddressLink() + ritual.accessController}
                                     className={styles.link}
-                                    sx={{ flex: "1 1 auto" }}
+                                    style={{ flex: "1 1 auto" }}
                                 >
                                     {ritual.accessController}
                                     <ShareLink style={{ marginLeft: "4px", flexShrink: 0 }}/>
@@ -437,7 +434,7 @@ const RitualDetailPage = () => {
                             </div>
                         </Box>
 
-                        <Box sx={{
+                        <Box style={{
                             padding: "12px",
                             margin: "4px",
                             backgroundColor: "white",
@@ -455,7 +452,7 @@ const RitualDetailPage = () => {
                                     underline="hover"
                                     href={Utils.getPolygonScanAddressLink() + ritual.feeModel}
                                     className={styles.link}
-                                    sx={{ flex: "1 1 auto" }}
+                                    style={{ flex: "1 1 auto" }}
                                 >
                                     {ritual.feeModel}
                                     <ShareLink style={{ marginLeft: "4px", flexShrink: 0 }}/>
@@ -472,7 +469,7 @@ const RitualDetailPage = () => {
                     <RitualManagement ritual={ritual} feeModelAddress={ritual.feeModel} />
 
                     {/* Participants Table Section */}
-                    <Box sx={{
+                    <Box style={{
                         width: "100%",
                         padding: "20px",
                         backgroundColor: "white",
@@ -480,11 +477,11 @@ const RitualDetailPage = () => {
                         boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
                     }}>
                         <div style={{ fontSize: "0.875rem", color: "rgba(0,0,0,0.6)", marginBottom: "12px" }}>Participants ({ritual.participants.length})</div>
-                        <TableContainer sx={{ width: '100%' }}>
-                            <Table sx={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+                        <TableContainer style={{ width: '100%' }}>
+                            <Table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell width="35%" sx={{ 
+                                        <TableCell width="35%" style={{ 
                                             color: 'rgba(0,0,0,0.6)', 
                                             fontSize: '0.75rem',
                                             textTransform: 'uppercase',
@@ -492,7 +489,7 @@ const RitualDetailPage = () => {
                                             padding: '12px 16px',
                                             borderBottom: '1px solid rgba(0,0,0,0.12)'
                                         }}>Node Address</TableCell>
-                                        <TableCell width="35%" sx={{ 
+                                        <TableCell width="35%" style={{ 
                                             color: 'rgba(0,0,0,0.6)', 
                                             fontSize: '0.75rem',
                                             textTransform: 'uppercase',
@@ -500,7 +497,7 @@ const RitualDetailPage = () => {
                                             padding: '12px 16px',
                                             borderBottom: '1px solid rgba(0,0,0,0.12)'
                                         }}>Operator Address</TableCell>
-                                        <TableCell width="15%" align="center" sx={{ 
+                                        <TableCell width="15%" align="center" style={{ 
                                             color: 'rgba(0,0,0,0.6)', 
                                             fontSize: '0.75rem',
                                             textTransform: 'uppercase',
@@ -508,7 +505,7 @@ const RitualDetailPage = () => {
                                             padding: '12px 16px',
                                             borderBottom: '1px solid rgba(0,0,0,0.12)'
                                         }}>Transcript</TableCell>
-                                        <TableCell width="15%" align="center" sx={{ 
+                                        <TableCell width="15%" align="center" style={{ 
                                             color: 'rgba(0,0,0,0.6)', 
                                             fontSize: '0.75rem',
                                             textTransform: 'uppercase',

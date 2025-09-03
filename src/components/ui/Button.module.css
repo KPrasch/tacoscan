@@ -1,0 +1,145 @@
+/* TACo Style Guide - Light Theme Button Styles */
+.button {
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-weight: 500;
+  border: none;
+  border-radius: 0.75rem; /* rounded-xl */
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.button:hover:not(.disabled) {
+  transition: all 0.3s ease;
+}
+
+.button:active:not(.disabled) {
+  transform: scale(0.98);
+}
+
+.small {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.medium {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.large {
+  padding: 10px 22px;
+  font-size: 16px;
+}
+
+/* Primary button style - lime green background */
+.contained {
+  background-color: #96FF5E;
+  color: #0A0A0A;
+  font-weight: 600;
+}
+
+.contained:hover:not(.disabled) {
+  background-color: #7ACC47;
+}
+
+.contained:active:not(.disabled) {
+  background-color: #6BB83F;
+}
+
+.contained.primary {
+  background-color: #96FF5E;
+  color: #0A0A0A;
+  font-weight: 600;
+}
+
+.contained.primary:hover:not(.disabled) {
+  background-color: #7ACC47;
+}
+
+.contained.primary:active:not(.disabled) {
+  background-color: #6BB83F;
+}
+
+/* Secondary button style - light gray background */
+.contained.secondary {
+  background-color: #F4F4F4;
+  color: #0A0A0A;
+}
+
+.contained.secondary:hover:not(.disabled) {
+  background-color: #E5E7EB;
+  border: 1px solid #96FF5E;
+}
+
+/* Outlined/Ghost button style */
+.outlined {
+  background-color: transparent;
+  border: 1px solid #E5E7EB;
+  color: #5A5A5A;
+}
+
+.outlined:hover:not(.disabled) {
+  background-color: #F8F9FA;
+  color: #0A0A0A;
+  border-color: #96FF5E;
+}
+
+.outlined.primary {
+  border-color: #96FF5E;
+  color: #0A0A0A;
+}
+
+.outlined.primary:hover:not(.disabled) {
+  background-color: rgba(150, 255, 94, 0.1);
+  border-color: #7ACC47;
+}
+
+.outlined.secondary {
+  border-color: #E5E7EB;
+  color: #5A5A5A;
+}
+
+.outlined.secondary:hover:not(.disabled) {
+  background-color: #F8F9FA;
+  color: #0A0A0A;
+}
+
+/* Text button style */
+.text {
+  background-color: transparent;
+  color: #5A5A5A;
+  padding: 6px 8px;
+}
+
+.text:hover:not(.disabled) {
+  color: #0A0A0A;
+  background-color: #F8F9FA;
+}
+
+/* Disabled state */
+.disabled {
+  background-color: #F4F4F4 !important;
+  color: #909090 !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+  border-color: #E5E7EB !important;
+}
+
+.startIcon,
+.endIcon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.startIcon {
+  margin-right: 8px;
+}
+
+.endIcon {
+  margin-left: 8px;
+}

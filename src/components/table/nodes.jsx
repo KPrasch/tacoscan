@@ -3,25 +3,27 @@ import { useTable } from "react-table";
 import Loader from "../loader";
 import styles from "./styles.module.css";
 import CopyButton from "../CopyButton";
-import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Paper from "@mui/material/Paper";
-import Link from "@mui/material/Link";
 import * as Data from "../../pages/data";
 import * as Utils from "../../utils/utils";
-import CheckSharpIcon from "@mui/icons-material/CheckSharp";
-import CloseSharpIcon from "@mui/icons-material/CloseSharp";
+import {
+  Tooltip,
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  Paper,
+  Link,
+  CheckSharpIcon,
+  CloseSharpIcon
+} from "../ui";
 
-export const StakerTable = ({ columns, data, isLoading, network }) => {
+export const NodesTable = ({ columns, data, isLoading, network }) => {
   const columnData = useMemo(() => columns, [columns]);
   const rowData = useMemo(() => data, [data]);
 
@@ -214,7 +216,7 @@ export const StakerTable = ({ columns, data, isLoading, network }) => {
               <TableContainer>
                 <Table
                   className={styles.table}
-                  sx={{ minWidth: 750 }}
+                  style={{ minWidth: 750 }}
                   aria-labelledby="tableTitle"
                   size={"small"}
                 >
@@ -272,4 +274,4 @@ export const StakerTable = ({ columns, data, isLoading, network }) => {
   );
 };
 
-export default StakerTable;
+export default NodesTable;

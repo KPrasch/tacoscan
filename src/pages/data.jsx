@@ -4,6 +4,8 @@ import moment from "moment";
 import Web3 from "web3";
 import { CoordinatorABI } from "../utils/abi";
 import { CoordinatorAddress } from "../utils/addresses";
+import web3Cache from "../utils/web3Cache";
+import BatchProcessor from "../utils/batchProcessor";
 
 const tacoAddr = "0x347cc7ede7e5517bd47d20620b2cf1b406edcf07"
 export const ritual_columns = [
@@ -44,9 +46,9 @@ export const ritual_columns = [
   },
 ];
 
-export const staker_columns = [
+export const node_columns = [
   {
-    header: "Staking Provider",
+    header: "Node Provider",
     accessor: "id",
     numeric: false,
   },
@@ -356,14 +358,26 @@ export const formatRitualsData = (rawData, timeout) => {
     .sort((a, b) => b.id - a.id);
 };
 
-export const formatStakers = (rawData) => {
-  const stakers = rawData.map((item) => ({
+export const formatNodes = (rawData) => {
+  // Handle null or undefined data
+  if (!rawData || !Array.isArray(rawData)) {
+    return {
+      nodes: [],
+      statsRecord: {
+        numBondedOperators: 0,
+        totalAuthorizedAmount: 0,
+        totalStaked: 0,
+      }
+    };
+  }
+
+  const nodes = rawData.map((item) => ({
     id: item.id.split('-')[0],
     registeredOperatorAddress: item.tacoOperator?.operator,
     isOperatorConfirmed: item.tacoOperator?.confirmed,
     isAuthorized: parseFloat(item.amount) > 0,
-    authorizedAmount: parseFloat(item.amount),
-    stakedAmount: parseFloat(item.stake?.stakedAmount),
+    authorizedAmount: parseFloat(item.amount) || 0,
+    stakedAmount: parseFloat(item.stake?.stakedAmount) || 0,
     bondedAt: item.tacoOperator?.bondedTimestamp * 1000,
   }))
 
@@ -373,18 +387,18 @@ export const formatStakers = (rawData) => {
     totalStaked: 0,
   };
 
-  stakers.forEach((staker) => {
-    if (staker.isOperatorConfirmed) {
+  nodes.forEach((node) => {
+    if (node.isOperatorConfirmed) {
       statsRecord.numBondedOperators += 1;
     }
-    statsRecord.totalAuthorizedAmount += staker.authorizedAmount;
-    statsRecord.totalStaked += staker.stakedAmount;
+    statsRecord.totalAuthorizedAmount += node.authorizedAmount;
+    statsRecord.totalStaked += node.stakedAmount;
   });
 
-  return { stakers, statsRecord };
+  return { nodes, statsRecord };
 };
 
-export const formatStakerDetail = (rawData) => {
+export const formatNodeDetail = (rawData) => {
   const appAuthorization = rawData.appAuthorization;
 
   const getFirstStakedAt = (stakeHistory) => {
@@ -489,47 +503,64 @@ export const getRituals = async (isSearch, searchInput) => {
             // Add operatorMap to each ritual
             if (data.data.rituals) {
                 // Create Web3 instance with Polygon RPC provider
-                const web3 = new Web3(Const.RPC_ETH_POLYGON);
+                const web3 = getWeb3Instance();
                 const coordinatorContract = new web3.eth.Contract(
                     CoordinatorABI,
                     CoordinatorAddress
                 );
 
-                // Fetch feeModel for each ritual
-                data.data.rituals = await Promise.all(data.data.rituals.map(async ritual => {
-                    try {
-                        // Verify ritual ID is valid
-                        if (!ritual.id || isNaN(ritual.id)) {
-                            console.error(`Invalid ritual ID: ${ritual.id}`);
-                            throw new Error('Invalid ritual ID');
-                        }
+                // Create batch processor to limit concurrent RPC calls
+                const batchProcessor = new BatchProcessor(3, 200); // Max 3 concurrent calls, 200ms delay
+                
+                // Process rituals in batches to avoid overwhelming the RPC endpoint
+                const processedRituals = await batchProcessor.processBatch(
+                    data.data.rituals,
+                    async (ritual) => {
+                        try {
+                            // Verify ritual ID is valid
+                            if (!ritual.id || isNaN(ritual.id)) {
+                                console.error(`Invalid ritual ID: ${ritual.id}`);
+                                throw new Error('Invalid ritual ID');
+                            }
 
-                        // Get ritual data from contract
-                        const ritualData = await coordinatorContract.methods.rituals(ritual.id).call();
-                        
-                        const enrichedRitual = {
-                            ...ritual,
-                            feeModel: ritualData.feeModel,  // Add feeModel from contract
-                            operatorAddresses: ritual.participants.reduce((acc, participant) => {
-                                const operatorInfo = operatorMap[participant.toLowerCase()];
-                                acc[participant] = operatorInfo && operatorInfo.confirmed ? operatorInfo.operator : "-";
-                                return acc;
-                            }, {}),
-                        };
-                        return enrichedRitual;
-                    } catch (error) {
-                        // Return ritual without feeModel if contract call fails
-                        return {
-                            ...ritual,
-                            feeModel: null,
-                            operatorAddresses: ritual.participants.reduce((acc, participant) => {
-                                const operatorInfo = operatorMap[participant.toLowerCase()];
-                                acc[participant] = operatorInfo && operatorInfo.confirmed ? operatorInfo.operator : "-";
-                                return acc;
-                            }, {})
-                        };
+                            // Check cache first
+                            const cachedFeeModel = await web3Cache.get(
+                                `ritual-feeModel-${ritual.id}`,
+                                async () => {
+                                    // Get ritual data from contract
+                                    const ritualData = await coordinatorContract.methods.rituals(ritual.id).call();
+                                    return ritualData.feeModel;
+                                },
+                                600000 // Cache for 10 minutes
+                            );
+                            
+                            const enrichedRitual = {
+                                ...ritual,
+                                feeModel: cachedFeeModel,
+                                operatorAddresses: ritual.participants.reduce((acc, participant) => {
+                                    const operatorInfo = operatorMap[participant.toLowerCase()];
+                                    acc[participant] = operatorInfo && operatorInfo.confirmed ? operatorInfo.operator : "-";
+                                    return acc;
+                                }, {}),
+                            };
+                            return enrichedRitual;
+                        } catch (error) {
+                            console.error(`Failed to fetch feeModel for ritual ${ritual.id}:`, error);
+                            // Return ritual without feeModel if contract call fails
+                            return {
+                                ...ritual,
+                                feeModel: null,
+                                operatorAddresses: ritual.participants.reduce((acc, participant) => {
+                                    const operatorInfo = operatorMap[participant.toLowerCase()];
+                                    acc[participant] = operatorInfo && operatorInfo.confirmed ? operatorInfo.operator : "-";
+                                    return acc;
+                                }, {})
+                            };
+                        }
                     }
-                }));
+                );
+                
+                data.data.rituals = processedRituals;
             }
             
             return data.data;
@@ -585,8 +616,8 @@ export const getRitualsByStakingProvider = async (searchInput) => {
   return emptyData;
 };
 
-export const getStakers = async (isSearch, searchInput) => {
-  const emptyData = JSON.parse(`[]`);
+export const getNodes = async (isSearch, searchInput) => {
+  const emptyData = { appAuthorizations: [] };
   try {
     let data;
     if (!isSearch) {
@@ -598,18 +629,24 @@ export const getStakers = async (isSearch, searchInput) => {
       });
     }
     console.log("data: ", data)
-    return data.data;
+    
+    // Check if data is valid before returning
+    if (data && data.data && !data.errors) {
+      return data.data;
+    } else if (data && data.errors) {
+      console.error("GraphQL errors:", data.errors);
+    }
   } catch (e) {
     console.log("error to fetch stakers data " + e);
   }
   return emptyData;
 };
 
-export const getStakerDetail = async (staker) => {
+export const getNodeDetail = async (node) => {
   const emptyData = JSON.parse(`[]`);  
   try {
     const data = await client.execute(client.StakerDetailDocument, {
-      id: `${staker}-${tacoAddr}`
+      id: `${node}-${tacoAddr}`
     });
 
     if (data.data !== undefined) {
@@ -683,32 +720,44 @@ export const getBalanceOfAddress = async (address) => {
   return 0;
 };
 
+// Singleton Web3 instance to reuse connection
+let web3Instance = null;
+const getWeb3Instance = () => {
+  if (!web3Instance) {
+    web3Instance = new Web3(Const.RPC_ETH_POLYGON);
+  }
+  return web3Instance;
+};
+
 export const getTimeout = async () => {
   if (Const.DEFAULT_NETWORK === Const.NETWORK_TESTNET) return 0;
 
-  const web3 = new Web3(Const.RPC_ETH_POLYGON);
-  const coordinator = "0xE74259e3dafe30bAA8700238e324b47aC98FE755";
-  const contractAbi = [
-    {
-      type: "function",
-      name: "timeout",
-      stateMutability: "view",
-      inputs: [],
-      outputs: [
-          {
-              name: "",
-              type: "uint32",
-              internalType: "uint32"
-          }
-      ]
-  },
-  ];
+  // Use cache to prevent multiple calls
+  return web3Cache.get('coordinator-timeout', async () => {
+    const web3 = getWeb3Instance();
+    const coordinator = "0xE74259e3dafe30bAA8700238e324b47aC98FE755";
+    const contractAbi = [
+      {
+        type: "function",
+        name: "timeout",
+        stateMutability: "view",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "uint32",
+                internalType: "uint32"
+            }
+        ]
+    },
+    ];
 
-  const contract = new web3.eth.Contract(contractAbi, coordinator);
-  const timeout = await contract.methods
-    .timeout()
-    .call();
-  return timeout;
+    const contract = new web3.eth.Contract(contractAbi, coordinator);
+    const timeout = await contract.methods
+      .timeout()
+      .call();
+    return timeout;
+  }, 300000); // Cache for 5 minutes
 };
 
 export const getTotalMerkleDropReward = async (address) => {

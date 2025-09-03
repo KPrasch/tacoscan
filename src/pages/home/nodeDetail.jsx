@@ -4,23 +4,25 @@ import styles from './styles.module.css'
 import { ReactComponent as Copy } from "../../assets/copy.svg";
 import * as Const from '../../utils/Cons';
 import {ReactComponent as ShareLink} from "../../assets/link.svg";
-import Link from "@mui/material/Link";
 import * as Utils from "../../utils/utils";
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import TabPanel from "@mui/lab/TabPanel";
-import TabList from '@mui/lab/TabList';
-import TabContext from "@mui/lab/TabContext";
-import CheckSharpIcon from '@mui/icons-material/CheckSharp';
-import CloseSharpIcon from '@mui/icons-material/CloseSharp';
 import {TIME_LOCK_DEAUTHORIZATION} from "../../utils/Cons";
 import Loader from "../../components/loader";
-import Tooltip from "@mui/material/Tooltip";
-import TableContainer from "@mui/material/TableContainer";
-import Paper from "@mui/material/Paper";
+import {
+  Link,
+  Tab,
+  Box,
+  TabPanel,
+  TabList,
+  TabContext,
+  Tooltip,
+  TableContainer,
+  Paper,
+  CheckSharpIcon,
+  CloseSharpIcon
+} from "../../components/ui";
 import RitualTable from "../../components/table/ritual";
 
-function StakerDetail({staker, stakingProvider}) {
+function NodeDetail({node, stakingProvider}) {
     const [value, setValue] = React.useState("1");
 
     const handleChange = (event, newValue) => {
@@ -28,22 +30,22 @@ function StakerDetail({staker, stakingProvider}) {
     };
 
     return (
-        <Box sx={{width: '100%'}}>
+        <Box style={{width: '100%'}}>
             <TabContext value={value}>
-                <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
+                <Box style={{borderBottom: '1px solid rgba(0, 0, 0, 0.12)'}}>
                     <TabList onChange={handleChange} aria-label="lab API tabs example">
                         <Tab style={{textTransform: 'none', color: "black"}} label="Overview" value="1"/>
                         <Tab style={{textTransform: 'none', color: "black"}} label="DKG Rituals" value="2"/>
                     </TabList>
                 </Box>
-                <TabPanel value="1" className={styles.staker_detail}>{Overview(staker)}</TabPanel>
+                <TabPanel value="1" className={styles.node_detail}>{Overview(node)}</TabPanel>
                 <TabPanel value="2">{DKGRituals(stakingProvider)}</TabPanel>
             </TabContext>
         </Box>
     );
 }
 
-function Overview(staker) {
+function Overview(node) {
     const copyToClipBoard = (data) => {
         try {
           navigator.clipboard.writeText(data);
@@ -63,15 +65,15 @@ function Overview(staker) {
 
         switch (event) {
             case "Staked":
-                return "Staker staked " + amount + " token."
+                return "Node staked " + amount + " token."
             case "ToppedUp":
-                return "Staker stake more " + amount + " token."
+                return "Node stake more " + amount + " token."
             case "Unstaked":
-                return "Staker has unstaked " + amount + " token."
+                return "Node has unstaked " + amount + " token."
             case "AuthorizationIncreased":
                 return "Has been authorized " + amount + " token to the Staking contract."
             case "AuthorizationDecreaseApproved":
-                return "Staker has reduced " + amount + " token from Staking contract."
+                return "Node has reduced " + amount + " token from Staking contract."
             case "AuthorizationInvoluntaryDecreased":
                 return "The Staking Contract has reduced the authorized amount to " + amount + " token."
             case "BondedOperator":
@@ -80,32 +82,32 @@ function Overview(staker) {
     }
 
     return (
-        <div className={styles.staker_detail_overview}>
+        <div className={styles.node_detail_overview}>
             <div style={{flex: "1 1 0%"}}>
-                <table className={styles.staker_detail_overview_table}>
+                <table className={styles.node_detail_overview_table}>
                     {/* --------- Stake---------*/}
                     <tbody>
                     <tr>
                         <th colSpan="2" style={{fontWeight: "bold"}}>Stake</th>
                     </tr>
                     </tbody>
-                    <tbody className={styles.staker_detail_overview_table_tbody}>
+                    <tbody className={styles.node_detail_overview_table_tbody}>
                     <tr>
                         <th>Stake</th>
                         <td>
-                            {"T " + staker.weiDecimalStakedAmount}
+                            {"T " + node.weiDecimalStakedAmount}
                         </td>
                     </tr>
                     <tr>
                         <th>Staked at</th>
                         <td>
-                            {Data.formatDate(staker.stakedAt) ?? "Not yet staked"}
+                            {Data.formatDate(node.stakedAt) ?? "Not yet staked"}
                         </td>
                     </tr>
                     <tr>
                         <th>Operator bonded at</th>
                         <td>
-                            {Data.formatDate(staker.bondedAt) ?? "Operator not bonded"}
+                            {Data.formatDate(node.bondedAt) ?? "Operator not bonded"}
                         </td>
                     </tr>
                     </tbody>
@@ -115,23 +117,23 @@ function Overview(staker) {
                             <th colSpan="2" style={{fontWeight: "bold"}}>Roles</th>
                         </tr>
                     </tbody>
-                    <tbody className={styles.staker_detail_overview_table_tbody}>
+                    <tbody className={styles.node_detail_overview_table_tbody}>
                         <tr>
                             <th>Owner</th>
                             <td>
                                 <Link
                                     target="_blank"
                                     underline="hover"
-                                    href={Utils.getEtherAddressLink() + staker.owner}
+                                    href={Utils.getEtherAddressLink() + node.owner}
                                     className={styles.link}
                                 >
-                                    {Data.formatString(staker.owner)}
+                                    {Data.formatString(node.owner)}
                                     <ShareLink/>
                                 </Link>
                                 <Tooltip title="Copied">
                                     <Copy
                                         style={{ cursor: "pointer" }}
-                                        onClick={(e) => copyToClipBoard(staker.owner)}
+                                        onClick={(e) => copyToClipBoard(node.owner)}
                                     />
                                 </Tooltip>
                             </td>
@@ -142,16 +144,16 @@ function Overview(staker) {
                                 <Link
                                     target="_blank"
                                     underline="hover"
-                                    href={Utils.getEtherAddressLink() + staker.beneficiary}
+                                    href={Utils.getEtherAddressLink() + node.beneficiary}
                                     className={styles.link}
                                 >
-                                    {Data.formatString(staker.beneficiary)}
+                                    {Data.formatString(node.beneficiary)}
                                     <ShareLink/>
                                 </Link>
                                 <Tooltip title="Copied">
                                     <Copy
                                         style={{ cursor: "pointer" }}
-                                        onClick={(e) => copyToClipBoard(staker.beneficiary)}
+                                        onClick={(e) => copyToClipBoard(node.beneficiary)}
                                     />
                                 </Tooltip>
                             </td>
@@ -162,16 +164,16 @@ function Overview(staker) {
                                 <Link
                                     target="_blank"
                                     underline="hover"
-                                    href={Utils.getEtherAddressLink() + staker.authorizer}
+                                    href={Utils.getEtherAddressLink() + node.authorizer}
                                     className={styles.link}
                                 >
-                                    {Data.formatString(staker.authorizer)}
+                                    {Data.formatString(node.authorizer)}
                                     <ShareLink/>
                                 </Link>
                                 <Tooltip title="Copied">
                                     <Copy
                                         style={{ cursor: "pointer" }}
-                                        onClick={(e) => copyToClipBoard(staker.authorizer)}
+                                        onClick={(e) => copyToClipBoard(node.authorizer)}
                                     />
                                 </Tooltip>
                             </td>
@@ -182,16 +184,16 @@ function Overview(staker) {
                                 <Link
                                     target="_blank"
                                     underline="hover"
-                                    href={Utils.getEtherAddressLink() + staker.registeredOperatorAddress}
+                                    href={Utils.getEtherAddressLink() + node.registeredOperatorAddress}
                                     className={styles.link}
                                 >
-                                    {staker.registeredOperatorAddress ? Data.formatString(staker.registeredOperatorAddress) : "Operator not registered"}
+                                    {node.registeredOperatorAddress ? Data.formatString(node.registeredOperatorAddress) : "Operator not registered"}
                                     <ShareLink/>
                                 </Link>
                                 <Tooltip title="Copied">
                                     <Copy
                                         style={{ cursor: "pointer" }}
-                                        onClick={(e) => copyToClipBoard(staker.registeredOperatorAddress)}
+                                        onClick={(e) => copyToClipBoard(node.registeredOperatorAddress)}
                                     />
                                 </Tooltip>
                             </td>
@@ -200,7 +202,7 @@ function Overview(staker) {
                             <th>Operator confirmed</th>
                             <td>
                                 {
-                                    staker.isOperatorConfirmed ? (
+                                    node.isOperatorConfirmed ? (
                                         <CheckSharpIcon style={{color: "green"}}/>
                                     ) : (
                                         <CloseSharpIcon style={{color: "red"}}/>
@@ -216,15 +218,15 @@ function Overview(staker) {
                             <th colSpan="2" style={{fontWeight: "bold"}}>Authorizations</th>
                         </tr>
                     </tbody>
-                    <tbody className={styles.staker_detail_overview_table_tbody}>
+                    <tbody className={styles.node_detail_overview_table_tbody}>
                         <tr>
                             <th>Total authorized</th>
                             <td>
                                 {
-                                    staker.weiDecimalAuthorizedAmount
+                                    node.weiDecimalAuthorizedAmount
                                 }
                                 {
-                                    staker.isAuthorized ? (
+                                    node.isAuthorized ? (
                                         <CheckSharpIcon style={{color: "green"}}/>
                                     ) : (
                                         <CloseSharpIcon style={{color: "red"}}/>
@@ -240,11 +242,11 @@ function Overview(staker) {
                         <th colSpan="2" style={{fontWeight: "bold"}}>Deauthorization</th>
                     </tr>
                     </tbody>
-                    <tbody className={styles.staker_detail_overview_table_tbody}>
+                    <tbody className={styles.node_detail_overview_table_tbody}>
                         <tr>
                             <th>Total deauthorizing</th>
                             <td>
-                                {staker.weiDecimalDeauthorizingAmount}
+                                {node.weiDecimalDeauthorizingAmount}
                             </td>
                         </tr>
                     </tbody>
@@ -252,7 +254,7 @@ function Overview(staker) {
             </div>
             <div style={{flex: "1 1 0%"}}>
                 <h4><strong>Log</strong></h4>
-                {staker?.events?.map(eventEntity => {
+                {node?.events?.map(eventEntity => {
                     const event = eventEntity.eventType;
                     const timestamp = eventEntity.timestamp;
                     const amount = eventEntity.weiDecimalEventAmount;
@@ -277,7 +279,7 @@ function Overview(staker) {
     );
 }
 
-function DKGRituals(staker) {
+function DKGRituals(node) {
     const [pageData, setPageData] = useState({
         rowData: [],
         isLoading: false,
@@ -291,7 +293,7 @@ function DKGRituals(staker) {
             isLoading: true,
         }));
 
-        Data.getRitualsByStakingProvider(staker).then(async (info) => {
+        Data.getRitualsByStakingProvider(node).then(async (info) => {
             if(info?.rituals === undefined){
                 setPageData({
                     isLoading: false,
@@ -316,19 +318,19 @@ function DKGRituals(staker) {
     
 }
 
-const StakerDetailPage = () => {
+const NodeDetailPage = () => {
     const [pageData, setPageData] = useState({
         rowData: {},
         isLoading: true,
     });
 
-    const [staker, setStaker] = useState();
+    const [node, setNode] = useState();
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
-        const staker = query.get("staker");
-        setStaker(staker);
+        const node = query.get("staker");  // Changed from "node" to "staker" to match the query parameter used in links
+        setNode(node);
 
-        Data.getStakerDetail(staker).then((info) => {
+        Data.getNodeDetail(node).then((info) => {
             if (info == null || info == undefined) {
                 setPageData({
                     isLoading: false,
@@ -339,7 +341,7 @@ const StakerDetailPage = () => {
 
             setPageData({
                 isLoading: false,
-                rowData: Data.formatStakerDetail(info)
+                rowData: Data.formatNodeDetail(info)
               });
         });
     }, []);
@@ -358,36 +360,36 @@ const StakerDetailPage = () => {
                     </div>
                 ) : (
                     <div>
-                        <div className={styles.staker_detail_header}>
-                            <div className={styles.staker_detail_header_address}>
+                        <div className={styles.node_detail_header}>
+                            <div className={styles.node_detail_header_address}>
                                 <h3><Link
                                     target="_blank"
                                     underline="hover"
-                                    href={Utils.getEtherAddressLink() + staker}
+                                    href={Utils.getEtherAddressLink() + node}
                                     className={styles.link}
                                 >
-                                    {Data.formatString(staker)}
+                                    {Data.formatString(node)}
                                     <ShareLink/>
                                 </Link>
                                 </h3>
                                 <span>Staking Provider</span>
                             </div>
-                            <div className={styles.staker_detail_header_value}>
-                                <div className={styles.staker_detail_header_value_item}>
-                                    <div className={styles.staker_detail_header_value_item_lable}>total authorized
+                            <div className={styles.node_detail_header_value}>
+                                <div className={styles.node_detail_header_value_item}>
+                                    <div className={styles.node_detail_header_value_item_lable}>total authorized
                                     </div>
                                     <div>
                                         <div>{pageData.rowData.weiDecimalAuthorizedAmount}<span
                                             className={styles.span_t_token}>{" T"}</span></div>
                                         <div
-                                            className={styles.staker_detail_header_value_item_percent}>
+                                            className={styles.node_detail_header_value_item_percent}>
                                             {calculatePercentAuthorizedOfStake(pageData.rowData.parsedAuthorizedAmount, pageData.rowData.parsedStakedAmount)}%
                                             of staked
                                         </div>
                                     </div>
                                 </div>
-                                <div className={styles.staker_detail_header_value_item}>
-                                    <div className={styles.staker_detail_header_value_item_lable}>staked</div>
+                                <div className={styles.node_detail_header_value_item}>
+                                    <div className={styles.node_detail_header_value_item_lable}>staked</div>
                                     <div>
                                         <div>{pageData.rowData.weiDecimalStakedAmount}<span
                                             className={styles.span_t_token}>{" T"}</span></div>
@@ -395,7 +397,7 @@ const StakerDetailPage = () => {
                                 </div>
                             </div>
                         </div>
-                        <StakerDetail staker={pageData.rowData} stakingProvider={staker} />
+                        <NodeDetail node={pageData.rowData} stakingProvider={node} />
                     </div>
                 )
             }</>
@@ -403,4 +405,4 @@ const StakerDetailPage = () => {
     );
 }
 
-export default StakerDetailPage;
+export default NodeDetailPage;

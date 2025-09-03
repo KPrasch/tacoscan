@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useReducer } from 'react';
 import { useReadContract, useWriteContract, useWatchContractEvent, useAccount, useConfig } from 'wagmi';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Alert from '@mui/material/Alert';
-import CircularProgress from '@mui/material/CircularProgress';
+import { Box, Button, TextField, Alert, CircularProgress } from './ui';
 import { standardSubscriptionAbi, erc20Abi, accessControllerAbi } from '../config/contracts';
 import { formatUnits } from 'viem';
 import { polygon } from 'wagmi/chains';
@@ -811,7 +807,7 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
   });
 
   return (
-    <Box sx={{
+    <Box style={{
       width: "100%",
       padding: "20px",
       backgroundColor: "white",
@@ -820,7 +816,7 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
       marginBottom: "20px"
     }}>
       {rpcError && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" style={{ marginBottom: "2px" }}>
           {rpcError}
         </Alert>
       )}
@@ -835,31 +831,31 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
       </div>
 
       {contractReadError && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setContractReadError(null)}>
+        <Alert severity="error" style={{ marginBottom: "2px" }} onClose={() => setContractReadError(null)}>
           Error reading contract data: {contractReadError}
         </Alert>
       )}
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+        <Alert severity="error" style={{ marginBottom: "2px" }} onClose={() => setError('')}>
           {error}
         </Alert>
       )}
 
       {/* Subscription Status & Timeline */}
       {timelineData && (
-        <Box sx={{ 
-          mb: 3,
-          p: 3,
-          backgroundColor: 'rgba(120, 80, 205, 0.04)',
+        <Box style={{ 
+          marginBottom: "3px",
+          padding: "3px",
+          backgroundColor: 'rgba(150, 255, 94, 0.04)',
           borderRadius: '8px',
         }}>
           {/* Header with current status */}
-          <Box sx={{ 
+          <Box style={{ 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            mb: 3
+            marginBottom: "3px"
           }}>
             <div style={{ 
               fontSize: "0.875rem", 
@@ -869,14 +865,14 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
               Subscription Status
             </div>
             {/* Status badges */}
-            <Box sx={{ 
+            <Box style={{ 
               display: 'flex',
               alignItems: 'center',
-              gap: 2
+              gap: "2px"
             }}>
               {/* Period Status */}
               {currentStatus && (
-                <Box sx={{ 
+                <Box style={{ 
                   display: 'flex',
                   alignItems: 'center',
                   gap: 1,
@@ -918,17 +914,17 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
           </Box>
 
           {/* Key metrics */}
-          <Box sx={{ 
+          <Box style={{ 
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 3,
-            mb: 4,
+            gap: "3px",
+            marginBottom: "4px",
           }}>
             {/* Subscription Info */}
-            <Box sx={{
+            <Box style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 2,
+              gap: "2px",
             }}>
               <div>
                 <div style={{ fontSize: '0.75rem', color: 'rgba(0,0,0,0.6)', marginBottom: '4px' }}>
@@ -960,19 +956,19 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
             </Box>
 
             {/* Node Info */}
-            <Box sx={{
+            <Box style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 2,
+              gap: "2px",
             }}>
               {/* Remove duplicate slots display */}
             </Box>
 
             {/* Fee Info */}
-            <Box sx={{
+            <Box style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 2,
+              gap: "2px",
             }}>
               <div>
                 <div style={{ fontSize: '0.75rem', color: 'rgba(0,0,0,0.6)', marginBottom: '4px' }}>
@@ -994,10 +990,10 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
           </Box>
           
           {/* Timeline visualization */}
-          <Box sx={{ 
+          <Box style={{ 
             position: 'relative',
             height: '80px',
-            mb: 6,
+            marginBottom: "6px",
             display: 'flex',
             borderRadius: '4px',
             overflow: 'visible',
@@ -1149,7 +1145,7 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
                   top: '-24px',
                   width: '2px',
                   height: '80px',
-                  backgroundColor: '#7850cd',
+                  backgroundColor: '#96FF5E',
                   transform: 'translateX(-50%)',
                   zIndex: 2
                 }} />
@@ -1161,7 +1157,7 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
                   top: '14px',
                   width: '6px',
                   height: '6px',
-                  backgroundColor: '#7850cd',
+                  backgroundColor: '#96FF5E',
                   borderRadius: '50%',
                   transform: 'translateX(-50%)',
                   zIndex: 3
@@ -1175,7 +1171,7 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
                   transform: 'translateX(-50%)',
                   fontSize: '0.75rem',
                   whiteSpace: 'nowrap',
-                  color: '#7850cd',
+                  color: '#96FF5E',
                   fontWeight: '600',
                   backgroundColor: 'white',
                   padding: '4px 8px',
@@ -1191,12 +1187,12 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
           </Box>
 
           {/* Timeline details grid */}
-          <Box sx={{ 
+          <Box style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(2, 1fr)', 
-            gap: 2,
-            mt: 2,
-            pt: 2,
+            gap: "2px",
+            marginTop: "2px",
+            paddingTop: "2px",
             borderTop: '1px solid rgba(0,0,0,0.05)'
           }}>
             <div>
@@ -1236,7 +1232,7 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
       )}
 
       {/* Pay for Subscription */}
-      <Box sx={{ mb: 4 }}>
+      <Box style={{ marginBottom: "4px" }}>
         <div style={{ 
           fontSize: "0.875rem", 
           fontWeight: "500", 
@@ -1247,11 +1243,11 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
         </div>
 
         {/* Current Period Status */}
-        <Box sx={{ 
+        <Box style={{ 
           padding: '12px',
-          backgroundColor: 'rgba(120, 80, 205, 0.04)',
+          backgroundColor: 'rgba(150, 255, 94, 0.04)',
           borderRadius: '4px',
-          mb: 2
+          marginBottom: "2px"
         }}>
           <div style={{ 
             display: 'flex',
@@ -1297,7 +1293,7 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
                   {contractState.usedSlots?.toString() || '0'}
                 </span>
                 <span style={{ color: 'rgba(0,0,0,0.6)', marginRight: '4px' }}>used of</span>
-                <span style={{ color: '#7850cd', fontWeight: '500', marginRight: '4px' }}>
+                <span style={{ color: '#96FF5E', fontWeight: '500', marginRight: '4px' }}>
                   {contractState.billingInfo?.[1]?.toString() || '0'}
                 </span>
                 <span style={{ color: 'rgba(0,0,0,0.6)', marginRight: '4px' }}>paid</span>
@@ -1308,29 +1304,26 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
             </div>
 
             {/* Add slot payment form for current period */}
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', mt: 2 }}>
+            <Box style={{ display: 'flex', gap: "2px", alignItems: 'flex-start', marginTop: "2px" }}>
               <TextField
                 label="Number of Encryptor Slots"
                 type="number"
                 value={currentPeriodSlots}
                 onChange={(e) => setCurrentPeriodSlots(e.target.value)}
-                sx={{ flex: 1 }}
+                style={{ flex: 1 }}
                 disabled={isPending}
               />
               <Button
                 variant="contained"
                 onClick={() => handleApproveAndPay(false)}
                 disabled={isPending || !currentPeriodSlots}
-                sx={{
-                  backgroundColor: '#7850cd',
-                  '&:hover': {
-                    backgroundColor: '#6340b0',
-                  },
-                  height: '56px',
+                style={{
+                  backgroundColor: '#96FF5E',
+                  height: '56px'
                 }}
               >
                 {isPending ? (
-                  <CircularProgress size={24} sx={{ color: 'white' }} />
+                  <CircularProgress size={24} style={{ color: 'white' }} />
                 ) : (
                   'Pay for Slots'
                 )}
@@ -1338,19 +1331,19 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
             </Box>
 
             {currentPeriodSlots && contractState.estimatedFees && (
-              <Box sx={{ 
+              <Box style={{ 
                 padding: '12px', 
                 backgroundColor: 'white', 
                 borderRadius: '4px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 1,
-                mt: 2
+                gap: "1px",
+                marginTop: "2px"
               }}>
                 <div style={{ fontSize: '0.875rem', color: 'rgba(0,0,0,0.6)' }}>
                   Estimated Cost for Slots
                 </div>
-                <div style={{ fontSize: '1.25rem', fontWeight: '500', color: '#7850cd' }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: '500', color: '#96FF5E' }}>
                   {formatFees(contractState.estimatedFees)} DAI
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'rgba(0,0,0,0.6)' }}>
@@ -1362,11 +1355,11 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
         </Box>
 
         {/* Next Period Payment */}
-        <Box sx={{ 
+        <Box style={{ 
           padding: '12px',
-          backgroundColor: 'rgba(120, 80, 205, 0.04)',
+          backgroundColor: 'rgba(150, 255, 94, 0.04)',
           borderRadius: '4px',
-          mb: 2
+          marginBottom: "2px"
         }}>
           <div style={{ 
             display: 'flex',
@@ -1407,7 +1400,7 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
                   0
                 </span>
                 <span style={{ color: 'rgba(0,0,0,0.6)', marginRight: '4px' }}>used of</span>
-                <span style={{ color: '#7850cd', fontWeight: '500', marginRight: '4px' }}>
+                <span style={{ color: '#96FF5E', fontWeight: '500', marginRight: '4px' }}>
                   {nextPeriodSlots || '0'}
                 </span>
                 <span style={{ color: 'rgba(0,0,0,0.6)', marginRight: '4px' }}>paid</span>
@@ -1421,29 +1414,26 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
           {/* Payment form for next period */}
           {!isNextPeriodPaidData && (
             <>
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', mt: 2 }}>
+              <Box style={{ display: 'flex', gap: "2px", alignItems: 'flex-start', marginTop: "2px" }}>
                 <TextField
                   label="Number of Encryptor Slots"
                   type="number"
                   value={nextPeriodSlots}
                   onChange={(e) => setNextPeriodSlots(e.target.value)}
-                  sx={{ flex: 1 }}
+                  style={{ flex: 1 }}
                   disabled={isPending}
                 />
                 <Button
                   variant="contained"
                   onClick={() => handleApproveAndPay(true)}
                   disabled={isPending || !nextPeriodSlots}
-                  sx={{
-                    backgroundColor: '#7850cd',
-                    '&:hover': {
-                      backgroundColor: '#6340b0',
-                    },
-                    height: '56px',
+                  style={{
+                    backgroundColor: '#96FF5E',
+                    height: '56px'
                   }}
                 >
                   {isPending ? (
-                    <CircularProgress size={24} sx={{ color: 'white' }} />
+                    <CircularProgress size={24} style={{ color: 'white' }} />
                   ) : (
                     'Pay for Next Period'
                   )}
@@ -1451,19 +1441,19 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
               </Box>
 
               {nextPeriodSlots && nextPeriodFeesData && contractState.estimatedFees && (
-                <Box sx={{ 
+                <Box style={{ 
                   padding: '12px', 
                   backgroundColor: 'white', 
                   borderRadius: '4px',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 1,
-                  mt: 2
+                  gap: "1px",
+                  marginTop: "2px"
                 }}>
                   <div style={{ fontSize: '0.875rem', color: 'rgba(0,0,0,0.6)' }}>
                     Estimated Cost for Next Period
                   </div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: '500', color: '#7850cd' }}>
+                  <div style={{ fontSize: '1.25rem', fontWeight: '500', color: '#96FF5E' }}>
                     {formatFees(nextPeriodFeesData + contractState.estimatedFees)} DAI
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'rgba(0,0,0,0.6)' }}>
@@ -1502,23 +1492,20 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
             disabled={isPending}
             placeholder="0x123..., 0x456..."
             fullWidth
-            sx={{ mb: 2 }}
+            style={{ marginBottom: "2px" }}
           />
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box style={{ display: 'flex', gap: "2px" }}>
             <Button
               variant="contained"
               onClick={() => handleEncryptors(true)}
               disabled={isPending || !encryptors}
-              sx={{
+              style={{
                 flex: 1,
-                backgroundColor: '#7850cd',
-                '&:hover': {
-                  backgroundColor: '#6340b0',
-                },
+                backgroundColor: '#96FF5E'
               }}
             >
               {isPending ? (
-                <CircularProgress size={24} sx={{ color: 'white' }} />
+                <CircularProgress size={24} style={{ color: 'white' }} />
               ) : (
                 'Add Encryptors'
               )}
@@ -1527,18 +1514,14 @@ export const RitualManagement = ({ ritual, feeModelAddress }) => {
               variant="outlined"
               onClick={() => handleEncryptors(false)}
               disabled={isPending || !encryptors}
-              sx={{
+              style={{
                 flex: 1,
-                borderColor: '#7850cd',
-                color: '#7850cd',
-                '&:hover': {
-                  borderColor: '#6340b0',
-                  backgroundColor: 'rgba(120, 80, 205, 0.04)',
-                },
+                borderColor: '#96FF5E',
+                color: '#96FF5E'
               }}
             >
               {isPending ? (
-                <CircularProgress size={24} sx={{ color: '#7850cd' }} />
+                <CircularProgress size={24} style={{ color: '#96FF5E' }} />
               ) : (
                 'Remove Encryptors'
               )}

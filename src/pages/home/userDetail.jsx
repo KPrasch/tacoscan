@@ -1,16 +1,18 @@
 import React, {useState, useEffect} from "react";
 import * as Data from "../data";
 import styles from './styles.module.css'
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import TabPanel from "@mui/lab/TabPanel";
-import TabList from '@mui/lab/TabList';
-import TabContext from "@mui/lab/TabContext";
 import Loader from "../../components/loader";
 import * as Const from "../../utils/Cons";
 import RitualTable from "../../components/table/ritual";
-import Link from "@mui/material/Link";
 import * as Utils from "../../utils/utils";
+import {
+  Tab,
+  Box,
+  TabPanel,
+  TabList,
+  TabContext,
+  Link
+} from "../../components/ui";
 import {ReactComponent as ShareLink} from "../../assets/link.svg";
 
 
@@ -22,9 +24,9 @@ function UserDetail({rowData}) {
   };
 
   return (
-    <Box sx={{width: '100%'}}>
+    <Box style={{width: '100%'}}>
       <TabContext value={value}>
-        <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
+        <Box style={{borderBottom: '1px solid rgba(0, 0, 0, 0.12)'}}>
           <TabList onChange={handleChange} aria-label="lab API tabs example">
             <Tab style={{textTransform: 'none', color: "black"}} label="DKG Rituals" value="1"/>
           </TabList>

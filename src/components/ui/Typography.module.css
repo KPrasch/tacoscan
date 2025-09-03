@@ -1,0 +1,127 @@
+.typography {
+  font-family: "Work Sans", sans-serif;
+  margin: 0;
+}
+
+.h1 {
+  font-size: 96px;
+  font-weight: 300;
+  line-height: 1.167;
+  letter-spacing: -1.5px;
+}
+
+.h2 {
+  font-size: 60px;
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.h3 {
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 1.167;
+}
+
+.h4 {
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1.235;
+  letter-spacing: 0.25px;
+}
+
+.h5 {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.334;
+}
+
+.h6 {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0.15px;
+}
+
+.subtitle1 {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.75;
+  letter-spacing: 0.15px;
+}
+
+.subtitle2 {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.57;
+  letter-spacing: 0.1px;
+}
+
+.body1 {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.15px;
+}
+
+.body2 {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.43;
+  letter-spacing: 0.15px;
+}
+
+.caption {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.66;
+  letter-spacing: 0.4px;
+}
+
+.overline {
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 2.66;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.alignLeft {
+  text-align: left;
+}
+
+.alignCenter {
+  text-align: center;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.alignJustify {
+  text-align: justify;
+}
+
+.alignInherit {
+  text-align: inherit;
+}
+
+.colorPrimary {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.colorSecondary {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.colorTextSecondary {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.colorError {
+  color: #f44336;
+}
+
+.colorInherit {
+  color: inherit;
+}
