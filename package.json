@@ -14,6 +14,7 @@
     "@web3modal/wagmi": "^5.1.11",
     "bootstrap": "5.2.1",
     "graphql": "16.6.0",
+    "lottie-react": "^2.4.1",
     "moment": "2.29.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",

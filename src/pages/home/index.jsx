@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./styles.module.css";
 import RitualPage from "./ritual";
 import RitualDetailPage from "./ritualDetail";
-import TacoLogo from "../../components/TacoLogo";
+import TacoLogoAnimated from "../../components/TacoLogoAnimated";
 
 import * as Const from "../../utils/Cons";
 import { IconButton, TextField } from "../../components/ui";
@@ -154,7 +154,7 @@ const HomePage = () => {
           >
             <div className={styles.logo_header}>
               <a href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-                <TacoLogo width={108} height={28} />
+                <TacoLogoAnimated width={108} height={28} loop={false} autoplay={true} />
                 <span style={{ 
                   fontFamily: 'var(--font-mono, "Space Mono", monospace)', 
                   fontSize: '18px', 
