@@ -295,6 +295,21 @@
   color: #6B7280;
 }
 
+.status.time_out {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.status.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.status.processing {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3B82F6;
+}
+
 .method {
   background: #F3F4F6;
   padding: 2px 6px;

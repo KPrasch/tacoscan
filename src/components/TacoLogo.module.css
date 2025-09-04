@@ -1,0 +1,58 @@
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoBox {
+  width: 32px;
+  height: 32px;
+  background: #96FF5E;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logoLetter {
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 20px;
+  font-weight: 700;
+  color: #0A0A0A;
+  line-height: 1;
+}
+
+.logoText {
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.taco {
+  color: #96FF5E;
+}
+
+.scan {
+  color: #FFFFFF;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .logoBox {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .logoLetter {
+    font-size: 18px;
+  }
+  
+  .logoText {
+    font-size: 20px;
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getRituals, getNodes } from './data';
+import { getRituals, getNodes, formatRitualsData, getTimeout, formatTimeToText } from './data';
 import styles from './Dashboard.module.css';
 
 const Dashboard = () => {
@@ -9,16 +9,14 @@ const Dashboard = () => {
     activeRituals: 0,
     totalNodes: 0,
     activeNodes: 0,
-    totalTransactions: '2,451,234',
-    avgBlockTime: '2.0s',
-    tacoPrice: 0.042,
-    marketCap: '42,000,000',
-    latestBlock: '19234567',
-    networkUtilization: '67.8%'
+    successRate: '98.5%',
+    avgResponseTime: '120ms',
+    networkUptime: '99.9%',
+    totalAuthorized: '1.2M'
   });
 
   const [recentRituals, setRecentRituals] = useState([]);
-  const [recentTransactions, setRecentTransactions] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,34 +25,38 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const [ritualsData, nodesData] = await Promise.all([
+      const [ritualsData, nodesData, timeout] = await Promise.all([
         getRituals(false, ''),  // Not searching, empty search input
-        getNodes(false, '')     // Not searching, empty search input
+        getNodes(false, ''),     // Not searching, empty search input
+        getTimeout()
       ]);
 
-      // Ensure we have arrays before filtering
-      const rituals = Array.isArray(ritualsData) ? ritualsData : [];
+      // getRituals returns an object with rituals property
+      const rituals = ritualsData?.rituals ? ritualsData.rituals : [];
       // getNodes returns an object with appAuthorizations property
       const nodes = nodesData?.appAuthorizations ? nodesData.appAuthorizations : [];
 
+      // Format rituals data for display
+      const formattedRituals = formatRitualsData(rituals, timeout);
+
       setStats(prev => ({
         ...prev,
-        totalRituals: rituals.length,
-        activeRituals: rituals.filter(r => r.status === 'ACTIVE' || r.status === 'SUCCESSFUL').length,
+        totalRituals: formattedRituals.length,
+        activeRituals: formattedRituals.filter(r => r.status === 'ACTIVE' || r.status === 'SUCCESSFUL').length,
         totalNodes: nodes.length,
         activeNodes: nodes.filter(n => n.tacoOperator?.confirmed).length
       }));
 
       // Get recent rituals for the table
-      setRecentRituals(rituals.slice(0, 10));
+      setRecentRituals(formattedRituals.slice(0, 10));
 
-      // Mock recent transactions (would come from real API)
-      setRecentTransactions([
-        { hash: '0xabc123...', method: 'startRitual', block: '19234567', age: '2 secs ago', from: '0x123...abc', to: 'Coordinator', value: '100 TACO', fee: '0.002' },
-        { hash: '0xdef456...', method: 'postTranscript', block: '19234566', age: '5 secs ago', from: '0x456...def', to: 'Ritual #1205', value: '0', fee: '0.001' },
-        { hash: '0xghi789...', method: 'postAggregation', block: '19234565', age: '8 secs ago', from: '0x789...ghi', to: 'Ritual #1204', value: '0', fee: '0.001' },
-        { hash: '0xjkl012...', method: 'nodeRegister', block: '19234564', age: '12 secs ago', from: '0x012...jkl', to: 'StakeManager', value: '50000 TACO', fee: '0.003' },
-        { hash: '0xmno345...', method: 'withdraw', block: '19234563', age: '15 secs ago', from: '0x345...mno', to: 'RewardPool', value: '250 TACO', fee: '0.001' }
+      // Mock recent network activity (would come from real API)
+      setRecentActivity([
+        { id: '1205', event: 'Ritual Started', time: '2 mins ago', participants: 7, authority: '0x123...abc', status: 'Active' },
+        { id: '1204', event: 'DKG Complete', time: '5 mins ago', participants: 7, authority: '0x456...def', status: 'Success' },
+        { id: '1203', event: 'Transcripts Posted', time: '8 mins ago', participants: 5, authority: '0x789...ghi', status: 'Processing' },
+        { id: '1202', event: 'Aggregation Complete', time: '12 mins ago', participants: 7, authority: '0x012...jkl', status: 'Success' },
+        { id: '1201', event: 'Ritual Expired', time: '15 mins ago', participants: 3, authority: '0x345...mno', status: 'Expired' }
       ]);
 
       setLoading(false);
@@ -94,21 +96,22 @@ const Dashboard = () => {
             </div>
             <div className={styles.overviewStats}>
               <div className={styles.overviewStat}>
-                <span className={styles.overviewLabel}>TACO PRICE</span>
-                <span className={styles.overviewValue}>${stats.tacoPrice}</span>
-                <span className={styles.overviewChange}>+5.2%</span>
+                <span className={styles.overviewLabel}>ACTIVE RITUALS</span>
+                <span className={styles.overviewValue}>{stats.activeRituals}</span>
+                <span className={styles.overviewChange}>of {stats.totalRituals} total</span>
               </div>
               <div className={styles.overviewStat}>
-                <span className={styles.overviewLabel}>MARKET CAP</span>
-                <span className={styles.overviewValue}>${stats.marketCap}</span>
+                <span className={styles.overviewLabel}>NODE OPERATORS</span>
+                <span className={styles.overviewValue}>{stats.activeNodes}</span>
+                <span className={styles.overviewSubtext}>active</span>
               </div>
               <div className={styles.overviewStat}>
-                <span className={styles.overviewLabel}>LATEST BLOCK</span>
-                <span className={styles.overviewValue}>#{stats.latestBlock}</span>
+                <span className={styles.overviewLabel}>SUCCESS RATE</span>
+                <span className={styles.overviewValue}>{stats.successRate}</span>
               </div>
               <div className={styles.overviewStat}>
-                <span className={styles.overviewLabel}>NETWORK UTILIZATION</span>
-                <span className={styles.overviewValue}>{stats.networkUtilization}</span>
+                <span className={styles.overviewLabel}>NETWORK UPTIME</span>
+                <span className={styles.overviewValue}>{stats.networkUptime}</span>
               </div>
             </div>
           </div>
@@ -126,21 +129,19 @@ const Dashboard = () => {
           <StatCard 
             title="Node Operators" 
             value={stats.totalNodes.toLocaleString()}
-            subtitle={`${stats.activeNodes} active`}
+            subtitle={`${stats.activeNodes} confirmed`}
             change="3.2%"
             trend="up"
           />
           <StatCard 
-            title="Total Transactions" 
-            value={stats.totalTransactions}
-            subtitle="All time"
-            change="8.1%"
-            trend="up"
+            title="Total Authorized" 
+            value={stats.totalAuthorized}
+            subtitle="Staking amount"
           />
           <StatCard 
-            title="Avg Block Time" 
-            value={stats.avgBlockTime}
-            subtitle="Last 1000 blocks"
+            title="Avg Response Time" 
+            value={stats.avgResponseTime}
+            subtitle="Network latency"
           />
         </section>
 
@@ -164,14 +165,14 @@ const Dashboard = () => {
                 </thead>
                 <tbody>
                   {recentRituals.map(ritual => (
-                    <tr key={ritual.ritualId}>
+                    <tr key={ritual.id}>
                       <td>
-                        <Link to={`/ritual/${ritual.ritualId}`} className={styles.idLink}>
-                          #{ritual.ritualId}
+                        <Link to={`/ritual/${ritual.id}`} className={styles.idLink}>
+                          #{ritual.id}
                         </Link>
                       </td>
                       <td>
-                        <span className={`${styles.status} ${styles[ritual.status?.toLowerCase()]}`}>
+                        <span className={`${styles.status} ${styles[ritual.status?.toLowerCase()?.replace(/\s/g, '_')]}`}>
                           {ritual.status}
                         </span>
                       </td>
@@ -181,7 +182,7 @@ const Dashboard = () => {
                         </Link>
                       </td>
                       <td>{ritual.totalParticipants || 0}</td>
-                      <td className={styles.age}>{ritual.timestamp || '2 mins ago'}</td>
+                      <td className={styles.age}>{formatTimeToText(ritual.updateTime)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -191,52 +192,44 @@ const Dashboard = () => {
 
           <div className={styles.tableSection}>
             <div className={styles.tableHeader}>
-              <h3 className={styles.tableTitle}>Latest Transactions</h3>
-              <Link to="/transactions" className={styles.viewAllLink}>View All →</Link>
+              <h3 className={styles.tableTitle}>Recent Network Activity</h3>
+              <Link to="/activity" className={styles.viewAllLink}>View All →</Link>
             </div>
             <div className={styles.tableWrapper}>
               <table className={styles.dataTable}>
                 <thead>
                   <tr>
-                    <th>Txn Hash</th>
-                    <th>Method</th>
-                    <th>Block</th>
-                    <th>Age</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Value</th>
-                    <th>Fee</th>
+                    <th>Ritual ID</th>
+                    <th>Event</th>
+                    <th>Time</th>
+                    <th>Participants</th>
+                    <th>Authority</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {recentTransactions.map((tx, idx) => (
+                  {recentActivity.map((activity, idx) => (
                     <tr key={idx}>
                       <td>
-                        <Link to={`/tx/${tx.hash}`} className={styles.hashLink}>
-                          {tx.hash}
+                        <Link to={`/ritual/${activity.id}`} className={styles.idLink}>
+                          #{activity.id}
                         </Link>
                       </td>
                       <td>
-                        <span className={styles.method}>{tx.method}</span>
+                        <span className={styles.method}>{activity.event}</span>
                       </td>
+                      <td className={styles.age}>{activity.time}</td>
+                      <td>{activity.participants}</td>
                       <td>
-                        <Link to={`/block/${tx.block}`} className={styles.blockLink}>
-                          {tx.block}
-                        </Link>
-                      </td>
-                      <td className={styles.age}>{tx.age}</td>
-                      <td>
-                        <Link to={`/address/${tx.from}`} className={styles.addressLink}>
-                          {tx.from}
+                        <Link to={`/address/${activity.authority}`} className={styles.addressLink}>
+                          {activity.authority}
                         </Link>
                       </td>
                       <td>
-                        <Link to={`/address/${tx.to}`} className={styles.addressLink}>
-                          {tx.to}
-                        </Link>
+                        <span className={`${styles.status} ${styles[activity.status?.toLowerCase()]}`}>
+                          {activity.status}
+                        </span>
                       </td>
-                      <td>{tx.value}</td>
-                      <td className={styles.fee}>{tx.fee}</td>
                     </tr>
                   ))}
                 </tbody>

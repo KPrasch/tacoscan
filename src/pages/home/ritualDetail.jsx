@@ -35,23 +35,41 @@ const RitualDetailPage = () => {
 
     useEffect(() => {
         const fetchRitualData = async () => {
-            const ritualId = window.location.pathname.split("/rituals/")[1];
-            if (!ritualId) return;
+            try {
+                // Handle both /ritual/:id and /rituals/:id paths
+                const pathname = window.location.pathname;
+                let ritualId = pathname.split("/ritual/")[1] || pathname.split("/rituals/")[1];
+                
+                if (!ritualId) {
+                    console.error("No ritual ID found in URL:", pathname);
+                    setPageData({ ritual: null, isLoading: false });
+                    return;
+                }
 
-            const data = await Data.getRituals(true, ritualId);
-            if (data?.rituals && data.rituals.length > 0) {
-                const timeout = await Data.getTimeout();
-                const formattedRitual = Data.formatRitualsData(data.rituals, timeout)[0];
+                console.log("Fetching ritual with ID:", ritualId);
+                const data = await Data.getRituals(true, ritualId);
                 
-                // Fetch feeModel for the specific ritual detail view
-                const feeModel = await Data.getRitualFeeModel(ritualId);
-                formattedRitual.feeModel = feeModel;
-                
-                setPageData({
-                    ritual: formattedRitual,
-                    isLoading: false
-                });
-            } else {
+                if (data?.rituals && data.rituals.length > 0) {
+                    const timeout = await Data.getTimeout();
+                    const formattedRitual = Data.formatRitualsData(data.rituals, timeout)[0];
+                    
+                    // Fetch feeModel for the specific ritual detail view
+                    const feeModel = await Data.getRitualFeeModel(ritualId);
+                    formattedRitual.feeModel = feeModel;
+                    
+                    setPageData({
+                        ritual: formattedRitual,
+                        isLoading: false
+                    });
+                } else {
+                    console.log("No ritual found with ID:", ritualId);
+                    setPageData({
+                        ritual: null,
+                        isLoading: false
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching ritual details:", error);
                 setPageData({
                     ritual: null,
                     isLoading: false

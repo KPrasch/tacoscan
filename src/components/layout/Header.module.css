@@ -1,17 +1,9 @@
 .header {
   width: 100%;
-  background: #FFFFFF;
-  border-bottom: 1px solid #E5E7EB;
+  background: #0A0A0A;
   position: sticky;
   top: 0;
   z-index: 1000;
-}
-
-.topBar {
-  background: #0A0A0A;
-  color: #FFFFFF;
-  padding: 8px 0;
-  font-size: 12px;
 }
 
 .container {
@@ -20,59 +12,9 @@
   padding: 0 20px;
 }
 
-.topBarContent {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.networkInfo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-family: var(--font-mono, 'Space Mono', monospace);
-}
-
-.networkLabel {
-  color: #96FF5E;
-  font-weight: 600;
-}
-
-.separator {
-  color: #4A4A4A;
-}
-
-.priceInfo, .gasInfo {
-  color: #E5E7EB;
-}
-
-.topBarActions {
-  display: flex;
-  gap: 12px;
-}
-
-.connectButton {
-  background: #96FF5E;
-  color: #0A0A0A;
-  border: none;
-  padding: 6px 16px;
-  border-radius: 4px;
-  font-family: var(--font-mono, 'Space Mono', monospace);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.connectButton:hover {
-  background: #7FE545;
-  transform: translateY(-1px);
-}
-
 .mainHeader {
-  background: #FFFFFF;
-  padding: 16px 0;
-  border-bottom: 1px solid #F3F4F6;
+  padding: 20px 0;
+  border-bottom: 1px solid #1A1A1A;
 }
 
 .headerContent {
@@ -84,29 +26,28 @@
 .logoSection {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .logoLink {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   text-decoration: none;
-  color: #0A0A0A;
+}
+
+.logoLink:hover {
+  opacity: 0.9;
 }
 
 .logoText {
-  font-family: var(--font-mono, 'Space Mono', monospace);
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-
-.tagline {
-  color: #6B7280;
-  font-size: 12px;
-  padding-left: 16px;
-  border-left: 1px solid #E5E7EB;
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 400;
+  color: #FFFFFF;
+  letter-spacing: 0.15em;
+  margin-left: 16px;
+  line-height: 1;
 }
 
 .mainNav {
@@ -116,47 +57,65 @@
 }
 
 .navLink {
-  color: #0A0A0A;
+  color: #E5E7EB;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
-  padding: 8px 0;
-  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
   background: none;
+  border: none;
   cursor: pointer;
-  position: relative;
+  font-family: inherit;
   display: flex;
   align-items: center;
   gap: 4px;
-  transition: color 0.2s ease;
 }
 
 .navLink:hover {
+  background: rgba(150, 255, 94, 0.1);
   color: #96FF5E;
-}
-
-.dropdownArrow {
-  font-size: 10px;
-  opacity: 0.6;
 }
 
 .dropdown {
   position: relative;
 }
 
-.dropdownContent {
-  display: none;
+.dropdown::before {
+  content: '';
   position: absolute;
   top: 100%;
   left: 0;
-  background: #FFFFFF;
-  min-width: 200px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #E5E7EB;
-  border-radius: 4px;
-  padding: 8px 0;
-  margin-top: 8px;
+  right: 0;
+  height: 10px;
+  display: none;
+}
+
+.dropdown:hover::before {
+  display: block;
+}
+
+.dropdownArrow {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.dropdown:hover .dropdownArrow {
+  transform: rotate(180deg);
+}
+
+.dropdownContent {
+  display: none;
+  position: absolute;
+  background: #1A1A1A;
+  min-width: 180px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border: 1px solid #2A2A2A;
   z-index: 1001;
+  top: calc(100% - 4px);
+  padding-top: 4px;
 }
 
 .dropdown:hover .dropdownContent {
@@ -164,23 +123,59 @@
 }
 
 .dropdownContent a {
-  display: block;
-  padding: 8px 16px;
-  color: #374151;
+  color: #E5E7EB;
+  padding: 12px 20px;
   text-decoration: none;
+  display: block;
   font-size: 14px;
   transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.dropdownContent a:first-child {
+  border-radius: 6px 6px 0 0;
+  padding-top: 8px;
+}
+
+.dropdownContent a:last-child {
+  border-radius: 0 0 6px 6px;
+  padding-bottom: 8px;
 }
 
 .dropdownContent a:hover {
-  background: #F9FAFB;
+  background: rgba(150, 255, 94, 0.1);
+  color: #96FF5E;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.connectButton {
+  background: #96FF5E;
   color: #0A0A0A;
-  padding-left: 20px;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.connectButton:hover {
+  background: #7FE545;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(150, 255, 94, 0.2);
 }
 
 .searchSection {
-  background: #F9FAFB;
+  background: #0F0F0F;
   padding: 24px 0;
+  border-bottom: 1px solid #1A1A1A;
 }
 
 .searchForm {
@@ -190,11 +185,12 @@
 
 .searchBar {
   display: flex;
-  background: #FFFFFF;
-  border: 2px solid #E5E7EB;
+  align-items: center;
+  background: #1A1A1A;
+  border: 2px solid #2A2A2A;
   border-radius: 8px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .searchBar.focused {
@@ -204,71 +200,73 @@
 
 .searchInput {
   flex: 1;
-  padding: 14px 20px;
+  padding: 14px 16px;
   border: none;
-  outline: none;
   font-size: 14px;
   font-family: var(--font-mono, 'Space Mono', monospace);
+  background: transparent;
+  color: #FFFFFF;
+}
+
+.searchInput:focus {
+  outline: none;
 }
 
 .searchInput::placeholder {
-  color: #9CA3AF;
+  color: #6B7280;
 }
 
 .searchButton {
-  background: #96FF5E;
+  padding: 14px 20px;
+  background: transparent;
   border: none;
-  padding: 0 24px;
+  border-left: 1px solid #2A2A2A;
   cursor: pointer;
-  transition: background 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: #96FF5E;
+  transition: all 0.2s ease;
 }
 
 .searchButton:hover {
-  background: #7FE545;
+  background: rgba(150, 255, 94, 0.1);
 }
 
 .searchButton svg {
-  width: 20px;
-  height: 20px;
-  color: #0A0A0A;
+  width: 18px;
+  height: 18px;
 }
 
 .searchHint {
   margin-top: 8px;
   font-size: 12px;
-  color: #6B7280;
+  color: #9CA3AF;
   text-align: center;
 }
 
 .exampleLink {
   color: #96FF5E;
   text-decoration: none;
-  font-family: var(--font-mono, 'Space Mono', monospace);
+  margin: 0 4px;
 }
 
 .exampleLink:hover {
   text-decoration: underline;
 }
 
-/* Mobile responsive */
+/* Responsive */
 @media (max-width: 768px) {
   .mainNav {
     display: none;
   }
   
-  .tagline {
-    display: none;
+  .headerContent {
+    padding: 12px 0;
   }
   
-  .networkInfo {
-    font-size: 11px;
+  .logoText {
+    font-size: 22px;
   }
   
-  .searchInput {
-    font-size: 12px;
-    padding: 12px 16px;
+  .searchSection {
+    padding: 16px 0;
   }
 }

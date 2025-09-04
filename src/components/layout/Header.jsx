@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import TacoLogoAnimated from '../TacoLogoAnimated';
+import TacoOfficialLogo from '../TacoOfficialLogo';
 import { SearchIcon } from '../ui';
 import { useWeb3Modal } from '@web3modal/wagmi/react';
 import { useAccount } from 'wagmi';
@@ -30,17 +30,53 @@ const Header = () => {
 
   return (
     <header className={styles.header}>
-      <div className={styles.topBar}>
+      <div className={styles.mainHeader}>
         <div className={styles.container}>
-          <div className={styles.topBarContent}>
-            <div className={styles.networkInfo}>
-              <span className={styles.networkLabel}>Polygon Network</span>
-              <span className={styles.separator}>|</span>
-              <span className={styles.priceInfo}>TACO: $0.042</span>
-              <span className={styles.separator}>|</span>
-              <span className={styles.gasInfo}>Gas: 30 Gwei</span>
+          <div className={styles.headerContent}>
+            <div className={styles.logoSection}>
+              <a href="/" className={styles.logoLink}>
+                <TacoOfficialLogo variant="full" color="#96FF5E" height={32} />
+                <span className={styles.logoText}>SCAN</span>
+              </a>
             </div>
-            <div className={styles.topBarActions}>
+
+            <nav className={styles.mainNav}>
+              <a href="/" className={styles.navLink}>Home</a>
+              <div className={styles.dropdown}>
+                <button className={styles.navLink}>
+                  Network <span className={styles.dropdownArrow}>▼</span>
+                </button>
+                <div className={styles.dropdownContent}>
+                  <a href="/rituals">DKG Rituals</a>
+                  <a href="/nodes">Node Operators</a>
+                  <a href="/activity">Network Activity</a>
+                  <a href="/performance">Performance Metrics</a>
+                </div>
+              </div>
+              <div className={styles.dropdown}>
+                <button className={styles.navLink}>
+                  Participants <span className={styles.dropdownArrow}>▼</span>
+                </button>
+                <div className={styles.dropdownContent}>
+                  <a href="/operators">All Operators</a>
+                  <a href="/authorities">Ritual Authorities</a>
+                  <a href="/stakes">Authorized Stakes</a>
+                </div>
+              </div>
+              <div className={styles.dropdown}>
+                <button className={styles.navLink}>
+                  Resources <span className={styles.dropdownArrow}>▼</span>
+                </button>
+                <div className={styles.dropdownContent}>
+                  <a href="/charts">Network Stats</a>
+                  <a href="/apis">APIs</a>
+                  <a href="/contracts">Smart Contracts</a>
+                  <a href="/docs">Documentation</a>
+                </div>
+              </div>
+            </nav>
+
+            <div className={styles.headerActions}>
               <button 
                 className={styles.connectButton}
                 onClick={() => open()}
@@ -55,62 +91,13 @@ const Header = () => {
         </div>
       </div>
 
-      <div className={styles.mainHeader}>
-        <div className={styles.container}>
-          <div className={styles.headerContent}>
-            <div className={styles.logoSection}>
-              <a href="/" className={styles.logoLink}>
-                <TacoLogoAnimated width={108} height={28} />
-                <span className={styles.logoText}>SCAN</span>
-              </a>
-              <span className={styles.tagline}>TACo Blockchain Explorer</span>
-            </div>
-
-            <nav className={styles.mainNav}>
-              <a href="/" className={styles.navLink}>Home</a>
-              <div className={styles.dropdown}>
-                <button className={styles.navLink}>
-                  Blockchain <span className={styles.dropdownArrow}>▼</span>
-                </button>
-                <div className={styles.dropdownContent}>
-                  <a href="/rituals">DKG Rituals</a>
-                  <a href="/nodes">Node Operators</a>
-                  <a href="/transactions">Transactions</a>
-                  <a href="/pending">Pending Txns</a>
-                </div>
-              </div>
-              <div className={styles.dropdown}>
-                <button className={styles.navLink}>
-                  Tokens <span className={styles.dropdownArrow}>▼</span>
-                </button>
-                <div className={styles.dropdownContent}>
-                  <a href="/token/taco">TACO Token</a>
-                  <a href="/token/holders">Top Holders</a>
-                  <a href="/token/transfers">Token Transfers</a>
-                </div>
-              </div>
-              <div className={styles.dropdown}>
-                <button className={styles.navLink}>
-                  Resources <span className={styles.dropdownArrow}>▼</span>
-                </button>
-                <div className={styles.dropdownContent}>
-                  <a href="/charts">Charts & Stats</a>
-                  <a href="/apis">APIs</a>
-                  <a href="/verified-contracts">Verified Contracts</a>
-                </div>
-              </div>
-            </nav>
-          </div>
-        </div>
-      </div>
-
       <div className={styles.searchSection}>
         <div className={styles.container}>
           <form onSubmit={handleSearch} className={styles.searchForm}>
             <div className={`${styles.searchBar} ${isSearchFocused ? styles.focused : ''}`}>
               <input
                 type="text"
-                placeholder="Search by Address / Ritual ID / Transaction Hash / Block"
+                placeholder="Search by Address / Ritual ID / Operator"
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}

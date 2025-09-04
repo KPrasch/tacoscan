@@ -42,8 +42,8 @@ const RitualPage = ({network, isSearch, searchInput}) => {
 
 
     return (
-        <div>
-            <div style={{ padding: "24px 40px" }}>
+        <div style={{ background: "#F9FAFB", minHeight: "100vh", paddingBottom: "60px" }}>
+            <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "24px 20px" }}>
                 {isSearch ? (
                     <h3 style={{ margin: 0, color: "#0A0A0A" }}>Search Results: {searchInput}</h3>
                 ) : (
@@ -52,15 +52,13 @@ const RitualPage = ({network, isSearch, searchInput}) => {
                         fontSize: "2.5rem", 
                         fontWeight: 700, 
                         color: "#0A0A0A",
-                        marginBottom: "8px"
+                        marginBottom: "24px"
                     }}>
                         DKG Rituals
                     </h1>
                 )}
-            </div>
             
-            <div style={{ 
-                padding: "0 40px 24px 40px",
+            <div style={{
                 display: "flex",
                 gap: "16px",
                 flexWrap: "wrap"
@@ -83,13 +81,14 @@ const RitualPage = ({network, isSearch, searchInput}) => {
                 />
             </div>
 
-            <div className={styles.table_content}>
+            <div className={styles.table_content} style={{ marginTop: "24px" }}>
                 <RitualTable
                     columns={Data.ritual_columns}
                     data={pageData.rowData}
                     isLoading={pageData.isLoading}
                     network={network}
                 />
+            </div>
             </div>
         </div>
     );

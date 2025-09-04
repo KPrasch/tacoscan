@@ -9,7 +9,7 @@ const Footer = () => {
           <div className={styles.footerSection}>
             <h4 className={styles.footerTitle}>TACo Scan</h4>
             <p className={styles.footerDescription}>
-              The TACo Network Blockchain Explorer and Analytics Platform
+              The TACo Threshold Encryption Network Explorer and Analytics Platform
             </p>
             <div className={styles.socialLinks}>
               <a href="https://github.com/nucypher" className={styles.socialLink}>GitHub</a>
@@ -19,13 +19,13 @@ const Footer = () => {
           </div>
 
           <div className={styles.footerSection}>
-            <h5 className={styles.footerSubtitle}>Blockchain</h5>
+            <h5 className={styles.footerSubtitle}>Network</h5>
             <ul className={styles.footerLinks}>
               <li><a href="/rituals">DKG Rituals</a></li>
               <li><a href="/nodes">Node Operators</a></li>
-              <li><a href="/transactions">Transactions</a></li>
-              <li><a href="/pending">Pending Txns</a></li>
-              <li><a href="/contracts">Verified Contracts</a></li>
+              <li><a href="/activity">Network Activity</a></li>
+              <li><a href="/performance">Performance Metrics</a></li>
+              <li><a href="/authorities">Ritual Authorities</a></li>
             </ul>
           </div>
 
@@ -35,8 +35,8 @@ const Footer = () => {
               <li><a href="/apis">APIs</a></li>
               <li><a href="/docs">Documentation</a></li>
               <li><a href="https://github.com/nucypher/tacoscan">Source Code</a></li>
-              <li><a href="/verify">Verify Contract</a></li>
-              <li><a href="/broadcast">Broadcast TXN</a></li>
+              <li><a href="/integrate">Integration Guide</a></li>
+              <li><a href="/sdk">SDK Reference</a></li>
             </ul>
           </div>
 
@@ -63,12 +63,12 @@ const Footer = () => {
                 <span className={styles.networkValue}>137</span>
               </div>
               <div className={styles.networkItem}>
-                <span className={styles.networkLabel}>Currency:</span>
-                <span className={styles.networkValue}>MATIC</span>
+                <span className={styles.networkLabel}>Protocol:</span>
+                <span className={styles.networkValue}>tBLS</span>
               </div>
               <div className={styles.networkItem}>
-                <span className={styles.networkLabel}>Block Time:</span>
-                <span className={styles.networkValue}>~2.0s</span>
+                <span className={styles.networkLabel}>Avg Response:</span>
+                <span className={styles.networkValue}>~120ms</span>
               </div>
             </div>
           </div>
