@@ -327,6 +327,32 @@
   color: #6B7280;
 }
 
+.statValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0A0A0A;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.description {
+  color: #6B7280;
+  font-size: 12px;
+}
+
+.status.active,
+.status.high,
+.status.strong,
+.status.diverse {
+  background: rgba(150, 255, 94, 0.1);
+  color: #96FF5E;
+}
+
+.status.quiet,
+.status.normal {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6B7280;
+}
+
 /* Chart Section */
 .chartSection {
   background: #FFFFFF;

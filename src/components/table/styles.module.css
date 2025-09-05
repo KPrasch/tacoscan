@@ -2,31 +2,35 @@
   border-collapse: collapse;
   width: 100%;
   background-color: #fff;
-  border-radius: 15px;
-  font-family: 'Work Sans', sans-serif;
+  border-radius: 12px;
+  font-family: var(--font-display, 'ABC Diatype');
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
+  border: 1px solid #E5E7EB;
 }
 
 .table th {
   display: table-cell;
   vertical-align: inherit;
-  font-weight: bold;
-  padding-bottom: 10px;
-  padding-top: 20px;
-  font-family: 'Work Sans', sans-serif;
+  font-weight: 600;
+  padding-bottom: 12px;
+  padding-top: 16px;
+  font-family: var(--font-display, 'ABC Diatype');
   -webkit-font-smoothing: antialiased;
-  font-size: 1rem;
-
+  font-size: 0.875rem;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .table td {
-  border-bottom: 1px solid rgb(245, 245, 245);
-  font-family: 'Work Sans', sans-serif;
+  border-bottom: 1px solid #F3F4F6;
+  font-family: var(--font-mono, 'OCR-X');
   -webkit-font-smoothing: antialiased;
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
+  padding: 14px 8px;
+  color: #111827;
 }
 
 .table .selected{
@@ -41,14 +45,18 @@
 }
 
 .link {
-  color: #0A0A0A;
+  color: #10B981; /* Readable green for tables */
   text-decoration: none;
-  font-family: Helvetica Neue;
-  transition: color 0.3s ease;
+  font-family: var(--font-mono, 'OCR-X');
+  font-size: 0.8125rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .link:hover {
-  color: #5A5A5A;
+  color: #059669; /* Darker on hover */
   text-decoration: underline;
 }
 
@@ -70,7 +78,7 @@
 }
 
 .rowSeleted{
-  background:antiquewhite;
+  background: rgba(150, 255, 94, 0.1); /* TACo green with low opacity */
 }
 
 .td_selected {
@@ -79,7 +87,7 @@
 
 .container_detail{
   margin:0;
-  background:floralwhite;
+  background: #F9FAFB; /* Light gray background matching style guide */
 }
 .detail_item{
   display: flex;
@@ -88,10 +96,12 @@
 }
 
 .timelineContainer {
-  padding: 24px 16px;
-  background-color: floralwhite;
-  border-radius: 4px;
+  padding: 20px 16px 28px;
+  background-color: white;
+  border-radius: 8px;
   overflow-x: auto;
+  margin: 0;
+  position: relative;
 }
 
 .timelineContainer :global(.MuiTimeline-root) {
@@ -104,10 +114,13 @@
 }
 
 .timelineItem {
-  min-width: 160px;
+  min-width: 180px;
   padding: 0 !important;
   flex: 1;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .timelineItem :global(.MuiTimelineSeparator-root) {
@@ -115,7 +128,7 @@
   padding: 0;
   width: 100%;
   height: 2px;
-  background-color: #d0d0d0;
+  background-color: #E5E7EB;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,7 +139,7 @@
 .timelineItem :global(.MuiTimelineConnector-root) {
   width: 100%;
   height: 2px;
-  background-color: #d0d0d0;
+  background-color: #E5E7EB;
   margin: 0;
   position: absolute;
   left: 50%;
@@ -135,9 +148,10 @@
 .timelineItem :global(.MuiTimelineDot-root) {
   margin: 0;
   padding: 0;
-  position: absolute;
+  position: relative;
   z-index: 1;
-  left: calc(50% - 6px);
+  border: 3px solid white;
+  box-shadow: 0 0 0 1px #E5E7EB;
 }
 
 .timelineItem :global(.MuiTimelineContent-root) {
@@ -145,29 +159,32 @@
   margin: 0 !important;
   text-align: center;
   width: 100%;
-  position: absolute;
-  top: 24px;
-  left: 0;
+  position: relative;
+  margin-top: 20px;
 }
 
 .timelineContentWrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  min-height: 60px;
 }
 
 .timelineTime {
+  font-family: var(--font-mono, 'OCR-X');
   font-size: 0.75rem;
-  color: rgba(0, 0, 0, 0.6);
+  color: #6B7280;
   margin-bottom: 2px;
 }
 
 .timelineDescription {
+  font-family: var(--font-display, 'ABC Diatype');
   font-size: 0.875rem;
   line-height: 1.4;
   text-align: center;
   padding: 0 8px;
+  color: #111827;
 }
 
 .bySpan{
@@ -178,8 +195,9 @@
 }
 
 .descriptionSpan{
+  font-family: var(--font-display, 'ABC Diatype');
   font-size: 0.875rem;
-  color: gray;
+  color: #6B7280;
 }
 
 .span_note{
@@ -187,8 +205,15 @@
 }
 
 .by_link{
-  color:"#96FF5E";
+  color: #10B981; /* Readable green for tables */
   font-size: 0.8rem;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.by_link:hover {
+  color: #059669; /* Darker on hover */
+  text-decoration: underline;
 }
 
 .table_detail{

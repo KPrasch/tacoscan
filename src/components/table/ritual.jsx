@@ -252,21 +252,21 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
             {row.status}
           </TableCell>
         </TableRow>
-        <TableRow className={styles.container_detail}>
+        <TableRow>
           <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
             <Collapse in={open} timeout="auto" unmountOnExit>
               <Box style={{ 
-                backgroundColor: '#F8F9FA',
-                padding: '24px',
-                borderTop: '2px solid #E5E7EB'
+                backgroundColor: '#FAFBFC',
+                padding: '32px',
+                borderTop: '2px solid #96FF5E'
               }}>
-                <div className={styles.detail_item} style={{ flexDirection: 'column' }}>
+                <div className={styles.detail_item} style={{ flexDirection: 'column', gap: '32px' }}>
+                  {/* Timeline Section */}
                   <div style={{ 
-                    marginBottom: '24px', 
-                    padding: '20px',
                     backgroundColor: '#FFFFFF',
-                    borderRadius: '8px',
-                    border: '1px solid #E5E7EB'
+                    borderRadius: '12px',
+                    padding: '24px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                   }}>
                     <TransactionTimeline
                       className={styles.timeline}
@@ -274,86 +274,95 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                       network={network}
                     />
                   </div>
+                  
+                  {/* Details Section */}
                   <div style={{
                     backgroundColor: '#FFFFFF',
-                    borderRadius: '8px',
-                    border: '1px solid #E5E7EB',
-                    padding: '20px'
+                    borderRadius: '12px',
+                    padding: '28px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                   }}>
-                    <div style={{ marginBottom: '20px' }}>
+                    <div style={{ marginBottom: '32px' }}>
                       <h3 style={{ 
-                        margin: '0 0 16px 0', 
-                        fontSize: '1.125rem',
+                        margin: '0 0 24px 0', 
+                        fontSize: '1.25rem',
+                        fontFamily: 'var(--font-display)',
                         fontWeight: 600,
-                        color: '#0A0A0A'
+                        color: '#111827',
+                        letterSpacing: '-0.01em'
                       }}>
                         Ritual Details
                       </h3>
                       <div style={{ 
                         display: 'grid', 
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '16px'
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                        gap: '24px',
+                        rowGap: '20px'
                       }}>
                         <div>
                           <div style={{ 
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
+                            fontSize: '0.8125rem',
+                            fontWeight: 500,
                             color: '#6B7280',
-                            marginBottom: '4px',
+                            marginBottom: '8px',
                             textTransform: 'uppercase',
-                            letterSpacing: '0.5px'
+                            letterSpacing: '0.025em',
+                            fontFamily: 'var(--font-display)'
                           }}>
                             DKG ID
                           </div>
-                          <div style={{ fontSize: '1rem', color: '#0A0A0A' }}>{row.id}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: '#111827', fontWeight: 500 }}>{row.id}</div>
                         </div>
                         <div>
                           <div style={{ 
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
+                            fontSize: '0.8125rem',
+                            fontWeight: 500,
                             color: '#6B7280',
-                            marginBottom: '4px',
+                            marginBottom: '8px',
                             textTransform: 'uppercase',
-                            letterSpacing: '0.5px'
+                            letterSpacing: '0.025em',
+                            fontFamily: 'var(--font-display)'
                           }}>
                             Threshold
                           </div>
-                          <div style={{ fontSize: '1rem', color: '#0A0A0A' }}>{row.threshold}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: '#111827', fontWeight: 500 }}>{row.threshold}</div>
                         </div>
                         <div>
                           <div style={{ 
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
+                            fontSize: '0.8125rem',
+                            fontWeight: 500,
                             color: '#6B7280',
-                            marginBottom: '4px',
+                            marginBottom: '8px',
                             textTransform: 'uppercase',
-                            letterSpacing: '0.5px'
+                            letterSpacing: '0.025em',
+                            fontFamily: 'var(--font-display)'
                           }}>
                             DKG Size
                           </div>
-                          <div style={{ fontSize: '1rem', color: '#0A0A0A' }}>{row.dkgSize}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: '#111827', fontWeight: 500 }}>{row.dkgSize}</div>
                         </div>
                         <div>
                           <div style={{ 
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
+                            fontSize: '0.8125rem',
+                            fontWeight: 500,
                             color: '#6B7280',
-                            marginBottom: '4px',
+                            marginBottom: '8px',
                             textTransform: 'uppercase',
-                            letterSpacing: '0.5px'
+                            letterSpacing: '0.025em',
+                            fontFamily: 'var(--font-display)'
                           }}>
                             Initiator
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <Link
                               target="_blank"
                               underline="hover"
                               href={Utils.getPolygonScanAddressLink() + row.initiator}
                               className={styles.link}
-                              style={{ fontSize: '0.875rem' }}
+                              style={{ fontSize: '0.9375rem', fontWeight: 500 }}
                             >
                               {Data.formatString(row.initiator)}
-                              <ShareLink style={{ marginLeft: '4px', width: '14px', height: '14px' }} />
+                              <ShareLink style={{ marginLeft: '6px', width: '14px', height: '14px', opacity: 0.7 }} />
                             </Link>
                             <CopyButton
                               onClick={(e) => copyToClipBoard(row.initiator)}
@@ -362,25 +371,26 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                         </div>
                         <div>
                           <div style={{ 
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
+                            fontSize: '0.8125rem',
+                            fontWeight: 500,
                             color: '#6B7280',
-                            marginBottom: '4px',
+                            marginBottom: '8px',
                             textTransform: 'uppercase',
-                            letterSpacing: '0.5px'
+                            letterSpacing: '0.025em',
+                            fontFamily: 'var(--font-display)'
                           }}>
                             Access Controller
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <Link
                               target="_blank"
                               underline="hover"
                               href={Utils.getPolygonScanAddressLink() + row.accessController}
                               className={styles.link}
-                              style={{ fontSize: '0.875rem' }}
+                              style={{ fontSize: '0.9375rem', fontWeight: 500 }}
                             >
                               {Data.formatString(row.accessController)}
-                              <ShareLink style={{ marginLeft: '4px', width: '14px', height: '14px' }} />
+                              <ShareLink style={{ marginLeft: '6px', width: '14px', height: '14px', opacity: 0.7 }} />
                             </Link>
                             <CopyButton
                               onClick={(e) => copyToClipBoard(row.accessController)}
@@ -390,87 +400,94 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                       </div>
                     </div>
                     
-                    <div style={{ marginTop: '24px' }}>
+                    <div style={{ marginTop: '36px' }}>
                       <h3 style={{ 
-                        margin: '0 0 16px 0', 
-                        fontSize: '1.125rem',
+                        margin: '0 0 20px 0', 
+                        fontSize: '1.25rem',
+                        fontFamily: 'var(--font-display)',
                         fontWeight: 600,
-                        color: '#0A0A0A'
+                        color: '#111827',
+                        letterSpacing: '-0.01em'
                       }}>
                         Participants
                       </h3>
-                      <Table size="small" style={{ backgroundColor: '#FFFFFF' }}>
+                      <Table size="small" style={{ backgroundColor: '#FAFBFC', borderRadius: '8px', overflow: 'hidden' }}>
                         <TableHead>
-                          <TableRow>
+                          <TableRow style={{ backgroundColor: '#F3F4F6' }}>
                             <TableCell style={{
-                              fontWeight: 600,
-                              fontSize: '0.75rem',
-                              letterSpacing: '0.5px',
+                              fontFamily: 'var(--font-display)',
+                              fontWeight: 500,
+                              fontSize: '0.8125rem',
+                              letterSpacing: '0.025em',
                               color: '#6B7280',
                               textTransform: 'uppercase',
-                              borderBottom: '2px solid #E5E7EB',
-                              padding: '12px 16px'
+                              borderBottom: '1px solid #E5E7EB',
+                              padding: '14px 20px'
                             }}>
                               Participant
                             </TableCell>
                             <TableCell style={{
-                              fontWeight: 600,
-                              fontSize: '0.75rem',
-                              letterSpacing: '0.5px',
+                              fontFamily: 'var(--font-display)',
+                              fontWeight: 500,
+                              fontSize: '0.8125rem',
+                              letterSpacing: '0.025em',
                               color: '#6B7280',
                               textTransform: 'uppercase',
-                              borderBottom: '2px solid #E5E7EB',
-                              padding: '12px 16px'
+                              borderBottom: '1px solid #E5E7EB',
+                              padding: '14px 20px'
                             }}>
                               Operator
                             </TableCell>
                             <TableCell style={{
-                              fontWeight: 600,
-                              fontSize: '0.75rem',
-                              letterSpacing: '0.5px',
+                              fontFamily: 'var(--font-display)',
+                              fontWeight: 500,
+                              fontSize: '0.8125rem',
+                              letterSpacing: '0.025em',
                               color: '#6B7280',
                               textTransform: 'uppercase',
-                              borderBottom: '2px solid #E5E7EB',
-                              padding: '12px 16px'
+                              borderBottom: '1px solid #E5E7EB',
+                              padding: '14px 20px'
                             }}>
                               Transcript Status
                             </TableCell>
                             <TableCell style={{
-                              fontWeight: 600,
-                              fontSize: '0.75rem',
-                              letterSpacing: '0.5px',
+                              fontFamily: 'var(--font-display)',
+                              fontWeight: 500,
+                              fontSize: '0.8125rem',
+                              letterSpacing: '0.025em',
                               color: '#6B7280',
                               textTransform: 'uppercase',
-                              borderBottom: '2px solid #E5E7EB',
-                              padding: '12px 16px'
+                              borderBottom: '1px solid #E5E7EB',
+                              padding: '14px 20px'
                             }}>
                               Aggregation Status
                             </TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {row.participants.map((participant) => (
+                          {row.participants.map((participant, index) => (
                             <TableRow key={participant} style={{ 
-                              borderBottom: '1px solid #E5E7EB'
+                              borderBottom: index < row.participants.length - 1 ? '1px solid #F3F4F6' : 'none',
+                              backgroundColor: '#FFFFFF'
                             }}>
-                              <TableCell style={{ padding: '12px 16px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <TableCell style={{ padding: '16px 20px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                   <Link
                                     target="_blank"
                                     underline="hover"
                                     href={Utils.getPolygonScanAddressLink() + participant}
                                     className={styles.link}
-                                    style={{ fontSize: '0.875rem' }}
+                                    style={{ fontSize: '0.9375rem', fontWeight: 500 }}
                                   >
                                     {Data.formatString(participant)}
-                                    <ShareLink style={{ marginLeft: '4px', width: '14px', height: '14px' }} />
+                                    <ShareLink style={{ marginLeft: '6px', width: '14px', height: '14px', opacity: 0.7 }} />
                                   </Link>
                                   <CopyButton
                                     onClick={(e) => copyToClipBoard(participant)}
                                   />
                                 </div>
                               </TableCell>
-                              <TableCell style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#0A0A0A' }}>
+                              <TableCell style={{ padding: '16px 20px', fontSize: '0.9375rem', fontFamily: 'var(--font-mono)', color: '#374151' }}>
                                 {row.operatorAddresses && row.operatorAddresses[participant] ? (
                                   row.operatorAddresses[participant] !== "-" ? (
                                     Data.formatString(row.operatorAddresses[participant])
@@ -481,19 +498,23 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                                   <span style={{ color: '#9CA3AF' }}>-</span>
                                 )}
                               </TableCell>
-                              <TableCell style={{ padding: '12px 16px' }}>
+                              <TableCell style={{ padding: '16px 20px' }}>
                                 {row.transcripts && row.transcripts.includes(participant) ? (
                                   <span style={{ 
                                     color: "#10B981",
-                                    fontWeight: 500,
+                                    fontWeight: 600,
                                     fontSize: '0.875rem',
+                                    fontFamily: 'var(--font-display)',
                                     display: 'inline-flex',
                                     alignItems: 'center',
-                                    gap: '6px'
+                                    gap: '6px',
+                                    padding: '4px 10px',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                                    borderRadius: '4px'
                                   }}>
                                     <span style={{ 
-                                      width: '8px', 
-                                      height: '8px', 
+                                      width: '6px', 
+                                      height: '6px', 
                                       borderRadius: '50%',
                                       backgroundColor: '#10B981'
                                     }}></span>
@@ -501,36 +522,41 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                                   </span>
                                 ) : (
                                   <span style={{ 
-                                    color: "#F59E0B",
+                                    color: "#6B7280",
                                     fontWeight: 500,
                                     fontSize: '0.875rem',
+                                    fontFamily: 'var(--font-display)',
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     gap: '6px'
                                   }}>
                                     <span style={{ 
-                                      width: '8px', 
-                                      height: '8px', 
+                                      width: '6px', 
+                                      height: '6px', 
                                       borderRadius: '50%',
-                                      backgroundColor: '#F59E0B'
+                                      backgroundColor: '#9CA3AF'
                                     }}></span>
                                     Pending
                                   </span>
                                 )}
                               </TableCell>
-                              <TableCell style={{ padding: '12px 16px' }}>
+                              <TableCell style={{ padding: '16px 20px' }}>
                                 {row.aggregations && row.aggregations.includes(participant) ? (
                                   <span style={{ 
                                     color: "#10B981",
-                                    fontWeight: 500,
+                                    fontWeight: 600,
                                     fontSize: '0.875rem',
+                                    fontFamily: 'var(--font-display)',
                                     display: 'inline-flex',
                                     alignItems: 'center',
-                                    gap: '6px'
+                                    gap: '6px',
+                                    padding: '4px 10px',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                                    borderRadius: '4px'
                                   }}>
                                     <span style={{ 
-                                      width: '8px', 
-                                      height: '8px', 
+                                      width: '6px', 
+                                      height: '6px', 
                                       borderRadius: '50%',
                                       backgroundColor: '#10B981'
                                     }}></span>
@@ -538,18 +564,19 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                                   </span>
                                 ) : (
                                   <span style={{ 
-                                    color: "#F59E0B",
+                                    color: "#6B7280",
                                     fontWeight: 500,
                                     fontSize: '0.875rem',
+                                    fontFamily: 'var(--font-display)',
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     gap: '6px'
                                   }}>
                                     <span style={{ 
-                                      width: '8px', 
-                                      height: '8px', 
+                                      width: '6px', 
+                                      height: '6px', 
                                       borderRadius: '50%',
-                                      backgroundColor: '#F59E0B'
+                                      backgroundColor: '#9CA3AF'
                                     }}></span>
                                     Pending
                                   </span>

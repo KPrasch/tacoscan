@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { useTable } from "react-table";
+import { Link as RouterLink } from "react-router-dom";
 import Loader from "../loader";
 import styles from "./styles.module.css";
 import CopyButton from "../CopyButton";
@@ -149,13 +150,12 @@ export const NodesTable = ({ columns, data, isLoading, network }) => {
           className={open ? styles.rowSeleted : null}
         >
           <TableCell align="left">
-            <Link
-              underline="hover"
-              href={Utils.getDomain() + "?staker=" + row.id}
+            <RouterLink
+              to={`/node/${row.id}`}
               className={styles.link}
             >
               {Data.formatString(row.id)}
-            </Link>
+            </RouterLink>
             <Tooltip title="Copied">
               <CopyButton
                 onClick={(e) => copyToClipBoard(row.id)}
@@ -163,13 +163,12 @@ export const NodesTable = ({ columns, data, isLoading, network }) => {
             </Tooltip>
           </TableCell>
           <TableCell align="left">
-            <Link
-              underline="hover"
-              href={Utils.getDomain() + "?staker=" + row.id}
+            <RouterLink
+              to={`/node/${row.id}`}
               className={styles.link}
             >
               {Data.formatString(row.registeredOperatorAddress)}
-            </Link>
+            </RouterLink>
             <Tooltip title="Copied">
               <CopyButton
                 onClick={(e) => copyToClipBoard(row.registeredOperatorAddress)}

@@ -27,7 +27,10 @@ export default function TransactionTimeline({ transactions, network }) {
         style={{
           padding: 0,
           margin: 0,
-          minHeight: '120px'
+          minHeight: '100px',
+          display: 'flex',
+          flexDirection: 'row',
+          width: '100%'
         }}
       >
         {sortedTransactions.map((transaction, index) => (
@@ -60,9 +63,10 @@ export default function TransactionTimeline({ transactions, network }) {
                       underline="hover"
                       href={getPolygonScanTxHashLink() + transaction.txHash}
                       className={styles.link}
+                      style={{ fontSize: '0.8125rem' }}
                     >
                       {transaction.description}
-                      <ShareLink style={{ verticalAlign: 'middle' }}/>
+                      <ShareLink style={{ width: '12px', height: '12px' }}/>
                     </Link>
                   ) : (
                     <span className={styles.descriptionSpan}>
@@ -79,7 +83,7 @@ export default function TransactionTimeline({ transactions, network }) {
                         className={styles.by_link}
                       >
                         {Data.formatString(transaction.from)}
-                        <ShareLink style={{ verticalAlign: 'middle' }}/>
+                        <ShareLink style={{ width: '10px', height: '10px' }}/>
                       </Link>
                     </>
                   )}

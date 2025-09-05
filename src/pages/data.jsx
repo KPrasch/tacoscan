@@ -468,22 +468,164 @@ export const formatUserDetail = (user) => ({
   rituals: formatRitualsData(user.rituals)
 });
 
+// Helper function to retry GraphQL queries with exponential backoff
+const retryQuery = async (queryFn, maxRetries = 3) => {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            const result = await queryFn();
+            if (result.errors) {
+                // Check if it's a network/fetch error vs a GraphQL schema error
+                const hasNetworkError = result.errors.some(error => 
+                    error.message.includes('Failed to fetch') || 
+                    error.message.includes('Network error') ||
+                    error.extensions?.code === 'NETWORK_ERROR'
+                );
+                
+                if (hasNetworkError && attempt < maxRetries - 1) {
+                    console.warn(`Network error detected, retrying... (${attempt + 1}/${maxRetries})`);
+                    throw new Error(`Network error: ${result.errors[0].message}`);
+                } else {
+                    throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
+                }
+            }
+            return result;
+        } catch (error) {
+            console.warn(`Query attempt ${attempt + 1} failed:`, error.message);
+            if (attempt === maxRetries - 1) throw error;
+            // Exponential backoff: wait 1s, 2s, 4s
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+        }
+    }
+};
+
+// Helper function to get all rituals data with pagination
+const getAllRitualsWithPagination = async () => {
+    const allRituals = [];
+    let skip = 0;
+    const pageSize = 1000;
+    let hasMore = true;
+    let ritualCounter = null;
+    let pageCount = 0;
+    let consecutiveFailures = 0;
+    const maxConsecutiveFailures = 3;
+    
+    console.log('🌮 Starting paginated ritual fetch...');
+    
+    while (hasMore && consecutiveFailures < maxConsecutiveFailures) {
+        pageCount++;
+        console.log(`📄 Fetching page ${pageCount} (skip: ${skip})`);
+        
+        try {
+            const query = () => client.execute(client.GetAllRitualsQueryDocument, { skip });
+            const data = await retryQuery(query, 2); // Fewer retries per page
+            
+            if (data.data) {
+                const rituals = data.data.rituals || [];
+                const pageRitualCounter = data.data.ritualCounter;
+                
+                // Store ritual counter from first page for total count
+                if (!ritualCounter && pageRitualCounter) {
+                    ritualCounter = pageRitualCounter;
+                    const expectedTotal = ritualCounter.total ? parseInt(ritualCounter.total) : 0;
+                    console.log(`📊 Expected total rituals: ${expectedTotal}`);
+                }
+                
+                if (rituals.length > 0) {
+                    // Remove duplicates by ID (just in case)
+                    const existingIds = new Set(allRituals.map(r => r.id));
+                    const newRituals = rituals.filter(r => !existingIds.has(r.id));
+                    
+                    allRituals.push(...newRituals);
+                    console.log(`✅ Page ${pageCount}: Added ${newRituals.length} new rituals (total: ${allRituals.length})`);
+                    
+                    skip += pageSize;
+                    consecutiveFailures = 0; // Reset failure counter on success
+                    
+                    // If we got less than pageSize, we've reached the end
+                    hasMore = rituals.length === pageSize;
+                    
+                    // Progress indicator
+                    if (ritualCounter?.total) {
+                        const progress = Math.min(100, (allRituals.length / parseInt(ritualCounter.total)) * 100);
+                        console.log(`📈 Progress: ${progress.toFixed(1)}% (${allRituals.length}/${ritualCounter.total})`);
+                    }
+                    
+                    // Safety check to prevent infinite loops
+                    if (allRituals.length >= 5000) {
+                        console.warn('⚠️ Reached safety limit of 5000 rituals');
+                        hasMore = false;
+                    }
+                } else {
+                    console.log('📋 No more rituals found, ending pagination');
+                    hasMore = false;
+                }
+            } else {
+                console.warn('❌ No data returned, ending pagination');
+                hasMore = false;
+            }
+            
+            // Small delay between successful requests
+            if (hasMore) {
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            
+        } catch (error) {
+            consecutiveFailures++;
+            console.error(`❌ Page ${pageCount} failed (${consecutiveFailures}/${maxConsecutiveFailures}):`, error.message);
+            
+            if (consecutiveFailures >= maxConsecutiveFailures) {
+                console.error('💥 Too many consecutive failures, stopping pagination');
+                throw new Error(`Pagination failed after ${maxConsecutiveFailures} consecutive failures: ${error.message}`);
+            }
+            
+            // Wait longer before retrying after failure
+            await new Promise(resolve => setTimeout(resolve, 2000 * consecutiveFailures));
+        }
+    }
+    
+    console.log(`🎉 Pagination complete! Total rituals fetched: ${allRituals.length}`);
+    
+    // If we got some data but not all, still return what we have
+    return {
+        rituals: allRituals,
+        ritualCounter: ritualCounter
+    };
+};
+
 export const getRituals = async (isSearch, searchInput) => {
-    const emptyData = JSON.parse(`[]`);
+    const emptyData = { rituals: [] };
     try {
         let data;
         if (!isSearch) {
-            data = await client.execute(client.GetAllRitualsQueryDocument, {});
+            // Try paginated fetch first, fallback to single query if it fails
+            console.log('Fetching all rituals with pagination...');
+            try {
+                const ritualsData = await getAllRitualsWithPagination();
+                data = { data: ritualsData };
+            } catch (paginationError) {
+                console.warn('Pagination failed, falling back to single query:', paginationError.message);
+                // Fallback to original single query without pagination
+                const fallbackQuery = () => client.execute(client.GetAllRitualsQueryDocument, { skip: 0 });
+                data = await retryQuery(fallbackQuery, 2); // Fewer retries for fallback
+            }
         } else {
             const fundingTxHashHex = convertToLittleEndian(searchInput.toLowerCase());
-            data = await client.execute(client.GetRitualsQueryByUserDocument, {
+            data = await retryQuery(() => client.execute(client.GetRitualsQueryByUserDocument, {
                 authority: searchInput.toLowerCase(),
                 id: searchInput.toLowerCase(),
                 txHash: fundingTxHashHex,
-            });
+            }));
         }
         
-        if (data.data !== undefined) {
+        console.log("GraphQL Response:", data);
+        
+        // Check for GraphQL errors
+        if (data.errors) {
+            console.error("GraphQL errors:", data.errors);
+            return emptyData;
+        }
+        
+        if (data.data !== undefined && data.data !== null) {
             // Fetch operator addresses for all participants
             const stakersData = await client.execute(client.GetAllStakersQueryDocument, {});
             const operatorMap = {};
@@ -517,7 +659,9 @@ export const getRituals = async (isSearch, searchInput) => {
             return data.data;
         }
     } catch (e) {
-        console.log("error to fetch ritual data:", e);
+        console.error("error to fetch ritual data:", e);
+        // Return empty but properly structured data to prevent null reference errors
+        return emptyData;
     }
     return emptyData;
 };

@@ -9,9 +9,10 @@ import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Dashboard from './pages/Dashboard';
 import RitualsPage from './pages/home/ritual';
-import RitualDetailPage from './pages/home/ritualDetail';
+import RitualDetail from './pages/RitualDetail';
 import NodesPage from './pages/home/nodes';
-import NodeDetailPage from './pages/home/nodeDetail';
+import NodeDetail from './pages/NodeDetail';
+import NetworkActivity from './pages/NetworkActivity';
 
 const queryClient = new QueryClient()
 
@@ -26,13 +27,14 @@ function App() {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/rituals" element={<RitualsPage />} />
-                <Route path="/ritual/:id" element={<RitualDetailPage />} />
-                <Route path="/rituals/:id" element={<RitualDetailPage />} />
+                <Route path="/ritual/:id" element={<RitualDetail />} />
+                <Route path="/rituals/:id" element={<RitualDetail />} />
                 <Route path="/nodes" element={<NodesPage />} />
-                <Route path="/node/:address" element={<NodeDetailPage />} />
-                <Route path="/staker/:address" element={<NodeDetailPage />} />
+                <Route path="/node/:address" element={<NodeDetail />} />
+                <Route path="/staker/:address" element={<NodeDetail />} />
                 <Route path="/stakers" element={<NodesPage />} />
-                <Route path="/address/:address" element={<NodeDetailPage />} />
+                <Route path="/address/:address" element={<NodeDetail />} />
+                <Route path="/activity" element={<NetworkActivity />} />
               </Routes>
             </main>
             <Footer />

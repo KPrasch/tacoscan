@@ -50,17 +50,6 @@ const Header = () => {
                   <a href="/rituals">DKG Rituals</a>
                   <a href="/nodes">Node Operators</a>
                   <a href="/activity">Network Activity</a>
-                  <a href="/performance">Performance Metrics</a>
-                </div>
-              </div>
-              <div className={styles.dropdown}>
-                <button className={styles.navLink}>
-                  Participants <span className={styles.dropdownArrow}>▼</span>
-                </button>
-                <div className={styles.dropdownContent}>
-                  <a href="/operators">All Operators</a>
-                  <a href="/authorities">Ritual Authorities</a>
-                  <a href="/stakes">Authorized Stakes</a>
                 </div>
               </div>
               <div className={styles.dropdown}>

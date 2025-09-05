@@ -40,38 +40,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div className={styles.footerSection}>
-            <h5 className={styles.footerSubtitle}>Resources</h5>
-            <ul className={styles.footerLinks}>
-              <li><a href="/charts">Charts & Stats</a></li>
-              <li><a href="/topstats">Top Statistics</a></li>
-              <li><a href="/directory">Directory</a></li>
-              <li><a href="/newsletter">Newsletter</a></li>
-              <li><a href="https://taco.build">TACo Website</a></li>
-            </ul>
-          </div>
 
-          <div className={styles.footerSection}>
-            <h5 className={styles.footerSubtitle}>Network Info</h5>
-            <div className={styles.networkInfo}>
-              <div className={styles.networkItem}>
-                <span className={styles.networkLabel}>Network:</span>
-                <span className={styles.networkValue}>Polygon</span>
-              </div>
-              <div className={styles.networkItem}>
-                <span className={styles.networkLabel}>Chain ID:</span>
-                <span className={styles.networkValue}>137</span>
-              </div>
-              <div className={styles.networkItem}>
-                <span className={styles.networkLabel}>Protocol:</span>
-                <span className={styles.networkValue}>tBLS</span>
-              </div>
-              <div className={styles.networkItem}>
-                <span className={styles.networkLabel}>Avg Response:</span>
-                <span className={styles.networkValue}>~120ms</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         <div className={styles.footerBottom}>

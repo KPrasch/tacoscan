@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from "react";
+import { useParams } from "react-router-dom";
 import * as Data from "../data";
 import styles from './styles.module.css'
 import { ReactComponent as Copy } from "../../assets/copy.svg";
@@ -319,6 +320,7 @@ function DKGRituals(node) {
 }
 
 const NodeDetailPage = () => {
+    const { address } = useParams(); // Get the node address from URL params
     const [pageData, setPageData] = useState({
         rowData: {},
         isLoading: true,
@@ -326,11 +328,10 @@ const NodeDetailPage = () => {
 
     const [node, setNode] = useState();
     useEffect(() => {
-        const query = new URLSearchParams(window.location.search);
-        const node = query.get("staker");  // Changed from "node" to "staker" to match the query parameter used in links
-        setNode(node);
+        const nodeAddress = address; // Use the address from URL params
+        setNode(nodeAddress);
 
-        Data.getNodeDetail(node).then((info) => {
+        Data.getNodeDetail(nodeAddress).then((info) => {
             if (info == null || info == undefined) {
                 setPageData({
                     isLoading: false,
@@ -344,7 +345,7 @@ const NodeDetailPage = () => {
                 rowData: Data.formatNodeDetail(info)
               });
         });
-    }, []);
+    }, [address]);
 
     function calculatePercentAuthorizedOfStake(authorizedAmount, stakedAmount) {
         if (stakedAmount == 0 || authorizedAmount == 0)
