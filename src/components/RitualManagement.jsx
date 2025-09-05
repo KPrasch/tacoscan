@@ -666,7 +666,6 @@ export const RitualManagement = ({ ritual }) => {
         {!canManage && (
           <div className={styles.notAuthorized}>
             <div className={styles.warningCard}>
-              <span className={styles.warningIcon}>🔒</span>
               <h3>Not Authorized</h3>
               <p>Connect with the ritual authority wallet to manage this ritual.</p>
               <p className={styles.authorityInfo}>
