@@ -48,7 +48,7 @@ const Header = () => {
                 </button>
                 <div className={styles.dropdownContent}>
                   <a href="/rituals">DKG Rituals</a>
-                  <a href="/nodes">Node Operators</a>
+                  <a href="/nodes">Nodes</a>
                   <a href="/activity">Network Activity</a>
                 </div>
               </div>
@@ -57,10 +57,10 @@ const Header = () => {
                   Resources <span className={styles.dropdownArrow}>▼</span>
                 </button>
                 <div className={styles.dropdownContent}>
+                  <a href="https://playground.taco.build/">Playground</a>
                   <a href="/charts">Network Stats</a>
-                  <a href="/apis">APIs</a>
-                  <a href="/contracts">Smart Contracts</a>
-                  <a href="/docs">Documentation</a>
+                  <a href="https://github.com/nucypher/nucypher-contracts">Smart Contracts</a>
+                  <a href="https://docs.taco.build">Documentation</a>
                 </div>
               </div>
             </nav>

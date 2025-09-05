@@ -13,8 +13,8 @@ const Footer = () => {
             </p>
             <div className={styles.socialLinks}>
               <a href="https://github.com/nucypher" className={styles.socialLink}>GitHub</a>
-              <a href="https://twitter.com/nucypher" className={styles.socialLink}>Twitter</a>
-              <a href="https://discord.gg/nucypher" className={styles.socialLink}>Discord</a>
+              <a href="https://x.com/buildwithtaco" className={styles.socialLink}>Twitter</a>
+              <a href="https://discord.gg/ZHnDAJtuED" className={styles.socialLink}>Discord</a>
             </div>
           </div>
 
@@ -22,18 +22,15 @@ const Footer = () => {
             <h5 className={styles.footerSubtitle}>Network</h5>
             <ul className={styles.footerLinks}>
               <li><a href="/rituals">DKG Rituals</a></li>
-              <li><a href="/nodes">Node Operators</a></li>
+              <li><a href="/nodes">Nodes</a></li>
               <li><a href="/activity">Network Activity</a></li>
-              <li><a href="/performance">Performance Metrics</a></li>
-              <li><a href="/authorities">Ritual Authorities</a></li>
             </ul>
           </div>
 
           <div className={styles.footerSection}>
             <h5 className={styles.footerSubtitle}>Developers</h5>
             <ul className={styles.footerLinks}>
-              <li><a href="/apis">APIs</a></li>
-              <li><a href="/docs">Documentation</a></li>
+              <li><a href="https://docs.taco.build/">Documentation</a></li>
               <li><a href="https://github.com/nucypher/tacoscan">Source Code</a></li>
               <li><a href="/integrate">Integration Guide</a></li>
               <li><a href="/sdk">SDK Reference</a></li>
@@ -46,7 +43,7 @@ const Footer = () => {
         <div className={styles.footerBottom}>
           <div className={styles.footerBottomContent}>
             <p className={styles.copyright}>
-              © 2024 TACo Scan. All rights reserved.
+              © 2025 TACo Scan. All rights reserved.
             </p>
             <div className={styles.footerBottomLinks}>
               <a href="/terms">Terms</a>

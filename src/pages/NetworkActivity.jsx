@@ -163,7 +163,7 @@ const NetworkActivity = () => {
         {/* Header */}
         <div className={styles.pageHeader}>
           <div className={styles.headerContent}>
-            <h1 className={styles.pageTitle}>🌮 Network Activity</h1>
+            <h1 className={styles.pageTitle}>Network Activity</h1>
             <p className={styles.pageSubtitle}>
               Real-time TACo network transactions and ritual events
             </p>

@@ -124,7 +124,7 @@ const RitualDetail = () => {
             className={`${styles.tab} ${activeTab === 'timeline' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('timeline')}
           >
-            Timeline
+            Formation
           </button>
           <button 
             className={`${styles.tab} ${activeTab === 'management' ? styles.activeTab : ''}`}
@@ -148,9 +148,14 @@ const RitualDetail = () => {
                 <div className={styles.infoRow}>
                   <span className={styles.label}>Authority:</span>
                   <div className={styles.addressValue}>
-                    <Link to={`/address/${ritual.authority}`} className={styles.addressLink}>
+                    <a 
+                      href={`https://polygonscan.com/address/${ritual.authority}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.addressLink}
+                    >
                       {ritual.authority}
-                    </Link>
+                    </a>
                     <button 
                       onClick={() => copyToClipboard(ritual.authority)}
                       className={styles.copyBtn}
@@ -163,9 +168,14 @@ const RitualDetail = () => {
                 <div className={styles.infoRow}>
                   <span className={styles.label}>Initiator:</span>
                   <div className={styles.addressValue}>
-                    <Link to={`/address/${ritual.initiator}`} className={styles.addressLink}>
+                    <a 
+                      href={`https://polygonscan.com/address/${ritual.initiator}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.addressLink}
+                    >
                       {ritual.initiator}
-                    </Link>
+                    </a>
                     <button 
                       onClick={() => copyToClipboard(ritual.initiator)}
                       className={styles.copyBtn}
@@ -235,9 +245,14 @@ const RitualDetail = () => {
                   <div className={styles.addressValue}>
                     {ritual.accessController ? (
                       <>
-                        <Link to={`/address/${ritual.accessController}`} className={styles.addressLink}>
+                        <a 
+                          href={`https://polygonscan.com/address/${ritual.accessController}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.addressLink}
+                        >
                           {ritual.accessController}
-                        </Link>
+                        </a>
                         <button 
                           onClick={() => copyToClipboard(ritual.accessController)}
                           className={styles.copyBtn}
@@ -256,9 +271,14 @@ const RitualDetail = () => {
                   <div className={styles.addressValue}>
                     {ritual.feeModel ? (
                       <>
-                        <Link to={`/address/${ritual.feeModel}`} className={styles.addressLink}>
+                        <a 
+                          href={`https://polygonscan.com/address/${ritual.feeModel}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.addressLink}
+                        >
                           {ritual.feeModel}
-                        </Link>
+                        </a>
                         <button 
                           onClick={() => copyToClipboard(ritual.feeModel)}
                           className={styles.copyBtn}
@@ -348,7 +368,7 @@ const RitualDetail = () => {
 
           {activeTab === 'timeline' && (
             <div className={styles.timelineSection}>
-              <h3 className={styles.sectionTitle}>Transaction History</h3>
+              <h3 className={styles.sectionTitle}>Formation History</h3>
               <div className={styles.timeline}>
                 {ritual.transactions?.map((tx, index) => {
                   // Determine event type based on description

@@ -538,11 +538,24 @@ const getAllRitualsWithPagination = async () => {
                     allRituals.push(...newRituals);
                     console.log(`✅ Page ${pageCount}: Added ${newRituals.length} new rituals (total: ${allRituals.length})`);
                     
-                    skip += pageSize;
-                    consecutiveFailures = 0; // Reset failure counter on success
-                    
-                    // If we got less than pageSize, we've reached the end
-                    hasMore = rituals.length === pageSize;
+                    // Check if we actually added new rituals
+                    if (newRituals.length === 0) {
+                        // No new rituals added, we've reached the end
+                        console.log('📊 No new unique rituals found, ending pagination');
+                        hasMore = false;
+                    } else {
+                        skip += pageSize;
+                        consecutiveFailures = 0; // Reset failure counter on success
+                        
+                        // If we got less than pageSize, we've reached the end
+                        hasMore = rituals.length === pageSize;
+                        
+                        // Also check against expected total if available
+                        if (ritualCounter?.total && allRituals.length >= parseInt(ritualCounter.total)) {
+                            console.log(`📊 Reached expected total of ${ritualCounter.total} rituals`);
+                            hasMore = false;
+                        }
+                    }
                     
                     // Progress indicator
                     if (ritualCounter?.total) {

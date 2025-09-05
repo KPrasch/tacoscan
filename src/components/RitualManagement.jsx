@@ -35,9 +35,10 @@ export const RitualManagement = ({ ritual }) => {
   const { address: connectedAddress } = useAccount();
   const [currentPeriodSlots, setCurrentPeriodSlots] = useState('');
   const [nextPeriodSlots, setNextPeriodSlots] = useState('');
-  const [encryptors, setEncryptors] = useState('');
+  const [encryptorList, setEncryptorList] = useState(['']);
   const [error, setError] = useState('');
   const [isPaymentPending, setIsPaymentPending] = useState(false);
+  const [activeTab, setActiveTab] = useState('subscription');
   
   // Get fee model address
   const feeModelAddress = ritual?.feeModel;
@@ -99,56 +100,69 @@ export const RitualManagement = ({ ritual }) => {
     chainId: polygon.id,
   });
 
-  // Calculate current period
-  const currentPeriod = useMemo(() => {
-    if (!startOfSubscription || !subscriptionDuration) return BigInt(0);
-    
-    const currentTime = BigInt(Math.floor(Date.now() / 1000));
-    const startTime = BigInt(startOfSubscription);
-    const duration = BigInt(subscriptionDuration);
-    
-    if (currentTime < startTime) return BigInt(0);
-    
-    return (currentTime - startTime) / duration;
-  }, [startOfSubscription, subscriptionDuration]);
-
-  const nextPeriod = currentPeriod + BigInt(1);
-
-  // Get billing info for current period
-  const { data: billingInfo } = useReadContract({
+  const { data: endOfCurrentPeriod } = useReadContract({
     address: feeModelAddress,
     abi: standardSubscriptionAbi,
-    functionName: 'billingInfo',
-    args: [currentPeriod],
-    enabled: Boolean(feeModelAddress && currentPeriod >= 0),
-    chainId: polygon.id,
-  });
-
-  // Check if periods are paid
-  const { data: isCurrentPeriodPaid } = useReadContract({
-    address: feeModelAddress,
-    abi: standardSubscriptionAbi,
-    functionName: 'isPeriodPaid',
-    args: [currentPeriod],
-    enabled: Boolean(feeModelAddress && currentPeriod >= 0),
-    chainId: polygon.id,
-  });
-
-  const { data: isNextPeriodPaid } = useReadContract({
-    address: feeModelAddress,
-    abi: standardSubscriptionAbi,
-    functionName: 'isPeriodPaid',
-    args: [nextPeriod],
+    functionName: 'endOfCurrentPeriod',
     enabled: Boolean(feeModelAddress),
     chainId: polygon.id,
   });
 
-  // Calculate fees
+  const { data: billingInfo } = useReadContract({
+    address: feeModelAddress,
+    abi: standardSubscriptionAbi,
+    functionName: 'billingInfo',
+    enabled: Boolean(feeModelAddress),
+    chainId: polygon.id,
+  });
+
+  const { data: currentPeriod } = useReadContract({
+    address: feeModelAddress,
+    abi: standardSubscriptionAbi,
+    functionName: 'getCurrentPeriod',
+    enabled: Boolean(feeModelAddress),
+    chainId: polygon.id,
+  });
+
+  const { data: baseFeeRate } = useReadContract({
+    address: feeModelAddress,
+    abi: standardSubscriptionAbi,
+    functionName: 'baseFeeRate',
+    enabled: Boolean(feeModelAddress),
+    chainId: polygon.id,
+  });
+
+  const { data: feeToken } = useReadContract({
+    address: feeModelAddress,
+    abi: standardSubscriptionAbi,
+    functionName: 'feeToken',
+    enabled: Boolean(feeModelAddress),
+    chainId: polygon.id,
+  });
+
+  const { data: paymentMade } = useReadContract({
+    address: feeModelAddress,
+    abi: standardSubscriptionAbi,
+    functionName: 'paymentMade',
+    args: currentPeriod ? [currentPeriod] : undefined,
+    enabled: Boolean(feeModelAddress && currentPeriod),
+    chainId: polygon.id,
+  });
+
+  const { data: tokenAllowance } = useReadContract({
+    address: feeToken,
+    abi: erc20Abi,
+    functionName: 'allowance',
+    args: connectedAddress && feeModelAddress ? [connectedAddress, feeModelAddress] : undefined,
+    enabled: Boolean(connectedAddress && feeToken && feeModelAddress),
+    chainId: polygon.id,
+  });
+
   const { data: currentPeriodFees } = useReadContract({
     address: feeModelAddress,
     abi: standardSubscriptionAbi,
-    functionName: 'encryptorFees',
-    args: currentPeriodSlots && subscriptionDuration ? [BigInt(currentPeriodSlots), subscriptionDuration] : undefined,
+    functionName: 'feeForEncryptorSlots',
+    args: currentPeriodSlots ? [BigInt(currentPeriodSlots), BigInt(subscriptionDuration || 0)] : undefined,
     enabled: Boolean(feeModelAddress && currentPeriodSlots && subscriptionDuration),
     chainId: polygon.id,
   });
@@ -156,436 +170,518 @@ export const RitualManagement = ({ ritual }) => {
   const { data: nextPeriodBaseFees } = useReadContract({
     address: feeModelAddress,
     abi: standardSubscriptionAbi,
-    functionName: 'baseFees',
-    args: [nextPeriod],
-    enabled: Boolean(feeModelAddress),
+    functionName: 'feeForEncryptorSlots',
+    args: [0n, BigInt(subscriptionDuration || 0)],
+    enabled: Boolean(feeModelAddress && subscriptionDuration),
     chainId: polygon.id,
   });
 
   const { data: nextPeriodSlotFees } = useReadContract({
     address: feeModelAddress,
     abi: standardSubscriptionAbi,
-    functionName: 'encryptorFees',
-    args: nextPeriodSlots && subscriptionDuration ? [BigInt(nextPeriodSlots), subscriptionDuration] : undefined,
+    functionName: 'feeForEncryptorSlots',
+    args: nextPeriodSlots ? [BigInt(nextPeriodSlots), BigInt(subscriptionDuration || 0)] : undefined,
     enabled: Boolean(feeModelAddress && nextPeriodSlots && subscriptionDuration),
     chainId: polygon.id,
   });
 
-  // Calculate timeline data
-  const timelineData = useMemo(() => {
-    if (!startOfSubscription || !subscriptionDuration || !yellowDuration || !redDuration) {
-      return null;
-    }
+  const { writeContract, isPending } = useWriteContract();
 
-    const start = Number(startOfSubscription);
-    const end = start + Number(subscriptionDuration);
-    const yellowEnd = end + Number(yellowDuration);
-    const redEnd = yellowEnd + Number(redDuration);
-    const current = Math.floor(Date.now() / 1000);
+  const nextPeriod = currentPeriod ? currentPeriod + 1n : 0n;
+  const isCurrentPeriodPaid = paymentMade || false;
+  
+  const { data: nextPaymentMade } = useReadContract({
+    address: feeModelAddress,
+    abi: standardSubscriptionAbi,
+    functionName: 'paymentMade',
+    args: [nextPeriod],
+    enabled: Boolean(feeModelAddress && nextPeriod),
+    chainId: polygon.id,
+  });
+  
+  const isNextPeriodPaid = nextPaymentMade || false;
 
-    return {
-      start,
-      end,
-      yellowEnd,
-      redEnd,
-      current,
-      totalDuration: redEnd - start,
-    };
-  }, [startOfSubscription, subscriptionDuration, yellowDuration, redDuration]);
+  const formatFees = (fees) => {
+    if (!fees) return '0';
+    return formatUnits(fees, 18);
+  };
 
-  // Get current status
-  const currentStatus = useMemo(() => {
-    if (!timelineData) return { status: 'unknown', label: 'Unknown' };
+  const canManage = connectedAddress && 
+    connectedAddress.toLowerCase() === ritual?.initiator?.toLowerCase();
 
-    const now = timelineData.current;
-    
-    if (now < timelineData.end) {
-      return { 
-        status: 'active', 
-        label: 'Active', 
-        timeLeft: timelineData.end - now 
-      };
-    } else if (now < timelineData.yellowEnd) {
-      return { 
-        status: 'grace', 
-        label: 'Grace Period', 
-        timeLeft: timelineData.yellowEnd - now 
-      };
-    } else if (now < timelineData.redEnd) {
-      return { 
-        status: 'final', 
-        label: 'Final Period', 
-        timeLeft: timelineData.redEnd - now 
-      };
-    } else {
-      return { 
-        status: 'expired', 
-        label: 'Expired', 
-        timeLeft: 0 
-      };
-    }
-  }, [timelineData]);
-
-  // Write contract hooks
-  const { writeContract: writeToken, isPending: isTokenPending } = useWriteContract();
-  const { writeContract: writeSubscription, isPending: isSubscriptionPending } = useWriteContract();
-  const { writeContract: writeAccessControl, isPending: isAccessPending } = useWriteContract();
-
-  const isPending = isPaymentPending || isTokenPending || isSubscriptionPending || isAccessPending;
-
-  // Handle payment
-  const handlePayment = async (isNext = false) => {
-    const slots = isNext ? nextPeriodSlots : currentPeriodSlots;
-    
-    if (!slots || Number(slots) <= 0) {
-      setError('Please enter a valid number of slots');
-      return;
-    }
-
+  const handlePayment = async (isNextPeriod) => {
     try {
-      setIsPaymentPending(true);
       setError('');
-
-      // Calculate total fees
-      const fees = isNext 
-        ? (nextPeriodBaseFees || 0n) + (nextPeriodSlotFees || 0n)
-        : currentPeriodFees || 0n;
-
-      // First approve token transfer
-      // Note: You'll need to get the fee token address from the contract
-      const feeTokenAddress = '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063'; // DAI on Polygon
+      setIsPaymentPending(true);
       
-      await writeToken({
-        address: feeTokenAddress,
-        abi: erc20Abi,
-        functionName: 'approve',
-        args: [feeModelAddress, fees],
-        chainId: polygon.id,
-      });
+      const slots = isNextPeriod ? nextPeriodSlots : currentPeriodSlots;
+      const period = isNextPeriod ? nextPeriod : currentPeriod;
+      
+      if (!slots || !period) {
+        throw new Error('Invalid slots or period');
+      }
 
-      // Then pay for slots
-      await writeSubscription({
+      const slotsAmount = BigInt(slots);
+      
+      const fees = await writeContract({
         address: feeModelAddress,
         abi: standardSubscriptionAbi,
-        functionName: isNext ? 'payForSubscription' : 'payForEncryptorSlots',
-        args: [BigInt(slots)],
-        chainId: polygon.id,
+        functionName: 'payForSubscription',
+        args: [slotsAmount, period],
       });
 
-      // Clear form
-      if (isNext) {
+      if (isNextPeriod) {
         setNextPeriodSlots('');
       } else {
         setCurrentPeriodSlots('');
       }
-    } catch (err) {
-      console.error('Payment error:', err);
-      setError(err.message || 'Payment failed');
+    } catch (error) {
+      console.error('Payment failed:', error);
+      setError(error.message || 'Payment failed');
     } finally {
       setIsPaymentPending(false);
     }
   };
 
-  // Handle encryptor management
-  const handleEncryptors = async (isAdding = true) => {
-    if (!encryptors) {
-      setError('Please enter encryptor addresses');
-      return;
-    }
-
-    const encryptorList = encryptors.split(',').map(addr => addr.trim()).filter(Boolean);
-    
-    if (encryptorList.length === 0) {
-      setError('Please enter valid addresses');
-      return;
-    }
-
+  const handleApproveToken = async () => {
     try {
-      setIsPaymentPending(true);
       setError('');
+      const maxApproval = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+      
+      await writeContract({
+        address: feeToken,
+        abi: erc20Abi,
+        functionName: 'approve',
+        args: [feeModelAddress, maxApproval],
+      });
+    } catch (error) {
+      console.error('Approval failed:', error);
+      setError(error.message || 'Approval failed');
+    }
+  };
 
-      await writeAccessControl({
-        address: ritual.accessController,
+  const handleAddEncryptor = (index, value) => {
+    const newList = [...encryptorList];
+    newList[index] = value;
+    setEncryptorList(newList);
+  };
+
+  const addNewEncryptorField = () => {
+    setEncryptorList([...encryptorList, '']);
+  };
+
+  const removeEncryptorField = (index) => {
+    const newList = encryptorList.filter((_, i) => i !== index);
+    if (newList.length === 0) newList.push('');
+    setEncryptorList(newList);
+  };
+
+  const handleEncryptors = async (isAdding) => {
+    try {
+      setError('');
+      const validAddresses = encryptorList
+        .filter(addr => addr && addr.trim())
+        .map(addr => addr.trim());
+
+      if (validAddresses.length === 0) {
+        throw new Error('Please enter at least one address');
+      }
+
+      await writeContract({
+        address: ritual?.accessController,
         abi: accessControllerAbi,
         functionName: isAdding ? 'authorize' : 'deauthorize',
-        args: [BigInt(ritual.id), encryptorList],
-        chainId: polygon.id,
+        args: [validAddresses],
       });
 
-      setEncryptors('');
-    } catch (err) {
-      console.error('Encryptor management error:', err);
-      setError(err.message || 'Operation failed');
-    } finally {
-      setIsPaymentPending(false);
+      setEncryptorList(['']);
+    } catch (error) {
+      console.error('Encryptor management failed:', error);
+      setError(error.message || 'Failed to manage encryptors');
     }
   };
 
-  const formatFees = (fees) => {
-    if (!fees) return '0';
-    return parseFloat(formatUnits(fees, 18)).toFixed(4);
-  };
+  const needsTokenApproval = useMemo(() => {
+    if (!tokenAllowance || !currentPeriodFees) return false;
+    return tokenAllowance < currentPeriodFees;
+  }, [tokenAllowance, currentPeriodFees]);
 
-  // Only show management if user is the authority
-  const canManage = connectedAddress && 
-    ritual?.authority && 
-    connectedAddress.toLowerCase() === ritual.authority.toLowerCase();
+  const timelineData = useMemo(() => {
+    if (!startOfSubscription || !subscriptionDuration || !yellowDuration || !redDuration) {
+      return null;
+    }
+    
+    const current = Math.floor(Date.now() / 1000);
+    const start = Number(startOfSubscription);
+    // If endOfCurrentPeriod is 0 or not set, calculate it from start + duration
+    const end = endOfCurrentPeriod && Number(endOfCurrentPeriod) > 0 
+      ? Number(endOfCurrentPeriod)
+      : start + Number(subscriptionDuration);
+    const yellowEnd = end + Number(yellowDuration);
+    const redEnd = yellowEnd + Number(redDuration);
+    const totalDuration = redEnd - start;
+    
+    return {
+      current,
+      start,
+      end,
+      yellowEnd,
+      redEnd,
+      totalDuration,
+      isInYellow: current >= end && current < yellowEnd,
+      isInRed: current >= yellowEnd && current < redEnd,
+      isExpired: current >= redEnd,
+      timeUntilYellow: end - current,
+      timeUntilRed: yellowEnd - current,
+      timeUntilExpiry: redEnd - current,
+    };
+  }, [startOfSubscription, subscriptionDuration, yellowDuration, redDuration, endOfCurrentPeriod]);
 
   return (
     <div className={styles.container}>
-      {error && (
-        <div className={styles.error}>
-          <span>⚠️</span>
-          {error}
+      {/* Header */}
+      <div className={styles.header}>
+        <h2 className={styles.title}>Ritual Management</h2>
+        <div className={styles.ritualInfo}>
+          <span className={styles.label}>Ritual #{ritual?.id}</span>
+          <span className={styles.authority}>Authority: {ritual?.initiator?.slice(0, 6)}...{ritual?.initiator?.slice(-4)}</span>
         </div>
-      )}
+      </div>
 
-      {/* Status Section */}
-      <div className={styles.section}>
-        <h3 className={styles.sectionHeader}>
-          Subscription Status
-          <span className={`${styles.statusBadge} ${styles[currentStatus.status]}`}>
-            <span className={styles.statusDot}></span>
-            {currentStatus.label}
-          </span>
-        </h3>
+      {/* Tabs */}
+      <div className={styles.tabs}>
+        <button 
+          className={`${styles.tab} ${activeTab === 'subscription' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('subscription')}
+        >
+          Subscription
+        </button>
+        <button 
+          className={`${styles.tab} ${activeTab === 'encryptors' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('encryptors')}
+        >
+          Encryptors
+        </button>
+        <button 
+          className={`${styles.tab} ${activeTab === 'timeline' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('timeline')}
+        >
+          Timeline
+        </button>
+      </div>
 
-        <div className={styles.infoGrid}>
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>Current Period</div>
-            <div className={styles.infoValue}>{currentPeriod?.toString() || '0'}</div>
-          </div>
-          
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>Time Remaining</div>
-            <div className={`${styles.infoValue} ${currentStatus.status === 'active' ? styles.green : ''}`}>
-              {formatDuration(currentStatus.timeLeft)}
-            </div>
-          </div>
-          
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>Max Encryptors</div>
-            <div className={styles.infoValue}>{maxNodes?.toString() || '-'}</div>
-          </div>
-          
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>Fee Rate</div>
-            <div className={`${styles.infoValue} ${styles.small}`}>
-              {encryptorFeeRate ? formatUnits(encryptorFeeRate, 18) : '-'} DAI/slot/s
-            </div>
-          </div>
-        </div>
-
-        {/* Timeline */}
-        {timelineData && (
-          <div className={styles.timelineWrapper}>
-            <div className={styles.timeline}>
-              {/* Active Period */}
-              <div 
-                className={`${styles.timelinePeriod} ${styles.active} ${
-                  timelineData.current >= timelineData.start && timelineData.current < timelineData.end 
-                    ? '' : styles.inactive
-                }`}
-                style={{ width: `${((timelineData.end - timelineData.start) / timelineData.totalDuration) * 100}%` }}
-              >
-                <span className={styles.timelineLabel}>Active</span>
-                <span className={`${styles.timelineDate} ${styles.start}`}>
-                  {formatTimestamp(timelineData.start)}
+      {/* Tab Content */}
+      <div className={styles.tabContent}>
+        {/* Subscription Tab */}
+        {activeTab === 'subscription' && canManage && (
+          <div className={styles.subscriptionContent}>
+            {/* Current Period Card */}
+            <div className={styles.periodCard}>
+              <div className={styles.periodHeader}>
+                <div>
+                  <h3 className={styles.periodTitle}>Current Period</h3>
+                  <span className={styles.periodNumber}>Period {currentPeriod?.toString() || '0'}</span>
+                </div>
+                <span className={`${styles.statusBadge} ${isCurrentPeriodPaid ? styles.paid : styles.unpaid}`}>
+                  {isCurrentPeriodPaid ? '✓ Paid' : '⚠ Unpaid'}
                 </span>
               </div>
 
-              {/* Grace Period */}
-              <div 
-                className={`${styles.timelinePeriod} ${styles.grace} ${
-                  timelineData.current >= timelineData.end && timelineData.current < timelineData.yellowEnd 
-                    ? '' : styles.inactive
-                }`}
-                style={{ width: `${((timelineData.yellowEnd - timelineData.end) / timelineData.totalDuration) * 100}%` }}
-              >
-                <span className={styles.timelineLabel}>Grace</span>
+              <div className={styles.slotMetrics}>
+                <div className={styles.metric}>
+                  <span className={styles.metricValue}>{usedSlots?.toString() || '0'}</span>
+                  <span className={styles.metricLabel}>Used</span>
+                </div>
+                <div className={styles.metric}>
+                  <span className={styles.metricValue}>{billingInfo?.[1]?.toString() || '0'}</span>
+                  <span className={styles.metricLabel}>Paid</span>
+                </div>
+                <div className={styles.metric}>
+                  <span className={styles.metricValue}>{maxNodes?.toString() || '-'}</span>
+                  <span className={styles.metricLabel}>Max</span>
+                </div>
               </div>
 
-              {/* Final Period */}
-              <div 
-                className={`${styles.timelinePeriod} ${styles.final} ${
-                  timelineData.current >= timelineData.yellowEnd && timelineData.current < timelineData.redEnd 
-                    ? '' : styles.inactive
-                }`}
-                style={{ width: `${((timelineData.redEnd - timelineData.yellowEnd) / timelineData.totalDuration) * 100}%` }}
-              >
-                <span className={styles.timelineLabel}>Final</span>
-                <span className={`${styles.timelineDate} ${styles.end}`}>
-                  {formatTimestamp(timelineData.redEnd)}
-                </span>
-              </div>
-
-              {/* Current Time Indicator */}
-              {timelineData.current >= timelineData.start && timelineData.current <= timelineData.redEnd && (
-                <div 
-                  className={styles.currentIndicator}
-                  style={{ 
-                    left: `${((timelineData.current - timelineData.start) / timelineData.totalDuration) * 100}%` 
-                  }}
-                />
+              {!isCurrentPeriodPaid && (
+                <div className={styles.paymentForm}>
+                  <div className={styles.inputWrapper}>
+                    <input
+                      type="number"
+                      className={styles.slotInput}
+                      placeholder="Number of slots"
+                      value={currentPeriodSlots}
+                      onChange={(e) => setCurrentPeriodSlots(e.target.value)}
+                      disabled={isPending}
+                      min="1"
+                      max={maxNodes?.toString()}
+                    />
+                    <span className={styles.inputHint}>slots</span>
+                  </div>
+                  
+                  {currentPeriodSlots && currentPeriodFees && (
+                    <div className={styles.feePreview}>
+                      <span className={styles.feeLabel}>Cost:</span>
+                      <span className={styles.feeAmount}>{formatFees(currentPeriodFees)} DAI</span>
+                    </div>
+                  )}
+                  
+                  <button
+                    className={`${styles.payButton} ${styles.primary}`}
+                    onClick={() => handlePayment(false)}
+                    disabled={isPending || !currentPeriodSlots}
+                  >
+                    {isPending ? 'Processing...' : 'Pay for Current Period'}
+                  </button>
+                </div>
               )}
+            </div>
+
+            {/* Next Period Card */}
+            <div className={styles.periodCard}>
+              <div className={styles.periodHeader}>
+                <div>
+                  <h3 className={styles.periodTitle}>Next Period</h3>
+                  <span className={styles.periodNumber}>Period {nextPeriod?.toString() || '1'}</span>
+                </div>
+                <span className={`${styles.statusBadge} ${isNextPeriodPaid ? styles.paid : styles.available}`}>
+                  {isNextPeriodPaid ? '✓ Paid' : 'Available'}
+                </span>
+              </div>
+
+              {!isNextPeriodPaid && (
+                <div className={styles.paymentForm}>
+                  <div className={styles.inputWrapper}>
+                    <input
+                      type="number"
+                      className={styles.slotInput}
+                      placeholder="Number of slots"
+                      value={nextPeriodSlots}
+                      onChange={(e) => setNextPeriodSlots(e.target.value)}
+                      disabled={isPending}
+                      min="1"
+                      max={maxNodes?.toString()}
+                    />
+                    <span className={styles.inputHint}>slots</span>
+                  </div>
+                  
+                  {nextPeriodSlots && (nextPeriodBaseFees || nextPeriodSlotFees) && (
+                    <div className={styles.feeBreakdown}>
+                      <div className={styles.feeRow}>
+                        <span className={styles.feeLabel}>Base Fee:</span>
+                        <span className={styles.feeValue}>{formatFees(nextPeriodBaseFees)} DAI</span>
+                      </div>
+                      <div className={styles.feeRow}>
+                        <span className={styles.feeLabel}>Slot Fee:</span>
+                        <span className={styles.feeValue}>{formatFees(nextPeriodSlotFees)} DAI</span>
+                      </div>
+                      <div className={`${styles.feeRow} ${styles.total}`}>
+                        <span className={styles.feeLabel}>Total:</span>
+                        <span className={styles.feeAmount}>
+                          {formatFees((nextPeriodBaseFees || 0n) + (nextPeriodSlotFees || 0n))} DAI
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <button
+                    className={`${styles.payButton} ${styles.primary}`}
+                    onClick={() => handlePayment(true)}
+                    disabled={isPending || !nextPeriodSlots}
+                  >
+                    {isPending ? 'Processing...' : 'Pay for Next Period'}
+                  </button>
+                </div>
+              )}
+
+              {isNextPeriodPaid && (
+                <div className={styles.paidInfo}>
+                  <p>Next period payment has been completed.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Encryptors Tab */}
+        {activeTab === 'encryptors' && canManage && ritual?.accessController && (
+          <div className={styles.encryptorsContent}>
+            <div className={styles.encryptorSection}>
+              <h3 className={styles.sectionTitle}>Manage Encryptor Addresses</h3>
+              <p className={styles.sectionDescription}>
+                Add or remove addresses that are authorized to encrypt data for this ritual.
+              </p>
+
+              <div className={styles.encryptorList}>
+                {encryptorList.map((address, index) => (
+                  <div key={index} className={styles.encryptorRow}>
+                    <input
+                      type="text"
+                      className={styles.addressInput}
+                      placeholder="0x..."
+                      value={address}
+                      onChange={(e) => handleAddEncryptor(index, e.target.value)}
+                      disabled={isPending}
+                    />
+                    {encryptorList.length > 1 && (
+                      <button
+                        className={styles.removeButton}
+                        onClick={() => removeEncryptorField(index)}
+                        disabled={isPending}
+                        title="Remove this address"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <button
+                className={styles.addMoreButton}
+                onClick={addNewEncryptorField}
+                disabled={isPending}
+              >
+                + Add Another Address
+              </button>
+
+              <div className={styles.actionButtons}>
+                <button
+                  className={`${styles.actionButton} ${styles.authorize}`}
+                  onClick={() => handleEncryptors(true)}
+                  disabled={isPending || encryptorList.every(addr => !addr.trim())}
+                >
+                  Authorize Addresses
+                </button>
+                <button
+                  className={`${styles.actionButton} ${styles.deauthorize}`}
+                  onClick={() => handleEncryptors(false)}
+                  disabled={isPending || encryptorList.every(addr => !addr.trim())}
+                >
+                  Deauthorize Addresses
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Timeline Tab */}
+        {activeTab === 'timeline' && timelineData && (
+          <div className={styles.timelineContent}>
+            <div className={styles.timelineSection}>
+              <h3 className={styles.sectionTitle}>Subscription Timeline</h3>
+              
+              <div className={styles.timelineStats}>
+                <div className={styles.timelineStat}>
+                  <span className={styles.statLabel}>Current Status</span>
+                  <span className={`${styles.statValue} ${
+                    timelineData.isExpired ? styles.expired :
+                    timelineData.isInRed ? styles.critical :
+                    timelineData.isInYellow ? styles.warning :
+                    styles.active
+                  }`}>
+                    {timelineData.isExpired ? 'Expired' :
+                     timelineData.isInRed ? 'Final Period' :
+                     timelineData.isInYellow ? 'Grace Period' :
+                     'Active'}
+                  </span>
+                </div>
+                
+                {!timelineData.isExpired && (
+                  <>
+                    <div className={styles.timelineStat}>
+                      <span className={styles.statLabel}>Time Until Grace</span>
+                      <span className={styles.statValue}>
+                        {timelineData.timeUntilYellow > 0 ? formatDuration(timelineData.timeUntilYellow) : 'In Grace'}
+                      </span>
+                    </div>
+                    
+                    <div className={styles.timelineStat}>
+                      <span className={styles.statLabel}>Time Until Expiry</span>
+                      <span className={styles.statValue}>
+                        {formatDuration(timelineData.timeUntilExpiry)}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className={styles.timelineBar}>
+                <div className={styles.timelineTrack}>
+                  {/* Active Period */}
+                  <div 
+                    className={`${styles.timelineSegment} ${styles.active} ${
+                      timelineData.current >= timelineData.start && timelineData.current < timelineData.end 
+                        ? styles.current : ''
+                    }`}
+                    style={{ width: `${((timelineData.end - timelineData.start) / timelineData.totalDuration) * 100}%` }}
+                  >
+                    <span className={styles.segmentLabel}>Active</span>
+                  </div>
+
+                  {/* Grace Period */}
+                  <div 
+                    className={`${styles.timelineSegment} ${styles.grace} ${
+                      timelineData.isInYellow ? styles.current : ''
+                    }`}
+                    style={{ width: `${((timelineData.yellowEnd - timelineData.end) / timelineData.totalDuration) * 100}%` }}
+                  >
+                    <span className={styles.segmentLabel}>Grace</span>
+                  </div>
+
+                  {/* Final Period */}
+                  <div 
+                    className={`${styles.timelineSegment} ${styles.final} ${
+                      timelineData.isInRed ? styles.current : ''
+                    }`}
+                    style={{ width: `${((timelineData.redEnd - timelineData.yellowEnd) / timelineData.totalDuration) * 100}%` }}
+                  >
+                    <span className={styles.segmentLabel}>Final</span>
+                  </div>
+
+                  {/* Current Position Indicator */}
+                  {!timelineData.isExpired && (
+                    <div 
+                      className={styles.currentIndicator}
+                      style={{ 
+                        left: `${Math.min(((timelineData.current - timelineData.start) / timelineData.totalDuration) * 100, 100)}%` 
+                      }}
+                    >
+                      <span className={styles.indicatorTooltip}>Now</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.timelineDates}>
+                  <span>{formatTimestamp(timelineData.start)}</span>
+                  <span>{formatTimestamp(timelineData.end)}</span>
+                  <span>{formatTimestamp(timelineData.yellowEnd)}</span>
+                  <span>{formatTimestamp(timelineData.redEnd)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Not Authorized Message */}
+        {!canManage && (
+          <div className={styles.notAuthorized}>
+            <div className={styles.warningCard}>
+              <span className={styles.warningIcon}>🔒</span>
+              <h3>Not Authorized</h3>
+              <p>Connect with the ritual authority wallet to manage this ritual.</p>
+              <p className={styles.authorityInfo}>
+                Authority: <span className={styles.address}>{ritual?.initiator}</span>
+              </p>
             </div>
           </div>
         )}
       </div>
 
-      {/* Payment Section - Only show if can manage */}
-      {canManage && (
-        <div className={styles.section}>
-          <h3 className={styles.sectionHeader}>
-            Subscription Payment
-          </h3>
-
-          <div className={styles.paymentSection}>
-            {/* Current Period Payment */}
-            <div className={styles.periodCard}>
-              <div className={styles.periodHeader}>
-                <span className={styles.periodTitle}>
-                  Current Period ({currentPeriod?.toString() || '0'})
-                </span>
-                <span className={styles.periodStatus}>
-                  {isCurrentPeriodPaid ? (
-                    <>✓ Paid</>
-                  ) : (
-                    <>⚠️ Unpaid</>
-                  )}
-                </span>
-              </div>
-
-              <div className={styles.slotInfo}>
-                <span className={styles.used}>{usedSlots?.toString() || '0'}</span>
-                <span>used of</span>
-                <span className={styles.paid}>{billingInfo?.[1]?.toString() || '0'}</span>
-                <span>paid</span>
-                <span className={styles.max}>(max {maxNodes?.toString() || '-'})</span>
-              </div>
-
-              <div className={styles.inputGroup}>
-                <input
-                  type="number"
-                  className={styles.input}
-                  placeholder="Number of slots"
-                  value={currentPeriodSlots}
-                  onChange={(e) => setCurrentPeriodSlots(e.target.value)}
-                  disabled={isPending}
-                />
-                <button
-                  className={`${styles.button} ${styles.primary}`}
-                  onClick={() => handlePayment(false)}
-                  disabled={isPending || !currentPeriodSlots}
-                >
-                  {isPending ? <span className={styles.loader}></span> : 'Pay for Slots'}
-                </button>
-              </div>
-
-              {currentPeriodSlots && currentPeriodFees && (
-                <div className={styles.feeEstimate}>
-                  <span className={styles.feeLabel}>Estimated Fee</span>
-                  <span className={styles.feeAmount}>{formatFees(currentPeriodFees)} DAI</span>
-                </div>
-              )}
-            </div>
-
-            {/* Next Period Payment */}
-            <div className={styles.periodCard}>
-              <div className={styles.periodHeader}>
-                <span className={styles.periodTitle}>
-                  Next Period ({nextPeriod?.toString()})
-                </span>
-                <span className={styles.periodStatus}>
-                  {isNextPeriodPaid ? (
-                    <>✓ Paid</>
-                  ) : (
-                    <>Available</>
-                  )}
-                </span>
-              </div>
-
-              {!isNextPeriodPaid && (
-                <>
-                  <div className={styles.inputGroup}>
-                    <input
-                      type="number"
-                      className={styles.input}
-                      placeholder="Number of slots"
-                      value={nextPeriodSlots}
-                      onChange={(e) => setNextPeriodSlots(e.target.value)}
-                      disabled={isPending}
-                    />
-                    <button
-                      className={`${styles.button} ${styles.primary}`}
-                      onClick={() => handlePayment(true)}
-                      disabled={isPending || !nextPeriodSlots}
-                    >
-                      {isPending ? <span className={styles.loader}></span> : 'Pay for Next Period'}
-                    </button>
-                  </div>
-
-                  {nextPeriodSlots && (nextPeriodBaseFees || nextPeriodSlotFees) && (
-                    <div className={styles.feeEstimate}>
-                      <span className={styles.feeLabel}>Total Fee</span>
-                      <span className={styles.feeAmount}>
-                        {formatFees((nextPeriodBaseFees || 0n) + (nextPeriodSlotFees || 0n))} DAI
-                      </span>
-                      <div className={styles.feeBreakdown}>
-                        <span>Base Fee: {formatFees(nextPeriodBaseFees)} DAI</span>
-                        <span>Slot Fee: {formatFees(nextPeriodSlotFees)} DAI</span>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Encryptor Management - Only show if user is authority */}
-      {canManage && ritual?.accessController && (
-        <div className={styles.section}>
-          <h3 className={styles.sectionHeader}>
-            Manage Encryptors
-          </h3>
-
-          <div className={styles.encryptorSection}>
-            <textarea
-              className={styles.textarea}
-              placeholder="Enter encryptor addresses (comma-separated)&#10;Example: 0x123..., 0x456..."
-              value={encryptors}
-              onChange={(e) => setEncryptors(e.target.value)}
-              disabled={isPending}
-            />
-            
-            <div className={styles.buttonGroup}>
-              <button
-                className={`${styles.button} ${styles.primary}`}
-                onClick={() => handleEncryptors(true)}
-                disabled={isPending || !encryptors}
-              >
-                {isPending ? <span className={styles.loader}></span> : 'Add Encryptors'}
-              </button>
-              <button
-                className={`${styles.button} ${styles.secondary}`}
-                onClick={() => handleEncryptors(false)}
-                disabled={isPending || !encryptors}
-              >
-                {isPending ? <span className={styles.loader}></span> : 'Remove Encryptors'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Show message if user cannot manage */}
-      {!canManage && (
-        <div className={styles.section}>
-          <div className={styles.warning}>
-            Connect as the ritual authority to manage this ritual
-          </div>
+      {/* Error Message */}
+      {error && (
+        <div className={styles.errorMessage}>
+          <span className={styles.errorIcon}>⚠️</span>
+          {error}
         </div>
       )}
     </div>

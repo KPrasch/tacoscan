@@ -310,6 +310,16 @@
   color: #3B82F6;
 }
 
+.status.pending {
+  background: rgba(251, 191, 36, 0.1);
+  color: #F59E0B;
+}
+
+.status.failed {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
 .method {
   background: #F3F4F6;
   padding: 2px 6px;

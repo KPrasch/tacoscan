@@ -243,40 +243,52 @@ const Dashboard = () => {
         ? Math.round(last24HSuccessfulRituals.reduce((sum, r) => sum + (r.totalParticipants || 0), 0) / last24HSuccessfulRituals.length)
         : 0;
       
-      const networkSummary = [
-        {
-          metric: 'Last Hour Activity',
-          value: lastHourRituals,
-          description: `${lastHourRituals} ritual${lastHourRituals !== 1 ? 's' : ''} updated`,
-          trend: lastHourRituals > 0 ? 'active' : 'quiet'
-        },
-        {
-          metric: '24 Hour Overview', 
-          value: last24HoursRituals,
-          description: `${last24HoursSuccessful} successful, ${last24HoursActive} active`,
-          trend: last24HoursSuccessful > 10 ? 'high' : 'normal'
-        },
-        {
-          metric: 'Weekly Volume',
-          value: lastWeekRituals,
-          description: `${lastWeekRituals} total rituals processed`,
-          trend: lastWeekRituals > 100 ? 'high' : 'normal'
-        },
-        {
-          metric: 'Active Authorities',
-          value: recentAuthorities,
-          description: `${recentAuthorities} unique authorities (24h)`,
-          trend: recentAuthorities > 5 ? 'diverse' : 'normal'
-        },
-        {
-          metric: 'Avg Participation',
-          value: avgParticipants,
-          description: `${avgParticipants} nodes per successful ritual`,
-          trend: avgParticipants > 25 ? 'strong' : 'normal'
-        }
-      ];
+      // Create recent events from rituals
+      const recentEvents = [];
       
-      setRecentActivity(networkSummary);
+      // Get up to 10 recent rituals for events
+      const eventsFromRituals = formattedRituals.slice(0, 10);
+      
+      eventsFromRituals.forEach(ritual => {
+        // Add events based on ritual status
+        if (ritual.status === 'SUCCESSFUL' || ritual.status === 'ACTIVE') {
+          recentEvents.push({
+            event: 'DKG Round Complete',
+            ritual: `#${ritual.id}`,
+            participants: ritual.totalParticipants || 0,
+            time: ritual.updateTime,
+            status: 'success'
+          });
+        } else if (ritual.status === 'DKG AWAITING TRANSCRIPTS') {
+          recentEvents.push({
+            event: 'Awaiting Transcripts',
+            ritual: `#${ritual.id}`,
+            participants: ritual.totalPostedTranscripts || 0,
+            time: ritual.updateTime,
+            status: 'pending'
+          });
+        } else if (ritual.status === 'DKG AWAITING AGGREGATIONS') {
+          recentEvents.push({
+            event: 'Awaiting Aggregations',
+            ritual: `#${ritual.id}`,
+            participants: ritual.totalPostedAggregations || 0,
+            time: ritual.updateTime,
+            status: 'pending'
+          });
+        } else if (ritual.status === 'EXPIRED' || ritual.status === 'TIME OUT') {
+          recentEvents.push({
+            event: ritual.status === 'EXPIRED' ? 'Ritual Expired' : 'Ritual Timeout',
+            ritual: `#${ritual.id}`,
+            participants: ritual.totalParticipants || 0,
+            time: ritual.updateTime,
+            status: 'failed'
+          });
+        }
+      });
+      
+      // Sort by time and take top 5
+      recentEvents.sort((a, b) => new Date(b.time) - new Date(a.time));
+      setRecentActivity(recentEvents.slice(0, 5));
 
       setLoading(false);
     } catch (error) {
@@ -380,32 +392,37 @@ const Dashboard = () => {
 
           <div className={styles.tableSection}>
             <div className={styles.tableHeader}>
-              <h3 className={styles.tableTitle}>Network Activity Summary</h3>
-              <Link to="/activity" className={styles.viewAllLink}>View Details →</Link>
+              <h3 className={styles.tableTitle}>Recent Network Events</h3>
+              <Link to="/activity" className={styles.viewAllLink}>View All Events →</Link>
             </div>
             <div className={styles.tableWrapper}>
               <table className={styles.dataTable}>
                 <thead>
                   <tr>
-                    <th>Metric</th>
-                    <th>Value</th>
-                    <th>Description</th>
+                    <th>Event</th>
+                    <th>Ritual</th>
+                    <th>Participants</th>
+                    <th>Time</th>
                     <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {recentActivity.map((summary, idx) => (
+                  {recentActivity.map((event, idx) => (
                     <tr key={idx}>
                       <td>
-                        <span className={styles.method}>{summary.metric}</span>
+                        <span className={styles.method}>{event.event}</span>
                       </td>
                       <td>
-                        <span className={styles.statValue}>{summary.value}</span>
+                        <Link to={`/ritual/${event.ritual.replace('#', '')}`} className={styles.idLink}>
+                          {event.ritual}
+                        </Link>
                       </td>
-                      <td className={styles.description}>{summary.description}</td>
+                      <td>{event.participants}</td>
+                      <td className={styles.age}>{formatTimeToText(event.time)}</td>
                       <td>
-                        <span className={`${styles.status} ${styles[summary.trend]}`}>
-                          {summary.trend}
+                        <span className={`${styles.status} ${styles[event.status]}`}>
+                          {event.status === 'success' ? 'Success' : 
+                           event.status === 'pending' ? 'Pending' : 'Failed'}
                         </span>
                       </td>
                     </tr>
