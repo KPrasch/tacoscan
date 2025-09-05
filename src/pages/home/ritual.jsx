@@ -4,7 +4,7 @@ import RitualTable from "../../components/table/ritual";
 import { StatsCard } from "../../components/ui";
 import styles from './styles.module.css'
 
-const RitualPage = ({network, isSearch, searchInput}) => {
+const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = {}) => {
     const [pageData, setPageData] = useState({
         rowData: [],
         isLoading: false,

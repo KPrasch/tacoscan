@@ -4,7 +4,7 @@ import NodesTable from "../../components/table/nodes";
 import { StatsCard } from "../../components/ui";
 import styles from "./styles.module.css";
 
-const NodesPage = ({ network, isSearch, searchInput }) => {
+const NodesPage = ({ network = 'polygon', isSearch = false, searchInput = '' } = {}) => {
   const [pageData, setPageData] = useState({
     rowData: [],
     isLoading: false,
