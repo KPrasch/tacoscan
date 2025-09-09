@@ -39,6 +39,7 @@ export function categorizeNode(authorization) {
   const hasAmount = authorization.amount && Number(authorization.amount) > 0;
   const hasOperator = authorization.tacoOperator?.operator;
   const isConfirmed = authorization.tacoOperator?.confirmed === true;
+  // deauthorization field may not exist in all subgraphs
   const hasDeauthorization = authorization.deauthorization && Number(authorization.deauthorization) > 0;
   
   // Active nodes (have authorization amount)
@@ -159,7 +160,7 @@ export function getNodeLifecycle(authorization) {
     });
   }
   
-  // Add deauthorization event
+  // Add deauthorization event (field may not exist in all subgraphs)
   if (authorization.deauthorization && Number(authorization.deauthorization) > 0) {
     events.push({
       type: 'deauthorized',

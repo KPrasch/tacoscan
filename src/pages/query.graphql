@@ -133,8 +133,6 @@ query GetAllStakersQuery {
         appAddress
         appName
         id
-        deauthorization
-        involuntaryExitTimestamp
         stake {
             authorizer
             beneficiary

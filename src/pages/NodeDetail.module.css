@@ -107,14 +107,15 @@
 .etherscanLink {
   margin-left: auto;
   font-size: 13px;
-  color: #96FF5E;
+  color: #059669;  /* Standard darker green */
   text-decoration: none;
   font-weight: 500;
   transition: opacity 0.2s;
 }
 
 .etherscanLink:hover {
-  opacity: 0.8;
+  color: #047857;  /* Darker on hover */
+  text-decoration: underline;
 }
 
 /* Stats Grid */
@@ -162,13 +163,15 @@
 }
 
 .operatorLink {
-  color: #96FF5E;
+  color: #059669;  /* Standard darker green for better readability */
   text-decoration: none;
   font-size: 16px;
+  font-weight: 500;
 }
 
 .operatorLink:hover {
   text-decoration: underline;
+  color: #047857;  /* Slightly darker on hover */
 }
 
 /* Tabs */
@@ -374,12 +377,13 @@
 }
 
 .txLink {
-  color: #96FF5E;
+  color: #059669;  /* Standard darker green */
   text-decoration: none;
   font-weight: 500;
 }
 
 .txLink:hover {
+  color: #047857;  /* Darker on hover */
   text-decoration: underline;
 }
 
