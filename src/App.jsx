@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { config } from './config/wagmi'
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
+import NetworkSwitcher from './components/NetworkSwitcher';
 import Dashboard from './pages/Dashboard';
 import RitualsPage from './pages/home/ritual';
 import RitualDetail from './pages/RitualDetail';
@@ -38,6 +39,7 @@ function App() {
               </Routes>
             </main>
             <Footer />
+            <NetworkSwitcher />
           </div>
         </Router>
       </QueryClientProvider>

@@ -6,8 +6,9 @@ import { CoordinatorABI } from "../utils/abi";
 import { CoordinatorAddress } from "../utils/addresses";
 import web3Cache from "../utils/web3Cache";
 import BatchProcessor from "../utils/batchProcessor";
+import { getStakingProviderInfo } from "../utils/contractReader";
 
-const tacoAddr = "0x347cc7ede7e5517bd47d20620b2cf1b406edcf07"
+const tacoAddr = "0x347cc7ede7e5517bd47d20620b2cf1b406edcf07".toLowerCase()
 export const ritual_columns = [
   {
     header: "ID",
@@ -136,7 +137,22 @@ export const formatGwei = (value) => {
 };
 
 export const formatGweiFixedZero = (value) => {
-  return parseFloat(value / Const.DECIMAL_ETH).toFixed(0);
+  // Handle null/undefined
+  if (!value) return "0";
+  
+  // Convert to string if not already
+  const valueStr = value.toString();
+  
+  // For very large numbers, use BigInt for accurate division
+  try {
+    const valueBigInt = BigInt(valueStr);
+    const decimalBigInt = BigInt(Const.DECIMAL_ETH);
+    const result = valueBigInt / decimalBigInt;
+    return result.toString();
+  } catch (e) {
+    // Fallback for non-integer values
+    return parseFloat(value / Const.DECIMAL_ETH).toFixed(0);
+  }
 };
 
 export const formatWeiDecimal = (value) => {
@@ -144,9 +160,24 @@ export const formatWeiDecimal = (value) => {
 };
 
 export const formatWeiDecimalNoSurplus = (value) => {
-  return new Intl.NumberFormat().format(
-    parseFloat(value / Const.DECIMAL_ETH).toFixed(0)
-  );
+  // Handle null/undefined
+  if (!value) return "0";
+  
+  // Convert to string if not already
+  const valueStr = value.toString();
+  
+  // For very large numbers, use BigInt for accurate division
+  try {
+    const valueBigInt = BigInt(valueStr);
+    const decimalBigInt = BigInt(Const.DECIMAL_ETH);
+    const result = valueBigInt / decimalBigInt;
+    return new Intl.NumberFormat().format(result.toString());
+  } catch (e) {
+    // Fallback for non-integer values
+    return new Intl.NumberFormat().format(
+      parseFloat(value / Const.DECIMAL_ETH).toFixed(0)
+    );
+  }
 };
 
 export const formatNumberToDecimal = (value) => {
@@ -399,6 +430,31 @@ export const formatNodes = (rawData) => {
 };
 
 export const formatNodeDetail = (rawData) => {
+  console.log("formatNodeDetail input:", rawData);
+  
+  // Handle null or missing appAuthorization
+  if (!rawData || !rawData.appAuthorization) {
+    console.log("No appAuthorization found, returning empty data");
+    return {
+      id: null,
+      registeredOperatorAddress: null,
+      isOperatorConfirmed: false,
+      isAuthorized: false,
+      weiDecimalAuthorizedAmount: "0",
+      parsedAuthorizedAmount: 0,
+      weiDecimalDeauthorizingAmount: "0",
+      weiDecimalStakedAmount: "0",
+      parsedStakedAmount: 0,
+      bondedAt: null,
+      stakedAt: null,
+      owner: null,
+      authorizer: null,
+      beneficiary: null,
+      appAuthorization: null,
+      events: []
+    };
+  }
+  
   const appAuthorization = rawData.appAuthorization;
 
   const getFirstStakedAt = (stakeHistory) => {
@@ -445,7 +501,7 @@ export const formatNodeDetail = (rawData) => {
     appAuthorization.tacoOperator || {}
   );
 
-  return {
+  const result = {
     id: appAuthorization.id?.split('-')[0],
     registeredOperatorAddress: appAuthorization.tacoOperator?.operator,
     isOperatorConfirmed: appAuthorization.tacoOperator?.confirmed,
@@ -462,6 +518,12 @@ export const formatNodeDetail = (rawData) => {
     beneficiary: appAuthorization.stake?.beneficiary,
     events: events,
   };
+  
+  console.log("formatNodeDetail result:", result);
+  console.log("Authorized amount:", appAuthorization.amount, "->", result.weiDecimalAuthorizedAmount);
+  console.log("Staked amount:", appAuthorization.stake?.stakedAmount, "->", result.weiDecimalStakedAmount);
+  
+  return result;
 };
 
 export const formatUserDetail = (user) => ({
@@ -751,19 +813,61 @@ export const getNodes = async (isSearch, searchInput) => {
 };
 
 export const getNodeDetail = async (node) => {
-  const emptyData = JSON.parse(`[]`);  
   try {
+    // First try to get data from subgraph
+    const nodeAddress = node.toLowerCase();
+    const appAddress = tacoAddr;
+    const queryId = `${nodeAddress}-${appAddress}`;
+    
+    console.log("Fetching node detail for ID:", queryId);
+    
     const data = await client.execute(client.StakerDetailDocument, {
-      id: `${node}-${tacoAddr}`
+      id: queryId
     });
 
-    if (data.data !== undefined) {
+    console.log("Node detail response:", data);
+    
+    if (data?.data?.appAuthorization) {
       return data.data;
+    }
+    
+    // If not found in subgraph, read directly from contract
+    console.log("Node not found in subgraph, reading from contract...");
+    const contractInfo = await getStakingProviderInfo(node, 'mainnet');
+    
+    if (contractInfo) {
+      // Format contract data to match subgraph structure
+      return {
+        appAuthorization: {
+          id: queryId,
+          amount: contractInfo.authorized,
+          amountDeauthorizing: contractInfo.deauthorizing,
+          appAddress: tacoAddr,
+          appName: "TACo",
+          stake: {
+            id: nodeAddress,
+            stakedAmount: contractInfo.authorized, // Use authorized as proxy for staked
+            owner: { id: nodeAddress },
+            authorizer: nodeAddress,
+            beneficiary: nodeAddress,
+            stakeHistory: []
+          },
+          tacoOperator: contractInfo.operator !== '0x0000000000000000000000000000000000000000' ? {
+            id: contractInfo.operator,
+            operator: contractInfo.operator,
+            confirmed: contractInfo.operatorConfirmed,
+            bondedTimestamp: contractInfo.operatorStartTimestamp,
+            bondedTimestampFirstOperator: contractInfo.operatorStartTimestamp
+          } : null
+        },
+        appAuthHistories: []
+      };
     }
   } catch (e) {
     console.log("error to fetch staking provider data " + e);
   }
-  return emptyData;
+  
+  return { appAuthorization: null, appAuthHistories: [] };
 };
 
 export const getUserDetail = async (userAddress) => {

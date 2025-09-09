@@ -332,7 +332,10 @@ const NodeDetailPage = () => {
         setNode(nodeAddress);
 
         Data.getNodeDetail(nodeAddress).then((info) => {
-            if (info == null || info == undefined) {
+            console.log("NodeDetail received info:", info);
+            
+            if (!info || !info.appAuthorization) {
+                console.log("No appAuthorization found, setting empty data");
                 setPageData({
                     isLoading: false,
                     rowData: {}
@@ -340,9 +343,12 @@ const NodeDetailPage = () => {
                 return
             }
 
+            const formattedData = Data.formatNodeDetail(info);
+            console.log("Formatted node data:", formattedData);
+            
             setPageData({
                 isLoading: false,
-                rowData: Data.formatNodeDetail(info)
+                rowData: formattedData
               });
         });
     }, [address]);

@@ -29,18 +29,32 @@ const NodeDetail = () => {
   }, [address]);
 
   const formatNodeDetail = (data) => {
-    if (!data) return null;
+    if (!data || !data.appAuthorization) return null;
     
-    const stakingProvider = data.id?.split('-')[0] || address;
+    const auth = data.appAuthorization;
+    const stakingProvider = auth.id?.split('-')[0] || address;
+    
+    // Use BigInt for accurate wei to token conversion
+    const formatAmount = (weiAmount) => {
+      if (!weiAmount) return 0;
+      try {
+        const wei = BigInt(weiAmount.toString());
+        const divisor = BigInt('1000000000000000000'); // 10^18
+        return Number(wei / divisor);
+      } catch {
+        return 0;
+      }
+    };
+    
     return {
       id: stakingProvider,
-      operator: data.tacoOperator?.operator || '-',
-      isConfirmed: data.tacoOperator?.confirmed || false,
-      authorizedAmount: parseFloat(data.amount) || 0,
-      stakedAmount: parseFloat(data.stake?.stakedAmount) || 0,
-      bondedAt: data.tacoOperator?.bondedTimestamp ? new Date(data.tacoOperator.bondedTimestamp * 1000) : null,
-      events: data.events || [],
-      rituals: data.rituals || []
+      operator: auth.tacoOperator?.operator || '-',
+      isConfirmed: auth.tacoOperator?.confirmed || false,
+      authorizedAmount: formatAmount(auth.amount),
+      stakedAmount: formatAmount(auth.stake?.stakedAmount),
+      bondedAt: auth.tacoOperator?.bondedTimestamp ? new Date(auth.tacoOperator.bondedTimestamp * 1000) : null,
+      events: data.appAuthHistories || [],
+      rituals: []
     };
   };
 
@@ -107,7 +121,7 @@ const NodeDetail = () => {
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Authorized Amount</div>
           <div className={styles.statValue}>
-            {formatWeiDecimal(nodeData.authorizedAmount)} T
+            {new Intl.NumberFormat().format(nodeData.authorizedAmount)} T
           </div>
           <div className={styles.statSubtext}>
             {nodeData.stakedAmount > 0 
@@ -120,7 +134,7 @@ const NodeDetail = () => {
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Staked Amount</div>
           <div className={styles.statValue}>
-            {formatWeiDecimal(nodeData.stakedAmount)} T
+            {new Intl.NumberFormat().format(nodeData.stakedAmount)} T
           </div>
         </div>
         
@@ -202,11 +216,11 @@ const NodeDetail = () => {
                 <div className={styles.infoGrid}>
                   <div className={styles.infoRow}>
                     <span className={styles.infoLabel}>Total Staked:</span>
-                    <span className={styles.infoValue}>{formatWeiDecimal(nodeData.stakedAmount)} T</span>
+                    <span className={styles.infoValue}>{new Intl.NumberFormat().format(nodeData.stakedAmount)} T</span>
                   </div>
                   <div className={styles.infoRow}>
                     <span className={styles.infoLabel}>Authorized to TACo:</span>
-                    <span className={styles.infoValue}>{formatWeiDecimal(nodeData.authorizedAmount)} T</span>
+                    <span className={styles.infoValue}>{new Intl.NumberFormat().format(nodeData.authorizedAmount)} T</span>
                   </div>
                   <div className={styles.infoRow}>
                     <span className={styles.infoLabel}>Authorization Rate:</span>

@@ -1,9 +1,9 @@
 import React from 'react';
 import styles from './StatsCard.module.css';
 
-const StatsCard = ({ title, value, subtitle, loading = false }) => {
+const StatsCard = ({ title, value, subtitle, loading = false, tooltip }) => {
   return (
-    <div className={styles.statsCard}>
+    <div className={styles.statsCard} title={tooltip}>
       <div className={styles.cardTitle}>{title}</div>
       <div className={styles.cardValue}>
         {loading ? (

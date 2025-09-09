@@ -324,12 +324,13 @@
 }
 
 /* Access Controller Card */
-.accessControllerCard {
+.accessControllerCard,
+.feeModelCard {
   background: #FFFFFF;
   border: 1px solid #E5E7EB;
   border-radius: 12px;
   padding: 24px;
-  margin-bottom: 8px;
+  margin-bottom: 24px;
 }
 
 .cardTitle {
@@ -406,20 +407,32 @@
   font-size: 14px;
 }
 
-.noAccessController {
+.noAccessController,
+.noFeeModel,
+.notAuthorizedInfo {
   padding: 20px;
   text-align: center;
   color: #6B7280;
 }
 
-.noAccessController p {
+.noAccessController p,
+.noFeeModel p,
+.notAuthorizedInfo p {
   margin: 0 0 8px 0;
   font-size: 14px;
 }
 
-.noAccessController .subtext {
+.noAccessController .subtext,
+.noFeeModel .subtext {
   font-size: 13px;
   color: #9CA3AF;
+}
+
+.notAuthorizedInfo {
+  background: #FEF3C7;
+  border: 1px solid #FCD34D;
+  border-radius: 8px;
+  margin-top: 16px;
 }
 
 .encryptorSection {

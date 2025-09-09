@@ -4,6 +4,7 @@ import { standardSubscriptionAbi, erc20Abi, accessControllerAbi } from '../confi
 import { formatUnits } from 'viem';
 import { polygon } from 'wagmi/chains';
 import styles from './RitualManagement.module.css';
+import { getFeeModelInfo, getAccessControllerInfo } from '../utils/contractRegistry';
 
 const formatDuration = (seconds) => {
   if (!seconds || seconds <= 0) return 'Expired';
@@ -45,6 +46,34 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
   
   // Get fee model address
   const feeModelAddress = ritual?.feeModel;
+  
+  // Detect access controller contract type
+  const accessControllerInfo = useMemo(() => {
+    if (!ritual?.accessController) return null;
+    return getAccessControllerInfo(ritual.accessController, 'polygon');
+  }, [ritual?.accessController]);
+  
+  const contractInterface = useMemo(() => {
+    if (!accessControllerInfo) return null;
+    return {
+      canManageAccess: accessControllerInfo.type === 'managed_allow_list',
+      isPublic: accessControllerInfo.type === 'global_allow_list' || accessControllerInfo.type === 'open_access'
+    };
+  }, [accessControllerInfo]);
+  
+  // Detect fee model contract type
+  const feeModelInfo = useMemo(() => {
+    if (!feeModelAddress) return null;
+    return getFeeModelInfo(feeModelAddress, 'polygon');
+  }, [feeModelAddress]);
+  
+  const feeModelInterface = useMemo(() => {
+    if (!feeModelInfo) return null;
+    return {
+      hasPeriodicPayments: feeModelInfo.type === 'subscription',
+      hasTimeline: feeModelInfo.type === 'subscription'
+    };
+  }, [feeModelInfo]);
   
   // Primary contract reads
   const { data: startOfSubscription } = useReadContract({
@@ -410,10 +439,102 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
       {/* Tab Content */}
       <div className={styles.tabContent}>
         {/* Subscription Tab */}
-        {activeTab === 'subscription' && canManage && (
+        {activeTab === 'subscription' && (
           <div className={styles.subscriptionContent}>
-            {/* Subscription Timeline - show at top when in subscription tab */}
-            {showSubscriptionTimeline && timelineData && (
+            {/* Fee Model Contract Card */}
+            <div className={styles.feeModelCard}>
+              <h3 className={styles.cardTitle}>Fee Model Contract</h3>
+              {feeModelAddress ? (
+                <div className={styles.cardContent}>
+                  <div className={styles.contractInfo}>
+                    <span className={styles.label}>Type:</span>
+                    <span className={styles.value}>{feeModelInfo?.displayName || 'Unknown'}</span>
+                  </div>
+                  <div className={styles.contractInfo}>
+                    <span className={styles.label}>Address:</span>
+                    <div className={styles.addressContainer}>
+                      <a 
+                        href={`https://polygonscan.com/address/${feeModelAddress}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.contractLink}
+                      >
+                        {feeModelAddress}
+                      </a>
+                      <button
+                        className={styles.copyButton}
+                        onClick={() => navigator.clipboard.writeText(feeModelAddress)}
+                        title="Copy address"
+                      >
+                        📋
+                      </button>
+                    </div>
+                  </div>
+                  <div className={styles.contractInfo}>
+                    <span className={styles.label}>Payment Token:</span>
+                    <span className={styles.value}>{feeModelInfo?.paymentToken || 'Unknown'}</span>
+                  </div>
+                  {feeModelInfo?.description && (
+                    <div className={styles.contractInfo}>
+                      <span className={styles.label}>Description:</span>
+                      <span className={styles.value}>{feeModelInfo.description}</span>
+                    </div>
+                  )}
+                  {feeModelInterface?.hasPeriodicPayments && (
+                    <>
+                      <div className={styles.contractInfo}>
+                        <span className={styles.label}>Billing Period:</span>
+                        <span className={styles.value}>
+                          {subscriptionDuration ? formatDuration(Number(subscriptionDuration)) : 'N/A'}
+                        </span>
+                      </div>
+                      <div className={styles.contractInfo}>
+                        <span className={styles.label}>Max Nodes:</span>
+                        <span className={styles.value}>{maxNodes ? Number(maxNodes) : 'N/A'}</span>
+                      </div>
+                      <div className={styles.contractInfo}>
+                        <span className={styles.label}>Used Slots:</span>
+                        <span className={styles.value}>
+                          {usedSlots !== undefined && maxNodes ? 
+                            `${Number(usedSlots)} / ${Number(maxNodes)}` : 
+                            'N/A'}
+                        </span>
+                      </div>
+                      <div className={styles.contractInfo}>
+                        <span className={styles.label}>Encryptor Fee Rate:</span>
+                        <span className={styles.value}>
+                          {encryptorFeeRate ? `${formatUnits(encryptorFeeRate, 18)} ${feeModelInfo?.paymentToken || 'tokens'} per slot` : 'N/A'}
+                        </span>
+                      </div>
+                      <div className={styles.contractInfo}>
+                        <span className={styles.label}>Yellow Period:</span>
+                        <span className={styles.value}>
+                          {yellowDuration ? formatDuration(Number(yellowDuration)) : 'N/A'}
+                        </span>
+                      </div>
+                      <div className={styles.contractInfo}>
+                        <span className={styles.label}>Red Period:</span>
+                        <span className={styles.value}>
+                          {redDuration ? formatDuration(Number(redDuration)) : 'N/A'}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  <div className={styles.contractInfo}>
+                    <span className={styles.label}>Status:</span>
+                    <span className={styles.statusActive}>Active</span>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.noFeeModel}>
+                  <p>No fee model configured for this ritual.</p>
+                  <p className={styles.subtext}>A fee model is required for subscription management.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Subscription Timeline - show at top when in subscription tab and has timeline */}
+            {showSubscriptionTimeline && timelineData && feeModelInterface?.hasTimeline && (
               <div className={styles.timelineSection}>
                 <h3 className={styles.sectionTitle}>Subscription Timeline</h3>
                 
@@ -493,8 +614,9 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
               </div>
             )}
             
-            {/* Current Period Card */}
-            <div className={styles.periodCard}>
+            {/* Current Period Card - only show for subscription models */}
+            {feeModelInterface?.hasPeriodicPayments && (
+              <div className={styles.periodCard}>
               <div className={styles.periodHeader}>
                 <div>
                   <h3 className={styles.periodTitle}>Current Period</h3>
@@ -520,7 +642,7 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
                 </div>
               </div>
 
-              {!isCurrentPeriodPaid && (
+              {!isCurrentPeriodPaid && canManage && (
                 <div className={styles.paymentForm}>
                   <div className={styles.inputWrapper}>
                     <input
@@ -552,10 +674,18 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
                   </button>
                 </div>
               )}
-            </div>
+              
+              {!isCurrentPeriodPaid && !canManage && (
+                <div className={styles.notAuthorizedInfo}>
+                  <p>Connect with the ritual authority wallet to manage payments.</p>
+                </div>
+              )}
+              </div>
+            )}
 
-            {/* Next Period Card */}
-            <div className={styles.periodCard}>
+            {/* Next Period Card - only show for subscription models */}
+            {feeModelInterface?.hasPeriodicPayments && (
+              <div className={styles.periodCard}>
               <div className={styles.periodHeader}>
                 <div>
                   <h3 className={styles.periodTitle}>Next Period</h3>
@@ -566,7 +696,7 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
                 </span>
               </div>
 
-              {!isNextPeriodPaid && (
+              {!isNextPeriodPaid && canManage && (
                 <div className={styles.paymentForm}>
                   <div className={styles.inputWrapper}>
                     <input
@@ -610,18 +740,25 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
                   </button>
                 </div>
               )}
+              
+              {!isNextPeriodPaid && !canManage && (
+                <div className={styles.notAuthorizedInfo}>
+                  <p>Connect with the ritual authority wallet to manage payments.</p>
+                </div>
+              )}
 
               {isNextPeriodPaid && (
                 <div className={styles.paidInfo}>
                   <p>Next period payment has been completed.</p>
                 </div>
               )}
-            </div>
+              </div>
+            )}
           </div>
         )}
 
         {/* Encryptors Tab */}
-        {activeTab === 'encryptors' && canManage && (
+        {activeTab === 'encryptors' && (
           <div className={styles.encryptorsContent}>
             {/* Access Controller Card */}
             <div className={styles.accessControllerCard}>
@@ -629,7 +766,29 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
               {ritual?.accessController ? (
                 <div className={styles.cardContent}>
                   <div className={styles.contractInfo}>
-                    <span className={styles.label}>Contract Address:</span>
+                    <span className={styles.label}>Contract:</span>
+                    <span className={styles.value}>
+                      {accessControllerInfo?.displayName || 'Unknown'}
+                      {accessControllerInfo?.isProxy && ' (Proxy)'}
+                    </span>
+                  </div>
+                  {accessControllerInfo?.isProxy && accessControllerInfo?.implementation && (
+                    <div className={styles.contractInfo}>
+                      <span className={styles.label}>Implementation:</span>
+                      <div className={styles.addressContainer}>
+                        <a 
+                          href={`https://polygonscan.com/address/${accessControllerInfo.implementation}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.contractLink}
+                        >
+                          {accessControllerInfo.implementation.slice(0, 10)}...{accessControllerInfo.implementation.slice(-8)}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  <div className={styles.contractInfo}>
+                    <span className={styles.label}>Address:</span>
                     <div className={styles.addressContainer}>
                       <a 
                         href={`https://polygonscan.com/address/${ritual.accessController}`}
@@ -650,12 +809,27 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
                   </div>
                   <div className={styles.contractInfo}>
                     <span className={styles.label}>Type:</span>
-                    <span className={styles.value}>Global Allow List</span>
+                    <span className={styles.value}>{accessControllerInfo?.displayName || 'Unknown'}</span>
                   </div>
+                  {accessControllerInfo?.description && (
+                    <div className={styles.contractInfo}>
+                      <span className={styles.label}>Description:</span>
+                      <span className={styles.value}>{accessControllerInfo.description}</span>
+                    </div>
+                  )}
                   <div className={styles.contractInfo}>
                     <span className={styles.label}>Status:</span>
                     <span className={styles.statusActive}>Active</span>
                   </div>
+                  {contractInterface && (
+                    <div className={styles.contractInfo}>
+                      <span className={styles.label}>Access:</span>
+                      <span className={styles.value}>
+                        {contractInterface.isPublic ? 'Public' : 'Restricted'}
+                        {contractInterface.canManageAccess && ' (Manageable)'}
+                      </span>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className={styles.noAccessController}>
@@ -665,7 +839,7 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
               )}
             </div>
             
-            {ritual?.accessController && (
+            {ritual?.accessController && canManage && (
               <div className={styles.encryptorSection}>
                 <h3 className={styles.sectionTitle}>Manage Encryptor Addresses</h3>
               <p className={styles.sectionDescription}>
@@ -722,6 +896,12 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
                 </button>
               </div>
             </div>
+            )}
+            
+            {ritual?.accessController && !canManage && (
+              <div className={styles.notAuthorizedInfo}>
+                <p>Connect with the ritual authority wallet to manage encryptor addresses.</p>
+              </div>
             )}
           </div>
         )}
@@ -824,18 +1004,6 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
           </div>
         )}
 
-        {/* Not Authorized Message */}
-        {!canManage && (
-          <div className={styles.notAuthorized}>
-            <div className={styles.warningCard}>
-              <h3>Not Authorized</h3>
-              <p>Connect with the ritual authority wallet to manage this ritual.</p>
-              <p className={styles.authorityInfo}>
-                Authority: <span className={styles.address}>{ritual?.initiator}</span>
-              </p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Error Message */}
