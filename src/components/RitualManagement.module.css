@@ -101,8 +101,9 @@
 
 /* Subscription Content */
 .subscriptionContent {
-  display: grid;
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .periodCard {
@@ -317,6 +318,108 @@
 .encryptorsContent {
   max-width: 800px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Access Controller Card */
+.accessControllerCard {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 8px;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 20px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contractInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.contractInfo .label {
+  color: #6B7280;
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 140px;
+}
+
+.addressContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.contractLink {
+  color: #047857;
+  text-decoration: none;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  word-break: break-all;
+  transition: color 0.2s;
+}
+
+.contractLink:hover {
+  color: #059669;
+  text-decoration: underline;
+}
+
+.copyButton {
+  background: transparent;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.copyButton:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+.contractInfo .value {
+  color: #374151;
+  font-size: 14px;
+}
+
+.statusActive {
+  color: #10B981;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.noAccessController {
+  padding: 20px;
+  text-align: center;
+  color: #6B7280;
+}
+
+.noAccessController p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+
+.noAccessController .subtext {
+  font-size: 13px;
+  color: #9CA3AF;
 }
 
 .encryptorSection {
@@ -466,9 +569,11 @@
 }
 
 .timelineSection {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 20px;
 }
 
 .timelineStats {
@@ -499,15 +604,15 @@
 }
 
 .statValue.active {
-  color: #10B981;
+  color: #5FC752;
 }
 
 .statValue.warning {
-  color: #FBBf24;
+  color: #D97706;
 }
 
 .statValue.critical {
-  color: #EF4444;
+  color: #DC2626;
 }
 
 .statValue.expired {
@@ -516,7 +621,98 @@
 
 /* Timeline Bar */
 .timelineBar {
-  padding: 24px 0;
+  position: relative;
+  height: 40px;
+  background: #F3F4F6;
+  border-radius: 8px;
+  overflow: visible;
+  margin: 20px 0;
+  border: 1px solid #E5E7EB;
+}
+
+.progressBar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 8px;
+}
+
+.greenBar {
+  background: rgba(150, 255, 94, 0.35);
+  border-right: 1px solid rgba(150, 255, 94, 0.5);
+}
+
+.yellowBar {
+  background: rgba(251, 191, 36, 0.25);
+  border-right: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+.redBar {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+.currentIndicator {
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  width: 3px;
+  background: #111827;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  transition: left 0.3s ease;
+}
+
+.currentIndicator::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 11px;
+  height: 11px;
+  background: #111827;
+  border-radius: 50%;
+}
+
+.timelineLabels {
+  position: relative;
+  height: 40px;
+  margin-top: 12px;
+}
+
+.timelineLabel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  transform: translateX(-50%);
+}
+
+.timelineLabel:first-child {
+  transform: translateX(0);
+  align-items: flex-start;
+}
+
+.timelineLabel:last-child {
+  transform: translateX(0);
+  align-items: flex-end;
+}
+
+.labelTitle {
+  font-weight: 600;
+  color: #374151;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.labelDate {
+  color: #6B7280;
+  font-size: 12px;
 }
 
 .timelineTrack {

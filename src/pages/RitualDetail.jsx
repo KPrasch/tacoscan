@@ -4,6 +4,7 @@ import * as Data from './data';
 import styles from './RitualDetail.module.css';
 import Loader from '../components/loader';
 import { RitualManagement } from '../components/RitualManagement';
+import FormationTimeline from '../components/FormationTimeline';
 
 const RitualDetail = () => {
   const { id } = useParams();
@@ -26,6 +27,28 @@ const RitualDetail = () => {
           // Fetch feeModel for the specific ritual detail view
           const feeModel = await Data.getRitualFeeModel(id);
           formattedRitual.feeModel = feeModel;
+          
+          // Add initiation transaction if not already present
+          const hasInitiationTx = formattedRitual.transactions?.some(tx => 
+            tx.description?.includes('Initiate') || tx.description?.includes('Initialize')
+          );
+          
+          if (!hasInitiationTx && formattedRitual.initiator && formattedRitual.initTimeStamp) {
+            const initiationTx = {
+              description: 'Initiate Ritual',
+              from: formattedRitual.initiator,
+              to: formattedRitual.authority || formattedRitual.initiator,
+              timestamp: formattedRitual.initTimeStamp / 1000, // Convert to seconds
+              txHash: null, // We don't have the exact tx hash from subgraph
+              eventName: 'Initiate Ritual'
+            };
+            
+            // Add to beginning of transactions array (oldest first)
+            formattedRitual.transactions = [
+              ...(formattedRitual.transactions || []),
+              initiationTx
+            ].sort((a, b) => a.timestamp - b.timestamp);
+          }
           
           setRitual(formattedRitual);
         } else {
@@ -121,16 +144,22 @@ const RitualDetail = () => {
             Participants ({ritual.totalParticipants})
           </button>
           <button 
-            className={`${styles.tab} ${activeTab === 'timeline' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('timeline')}
+            className={`${styles.tab} ${activeTab === 'formation' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('formation')}
           >
             Formation
           </button>
           <button 
-            className={`${styles.tab} ${activeTab === 'management' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('management')}
+            className={`${styles.tab} ${activeTab === 'subscription' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('subscription')}
           >
-            Management
+            Subscription
+          </button>
+          <button 
+            className={`${styles.tab} ${activeTab === 'authorizations' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('authorizations')}
+          >
+            Authorizations
           </button>
         </div>
 
@@ -366,99 +395,22 @@ const RitualDetail = () => {
             </div>
           )}
 
-          {activeTab === 'timeline' && (
+          {activeTab === 'formation' && (
             <div className={styles.timelineSection}>
               <h3 className={styles.sectionTitle}>Formation History</h3>
-              <div className={styles.timeline}>
-                {ritual.transactions?.map((tx, index) => {
-                  // Determine event type based on description
-                  const eventType = tx.description || tx.eventName || 'Transaction';
-                  const isStartRitual = eventType.includes('Start Ritual');
-                  const isTranscripts = eventType.includes('Posted Transcripts');
-                  const isAggregations = eventType.includes('Posted Aggregations');
-                  
-                  return (
-                    <div key={index} className={styles.timelineItem}>
-                      <div className={styles.timelineMarker} style={{
-                        background: isAggregations ? '#10B981' : 
-                                   isTranscripts ? '#96FF5E' : 
-                                   isStartRitual ? '#3B82F6' : '#6B7280'
-                      }}></div>
-                      <div className={styles.timelineContent}>
-                        <div className={styles.timelineHeader}>
-                          <span className={styles.timelineEvent}>{eventType}</span>
-                          <span className={styles.timelineTime}>
-                            {new Date(tx.timestamp * 1000).toLocaleString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
-                        </div>
-                        
-                        {/* Transaction details */}
-                        <div style={{ marginTop: '12px', fontSize: '0.875rem' }}>
-                          {tx.txHash && (
-                            <div className={styles.timelineTx}>
-                              <span className={styles.label} style={{ color: '#6B7280' }}>Tx Hash:</span>
-                              <a 
-                                href={`https://polygonscan.com/tx/${tx.txHash}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={styles.txLink}
-                                style={{ fontFamily: 'var(--font-mono)' }}
-                              >
-                                {formatAddress(tx.txHash)}
-                              </a>
-                            </div>
-                          )}
-                          
-                          {tx.from && (
-                            <div className={styles.timelineTx} style={{ marginTop: '6px' }}>
-                              <span className={styles.label} style={{ color: '#6B7280' }}>From:</span>
-                              <a 
-                                href={`https://polygonscan.com/address/${tx.from}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={styles.txLink}
-                                style={{ fontFamily: 'var(--font-mono)' }}
-                              >
-                                {formatAddress(tx.from)}
-                              </a>
-                            </div>
-                          )}
-                          
-                          {/* Block number if available */}
-                          {tx.blockNumber && (
-                            <div style={{ marginTop: '6px', color: '#6B7280', fontSize: '0.75rem' }}>
-                              Block #{tx.blockNumber}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                
-                {(!ritual.transactions || ritual.transactions.length === 0) && (
-                  <div style={{ 
-                    textAlign: 'center', 
-                    padding: '40px', 
-                    color: '#6B7280',
-                    fontFamily: 'var(--font-display)'
-                  }}>
-                    No transactions recorded yet
-                  </div>
-                )}
-              </div>
+              <FormationTimeline transactions={ritual.transactions || []} />
             </div>
           )}
 
-          {activeTab === 'management' && (
+          {activeTab === 'subscription' && (
             <div className={styles.timelineSection}>
-              <RitualManagement ritual={ritual} />
+              <RitualManagement ritual={ritual} defaultTab="subscription" />
+            </div>
+          )}
+
+          {activeTab === 'authorizations' && (
+            <div className={styles.timelineSection}>
+              <RitualManagement ritual={ritual} defaultTab="encryptors" />
             </div>
           )}
         </div>

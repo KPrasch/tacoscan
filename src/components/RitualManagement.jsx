@@ -31,14 +31,17 @@ const formatTimestamp = (timestamp) => {
   });
 };
 
-export const RitualManagement = ({ ritual }) => {
+export const RitualManagement = ({ ritual, defaultTab = null }) => {
   const { address: connectedAddress } = useAccount();
   const [currentPeriodSlots, setCurrentPeriodSlots] = useState('');
   const [nextPeriodSlots, setNextPeriodSlots] = useState('');
   const [encryptorList, setEncryptorList] = useState(['']);
   const [error, setError] = useState('');
   const [isPaymentPending, setIsPaymentPending] = useState(false);
-  const [activeTab, setActiveTab] = useState('subscription');
+  const [activeTab, setActiveTab] = useState(defaultTab || 'subscription');
+  
+  // If defaultTab is subscription, show both subscription and timeline content
+  const showSubscriptionTimeline = defaultTab === 'subscription';
   
   // Get fee model address
   const feeModelAddress = ritual?.feeModel;
@@ -321,13 +324,43 @@ export const RitualManagement = ({ ritual }) => {
     const redEnd = yellowEnd + Number(redDuration);
     const totalDuration = redEnd - start;
     
+    // Calculate progress percentages
+    const greenDuration = end - start;
+    const yellowDurationNum = yellowEnd - end;
+    const redDurationNum = redEnd - yellowEnd;
+    
+    const greenProgress = (greenDuration / totalDuration) * 100;
+    const yellowProgress = (yellowDurationNum / totalDuration) * 100;
+    const redProgress = (redDurationNum / totalDuration) * 100;
+    
+    // Calculate current position
+    const elapsed = Math.min(Math.max(current - start, 0), totalDuration);
+    const totalProgress = (elapsed / totalDuration) * 100;
+    
+    // Determine status text
+    let statusText = 'Active';
+    if (current >= redEnd) {
+      statusText = 'Expired';
+    } else if (current >= yellowEnd) {
+      statusText = 'Critical';
+    } else if (current >= end) {
+      statusText = 'Warning';
+    }
+    
     return {
       current,
       start,
       end,
+      yellowStart: end,
+      redStart: yellowEnd,
       yellowEnd,
       redEnd,
       totalDuration,
+      greenProgress,
+      yellowProgress,
+      redProgress,
+      totalProgress,
+      statusText,
       isInYellow: current >= end && current < yellowEnd,
       isInRed: current >= yellowEnd && current < redEnd,
       isExpired: current >= redEnd,
@@ -339,42 +372,127 @@ export const RitualManagement = ({ ritual }) => {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <h2 className={styles.title}>Ritual Management</h2>
-        <div className={styles.ritualInfo}>
-          <span className={styles.label}>Ritual #{ritual?.id}</span>
-          <span className={styles.authority}>Authority: {ritual?.initiator?.slice(0, 6)}...{ritual?.initiator?.slice(-4)}</span>
+      {/* Header - only show if no defaultTab is provided */}
+      {!defaultTab && (
+        <div className={styles.header}>
+          <h2 className={styles.title}>Ritual Management</h2>
+          <div className={styles.ritualInfo}>
+            <span className={styles.label}>Ritual #{ritual?.id}</span>
+            <span className={styles.authority}>Authority: {ritual?.initiator?.slice(0, 6)}...{ritual?.initiator?.slice(-4)}</span>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Tabs */}
-      <div className={styles.tabs}>
-        <button 
-          className={`${styles.tab} ${activeTab === 'subscription' ? styles.activeTab : ''}`}
-          onClick={() => setActiveTab('subscription')}
-        >
-          Subscription
-        </button>
-        <button 
-          className={`${styles.tab} ${activeTab === 'encryptors' ? styles.activeTab : ''}`}
-          onClick={() => setActiveTab('encryptors')}
-        >
-          Encryptors
-        </button>
-        <button 
-          className={`${styles.tab} ${activeTab === 'timeline' ? styles.activeTab : ''}`}
-          onClick={() => setActiveTab('timeline')}
-        >
-          Timeline
-        </button>
-      </div>
+      {/* Tabs - only show if no defaultTab is provided */}
+      {!defaultTab && (
+        <div className={styles.tabs}>
+          <button 
+            className={`${styles.tab} ${activeTab === 'subscription' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('subscription')}
+          >
+            Subscription
+          </button>
+          <button 
+            className={`${styles.tab} ${activeTab === 'encryptors' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('encryptors')}
+          >
+            Encryptors
+          </button>
+          <button 
+            className={`${styles.tab} ${activeTab === 'timeline' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('timeline')}
+          >
+            Timeline
+          </button>
+        </div>
+      )}
 
       {/* Tab Content */}
       <div className={styles.tabContent}>
         {/* Subscription Tab */}
         {activeTab === 'subscription' && canManage && (
           <div className={styles.subscriptionContent}>
+            {/* Subscription Timeline - show at top when in subscription tab */}
+            {showSubscriptionTimeline && timelineData && (
+              <div className={styles.timelineSection}>
+                <h3 className={styles.sectionTitle}>Subscription Timeline</h3>
+                
+                <div className={styles.timelineStats}>
+                  <div className={styles.timelineStat}>
+                    <span className={styles.statLabel}>Current Status</span>
+                    <span className={`${styles.statValue} ${
+                      timelineData.isExpired ? styles.expired :
+                      timelineData.isInRed ? styles.critical :
+                      timelineData.isInYellow ? styles.warning :
+                      styles.active
+                    }`}>
+                      {timelineData.statusText}
+                    </span>
+                  </div>
+                  <div className={styles.timelineStat}>
+                    <span className={styles.statLabel}>Time Remaining</span>
+                    <span className={styles.statValue}>
+                      {timelineData.isExpired ? 'Expired' : formatDuration(timelineData.timeUntilExpiry)}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className={styles.timelineBar}>
+                  <div 
+                    className={`${styles.progressBar} ${styles.greenBar}`}
+                    style={{ 
+                      width: `${timelineData.greenProgress}%`
+                    }}
+                  />
+                  <div 
+                    className={`${styles.progressBar} ${styles.yellowBar}`}
+                    style={{ 
+                      width: `${timelineData.yellowProgress}%`,
+                      left: `${timelineData.greenProgress}%`
+                    }}
+                  />
+                  <div 
+                    className={`${styles.progressBar} ${styles.redBar}`}
+                    style={{ 
+                      width: `${timelineData.redProgress}%`,
+                      left: `${timelineData.greenProgress + timelineData.yellowProgress}%`
+                    }}
+                  />
+                  <div 
+                    className={styles.currentIndicator}
+                    style={{ left: `${timelineData.totalProgress}%` }}
+                  />
+                </div>
+                
+                <div className={styles.timelineLabels}>
+                  <div className={styles.timelineLabel} style={{ left: '0%' }}>
+                    <span className={styles.labelTitle}>Start</span>
+                    <span className={styles.labelDate}>
+                      {formatTimestamp(startOfSubscription)}
+                    </span>
+                  </div>
+                  <div className={styles.timelineLabel} style={{ left: `${timelineData.greenProgress}%` }}>
+                    <span className={styles.labelTitle}>Yellow Period</span>
+                    <span className={styles.labelDate}>
+                      {formatTimestamp(timelineData.yellowStart)}
+                    </span>
+                  </div>
+                  <div className={styles.timelineLabel} style={{ left: `${timelineData.greenProgress + timelineData.yellowProgress}%` }}>
+                    <span className={styles.labelTitle}>Red Period</span>
+                    <span className={styles.labelDate}>
+                      {formatTimestamp(timelineData.redStart)}
+                    </span>
+                  </div>
+                  <div className={styles.timelineLabel} style={{ right: '0', left: 'auto' }}>
+                    <span className={styles.labelTitle}>Expiry</span>
+                    <span className={styles.labelDate}>
+                      {formatTimestamp(timelineData.redEnd)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Current Period Card */}
             <div className={styles.periodCard}>
               <div className={styles.periodHeader}>
@@ -503,10 +621,53 @@ export const RitualManagement = ({ ritual }) => {
         )}
 
         {/* Encryptors Tab */}
-        {activeTab === 'encryptors' && canManage && ritual?.accessController && (
+        {activeTab === 'encryptors' && canManage && (
           <div className={styles.encryptorsContent}>
-            <div className={styles.encryptorSection}>
-              <h3 className={styles.sectionTitle}>Manage Encryptor Addresses</h3>
+            {/* Access Controller Card */}
+            <div className={styles.accessControllerCard}>
+              <h3 className={styles.cardTitle}>Access Controller Contract</h3>
+              {ritual?.accessController ? (
+                <div className={styles.cardContent}>
+                  <div className={styles.contractInfo}>
+                    <span className={styles.label}>Contract Address:</span>
+                    <div className={styles.addressContainer}>
+                      <a 
+                        href={`https://polygonscan.com/address/${ritual.accessController}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.contractLink}
+                      >
+                        {ritual.accessController}
+                      </a>
+                      <button
+                        className={styles.copyButton}
+                        onClick={() => navigator.clipboard.writeText(ritual.accessController)}
+                        title="Copy address"
+                      >
+                        📋
+                      </button>
+                    </div>
+                  </div>
+                  <div className={styles.contractInfo}>
+                    <span className={styles.label}>Type:</span>
+                    <span className={styles.value}>Global Allow List</span>
+                  </div>
+                  <div className={styles.contractInfo}>
+                    <span className={styles.label}>Status:</span>
+                    <span className={styles.statusActive}>Active</span>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.noAccessController}>
+                  <p>No access controller configured for this ritual.</p>
+                  <p className={styles.subtext}>An access controller is required to manage encryptor authorizations.</p>
+                </div>
+              )}
+            </div>
+            
+            {ritual?.accessController && (
+              <div className={styles.encryptorSection}>
+                <h3 className={styles.sectionTitle}>Manage Encryptor Addresses</h3>
               <p className={styles.sectionDescription}>
                 Add or remove addresses that are authorized to encrypt data for this ritual.
               </p>
@@ -561,11 +722,12 @@ export const RitualManagement = ({ ritual }) => {
                 </button>
               </div>
             </div>
+            )}
           </div>
         )}
 
-        {/* Timeline Tab */}
-        {activeTab === 'timeline' && timelineData && (
+        {/* Timeline Tab - only show when timeline tab is active (not in subscription tab) */}
+        {activeTab === 'timeline' && !showSubscriptionTimeline && timelineData && (
           <div className={styles.timelineContent}>
             <div className={styles.timelineSection}>
               <h3 className={styles.sectionTitle}>Subscription Timeline</h3>
