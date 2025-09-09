@@ -447,8 +447,8 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
               {feeModelAddress ? (
                 <div className={styles.cardContent}>
                   <div className={styles.contractInfo}>
-                    <span className={styles.label}>Type:</span>
-                    <span className={styles.value}>{feeModelInfo?.displayName || 'Unknown'}</span>
+                    <span className={styles.label}>Contract:</span>
+                    <span className={styles.value}>{feeModelInfo?.displayName || 'Free Fee Model'}</span>
                   </div>
                   <div className={styles.contractInfo}>
                     <span className={styles.label}>Address:</span>
@@ -471,15 +471,17 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
                     </div>
                   </div>
                   <div className={styles.contractInfo}>
-                    <span className={styles.label}>Payment Token:</span>
-                    <span className={styles.value}>{feeModelInfo?.paymentToken || 'Unknown'}</span>
+                    <span className={styles.label}>Type:</span>
+                    <span className={styles.value}>Fee Model</span>
                   </div>
-                  {feeModelInfo?.description && (
-                    <div className={styles.contractInfo}>
-                      <span className={styles.label}>Description:</span>
-                      <span className={styles.value}>{feeModelInfo.description}</span>
-                    </div>
-                  )}
+                  <div className={styles.contractInfo}>
+                    <span className={styles.label}>Description:</span>
+                    <span className={styles.value}>{feeModelInfo?.description || 'No fees required'}</span>
+                  </div>
+                  <div className={styles.contractInfo}>
+                    <span className={styles.label}>Status:</span>
+                    <span className={styles.statusActive}>Active</span>
+                  </div>
                   {feeModelInterface?.hasPeriodicPayments && (
                     <>
                       <div className={styles.contractInfo}>
@@ -809,27 +811,25 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
                   </div>
                   <div className={styles.contractInfo}>
                     <span className={styles.label}>Type:</span>
-                    <span className={styles.value}>{accessControllerInfo?.displayName || 'Unknown'}</span>
+                    <span className={styles.value}>Access Controller</span>
                   </div>
-                  {accessControllerInfo?.description && (
-                    <div className={styles.contractInfo}>
-                      <span className={styles.label}>Description:</span>
-                      <span className={styles.value}>{accessControllerInfo.description}</span>
-                    </div>
-                  )}
+                  <div className={styles.contractInfo}>
+                    <span className={styles.label}>Description:</span>
+                    <span className={styles.value}>{accessControllerInfo?.description || 'Allows all addresses to access the ritual'}</span>
+                  </div>
                   <div className={styles.contractInfo}>
                     <span className={styles.label}>Status:</span>
                     <span className={styles.statusActive}>Active</span>
                   </div>
-                  {contractInterface && (
-                    <div className={styles.contractInfo}>
-                      <span className={styles.label}>Access:</span>
-                      <span className={styles.value}>
-                        {contractInterface.isPublic ? 'Public' : 'Restricted'}
-                        {contractInterface.canManageAccess && ' (Manageable)'}
-                      </span>
-                    </div>
-                  )}
+                  <div className={styles.contractInfo}>
+                    <span className={styles.label}>Access:</span>
+                    <span className={styles.value}>
+                      {contractInterface?.isPublic !== undefined 
+                        ? (contractInterface.isPublic ? 'Public' : 'Restricted')
+                        : 'Public'}
+                      {contractInterface?.canManageAccess && ' (Manageable)'}
+                    </span>
+                  </div>
                 </div>
               ) : (
                 <div className={styles.noAccessController}>

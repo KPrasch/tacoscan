@@ -368,7 +368,16 @@ const NodeDetail = () => {
                               {ritual.status}
                             </span>
                           </td>
-                          <td>{formatString(ritual.authority)}</td>
+                          <td>
+                            <a 
+                              href={`https://polygonscan.com/address/${ritual.authority}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={styles.addressLink}
+                            >
+                              {formatString(ritual.authority)}
+                            </a>
+                          </td>
                           <td>{ritual.participants || 0}</td>
                           <td>{formatTimeToText(ritual.updateTime)}</td>
                         </tr>

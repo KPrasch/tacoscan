@@ -28,27 +28,7 @@ const RitualDetail = () => {
           const feeModel = await Data.getRitualFeeModel(id);
           formattedRitual.feeModel = feeModel;
           
-          // Add initiation transaction if not already present
-          const hasInitiationTx = formattedRitual.transactions?.some(tx => 
-            tx.description?.includes('Initiate') || tx.description?.includes('Initialize')
-          );
-          
-          if (!hasInitiationTx && formattedRitual.initiator && formattedRitual.initTimeStamp) {
-            const initiationTx = {
-              description: 'Initiate Ritual',
-              from: formattedRitual.initiator,
-              to: formattedRitual.authority || formattedRitual.initiator,
-              timestamp: formattedRitual.initTimeStamp / 1000, // Convert to seconds
-              txHash: null, // We don't have the exact tx hash from subgraph
-              eventName: 'Initiate Ritual'
-            };
-            
-            // Add to beginning of transactions array (oldest first)
-            formattedRitual.transactions = [
-              ...(formattedRitual.transactions || []),
-              initiationTx
-            ].sort((a, b) => a.timestamp - b.timestamp);
-          }
+          // Don't add duplicate initiation transaction - the real one with txHash is already in the data
           
           setRitual(formattedRitual);
         } else {
@@ -120,7 +100,7 @@ const RitualDetail = () => {
           <div className={styles.headerTop}>
             <div className={styles.headerLeft}>
               <h1 className={styles.title}>
-                Ritual <span className={styles.ritualId}>#{ritual.id}</span>
+                DKG Ritual <span className={styles.ritualId}>#{ritual.id}</span>
               </h1>
               <div className={styles.statusBadge} style={{ backgroundColor: getStatusColor(ritual.status) }}>
                 {ritual.status}
