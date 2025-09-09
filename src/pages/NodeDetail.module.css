@@ -342,7 +342,7 @@
 }
 
 .idLink {
-  color: #96FF5E;
+  color: #059669;
   text-decoration: none;
   font-weight: 500;
 }
@@ -361,9 +361,10 @@
 }
 
 .status.active,
-.status.successful {
-  background: rgba(150, 255, 94, 0.1);
-  color: #96FF5E;
+.status.successful,
+.status.finalized {
+  background: rgba(5, 150, 105, 0.1);
+  color: #059669;
 }
 
 .status.expired {
@@ -371,9 +372,15 @@
   color: #6B7280;
 }
 
-.status.timeout {
+.status.timeout,
+.status.invalid {
   background: rgba(239, 68, 68, 0.1);
   color: #EF4444;
+}
+
+.status.pending {
+  background: rgba(251, 191, 36, 0.1);
+  color: #F59E0B;
 }
 
 .txLink {

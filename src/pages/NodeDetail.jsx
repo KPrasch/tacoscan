@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getNodeDetail } from './data';
+import { getNodeDetail, getTimeout } from './data';
 import { formatString, formatWeiDecimal, formatTimeToText } from './data';
 import styles from './NodeDetail.module.css';
 
@@ -17,38 +17,65 @@ const NodeDetail = () => {
         if (data) {
           const formatted = formatNodeDetail(data);
           
-          // Also fetch rituals for this node
+          // Also fetch rituals for this node and timeout value
           try {
-            const ritualsResponse = await fetch('https://gateway-arbitrum.network.thegraph.com/api/f49026e5653284c96b9798f93567eaa1/subgraphs/id/6VFbgC6JWwPQkqCxdVDNSieW8bwLdoVBtimVm3F2WV86', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                query: `
-                  query GetRitualsForNode($node: String!) {
-                    rituals(where: { participants_contains: [$node] }, first: 100) {
-                      id
-                      initTimestamp
-                      endTimestamp
-                      authority
-                      dkgSize
-                      dkgStatus
-                      participants
+            const [ritualsResponse, timeout] = await Promise.all([
+              fetch('https://gateway-arbitrum.network.thegraph.com/api/f49026e5653284c96b9798f93567eaa1/subgraphs/id/6VFbgC6JWwPQkqCxdVDNSieW8bwLdoVBtimVm3F2WV86', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  query: `
+                    query GetRitualsForNode($node: String!) {
+                      rituals(where: { participants_contains: [$node] }, first: 100) {
+                        id
+                        initTimestamp
+                        endTimestamp
+                        authority
+                        dkgSize
+                        dkgStatus
+                        participants
+                      }
                     }
-                  }
-                `,
-                variables: { node: address.toLowerCase() }
-              })
-            });
+                  `,
+                  variables: { node: address.toLowerCase() }
+                })
+              }),
+              getTimeout()
+            ]);
             
             const ritualsData = await ritualsResponse.json();
             if (ritualsData?.data?.rituals) {
-              formatted.rituals = ritualsData.data.rituals.map(r => ({
-                id: r.id,
-                status: r.dkgStatus === '4' ? 'FINALIZED' : r.dkgStatus === '3' ? 'TIMEOUT' : 'PENDING',
-                authority: r.authority,
-                participants: r.dkgSize,
-                updateTime: r.endTimestamp || r.initTimestamp
-              }));
+              const timeoutMs = parseFloat(timeout) * 1000;
+              const currentTimestamp = Date.now();
+              
+              formatted.rituals = ritualsData.data.rituals.map(r => {
+                const initTimestampMs = parseInt(r.initTimestamp) * 1000;
+                const timeoutStamp = initTimestampMs + timeoutMs;
+                
+                // Determine status based on dkgStatus and timeout
+                let status;
+                if (r.dkgStatus === 'DKG_RITUAL_FINALIZED') {
+                  status = 'FINALIZED';
+                } else if (r.dkgStatus === 'DKG_INVALID') {
+                  status = 'INVALID';
+                } else if ((r.dkgStatus === 'DKG_AWAITING_AGGREGATIONS' || 
+                            r.dkgStatus === 'DKG_AWAITING_TRANSCRIPTS') && 
+                           timeoutStamp < currentTimestamp) {
+                  status = 'EXPIRED';
+                } else if (r.dkgStatus === 'DKG_TIMEOUT') {
+                  status = 'TIMEOUT';
+                } else {
+                  status = 'PENDING';
+                }
+                
+                return {
+                  id: r.id,
+                  status: status,
+                  authority: r.authority,
+                  participants: r.dkgSize,
+                  updateTime: (r.endTimestamp || r.initTimestamp) ? parseInt(r.endTimestamp || r.initTimestamp) * 1000 : Date.now()
+                };
+              });
             }
           } catch (err) {
             console.error('Error fetching rituals:', err);

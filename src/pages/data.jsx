@@ -352,7 +352,7 @@ export const formatRitualsData = (rawData, timeout) => {
       let status = ritual.dkgStatus.replaceAll("_", " ");
       
       if ((ritual.dkgStatus === "DKG_AWAITING_AGGREGATIONS" || 
-           ritual.dkStatus === "DKG_AWAITING_TRANSCRIPTS") && 
+           ritual.dkgStatus === "DKG_AWAITING_TRANSCRIPTS") && 
           timeoutStamp < currentTimestampMs) {
         status = "TIME OUT";
       }
