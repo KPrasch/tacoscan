@@ -54,15 +54,17 @@ const NodeDetail = () => {
                 
                 // Determine status based on dkgStatus and timeout
                 let status;
-                if (r.dkgStatus === 'DKG_RITUAL_FINALIZED') {
+                if (r.dkgStatus === 'SUCCESSFUL') {
+                  status = 'SUCCESSFUL';
+                } else if (r.dkgStatus === 'DKG_RITUAL_FINALIZED') {
                   status = 'FINALIZED';
-                } else if (r.dkgStatus === 'DKG_INVALID') {
+                } else if (r.dkgStatus === 'DKG_INVALID' || r.dkgStatus === 'INVALID') {
                   status = 'INVALID';
                 } else if ((r.dkgStatus === 'DKG_AWAITING_AGGREGATIONS' || 
                             r.dkgStatus === 'DKG_AWAITING_TRANSCRIPTS') && 
                            timeoutStamp < currentTimestamp) {
                   status = 'EXPIRED';
-                } else if (r.dkgStatus === 'DKG_TIMEOUT') {
+                } else if (r.dkgStatus === 'DKG_TIMEOUT' || r.dkgStatus === 'TIMEOUT') {
                   status = 'TIMEOUT';
                 } else {
                   status = 'PENDING';
