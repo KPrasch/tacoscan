@@ -1,0 +1,13 @@
+name: tacoscan
+services:
+  - name: web
+    environment_slug: node-js
+    github:
+      branch: main
+      deploy_on_push: true
+    build_command: yarn build-prod
+    output_dir: dist
+    routes:
+      - path: /
+        preserve_path_prefix: true
+    catchall_document: index.html
