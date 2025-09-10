@@ -206,8 +206,14 @@
 .contractMain {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
+  gap: 16px;
+}
+
+.contractInfo {
+  flex: 1;
+  min-width: 0;
 }
 
 .contractName {
@@ -216,6 +222,12 @@
   color: #111827;
   margin: 0;
   font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.contractMeta {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .contractType {
@@ -228,10 +240,20 @@
   text-transform: uppercase;
 }
 
+.contractChain {
+  padding: 4px 12px;
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366F1;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .contractActions {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .viewButton {
@@ -275,9 +297,10 @@
   padding: 12px 20px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   background: #F9FAFB;
   border-top: 1px solid #F3F4F6;
+  min-width: 0;
 }
 
 .addressLabel {
@@ -293,10 +316,12 @@
   font-family: var(--font-mono, 'Space Mono', monospace);
   font-size: 13px;
   color: #374151;
-  background: #F9FAFB;
+  background: #FFFFFF;
   padding: 8px 12px;
   border-radius: 6px;
-  word-break: break-all;
+  word-break: keep-all;
+  overflow-x: auto;
+  white-space: nowrap;
   border: 1px solid #E5E7EB;
 }
 
@@ -308,6 +333,7 @@
   color: #6B7280;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .copyButton:hover {

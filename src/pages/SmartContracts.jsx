@@ -9,45 +9,63 @@ const SmartContracts = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedContracts, setExpandedContracts] = useState({});
 
+  // TACo domains encompass multiple blockchains
   const networks = {
     mainnet: {
-      name: 'Polygon Mainnet',
-      data: mainnetArtifacts['137'] || {},  // Use Polygon chain (137)
-      chainId: 137,
-      explorer: 'https://polygonscan.com',
-      color: '#059669'
+      name: 'Mainnet Domain',
+      data: mainnetArtifacts,  // Contains both Ethereum (1) and Polygon (137)
+      color: '#059669',
+      chains: {
+        '1': { name: 'Ethereum', explorer: 'https://etherscan.io' },
+        '137': { name: 'Polygon', explorer: 'https://polygonscan.com' }
+      }
     },
     lynx: {
       name: 'Lynx Testnet',
-      data: lynxArtifacts['80002'] || lynxArtifacts,  // Amoy testnet
-      chainId: 80002,
-      explorer: 'https://amoy.polygonscan.com',
-      color: '#FBBf24'
+      data: lynxArtifacts,
+      color: '#FBBf24',
+      chains: {
+        '11155111': { name: 'Ethereum Sepolia', explorer: 'https://sepolia.etherscan.io' },
+        '80002': { name: 'Polygon Amoy', explorer: 'https://amoy.polygonscan.com' }
+      }
     },
     tapir: {
       name: 'Tapir Testnet',
-      data: tapirArtifacts['80002'] || tapirArtifacts,  // Amoy testnet
-      chainId: 80002,
-      explorer: 'https://amoy.polygonscan.com',
-      color: '#8B5CF6'
+      data: tapirArtifacts,
+      color: '#8B5CF6',
+      chains: {
+        '11155111': { name: 'Ethereum Sepolia', explorer: 'https://sepolia.etherscan.io' },
+        '80002': { name: 'Polygon Amoy', explorer: 'https://amoy.polygonscan.com' }
+      }
     }
   };
 
-  const parseContracts = (artifacts) => {
+  const parseContracts = (artifacts, networkConfig) => {
     const contracts = [];
     
-    // Now artifacts is the chain-specific data directly
-    Object.entries(artifacts).forEach(([contractName, contractDetails]) => {
-      // Skip if not a contract object
-      if (!contractDetails || typeof contractDetails !== 'object' || !contractDetails.address) return;
+    // Parse contracts from all chains in the domain
+    Object.entries(artifacts).forEach(([chainId, chainData]) => {
+      // Skip if not a valid chain object
+      if (!chainData || typeof chainData !== 'object') return;
       
-      contracts.push({
-        name: contractName,
-        address: contractDetails.address,
-        type: determineContractType(contractName),
-        abi: contractDetails.abi || [],
-        deployBlock: contractDetails.block || null,
-        version: contractDetails.version || null
+      const chainInfo = networkConfig.chains?.[chainId];
+      if (!chainInfo) return; // Skip unknown chains
+      
+      Object.entries(chainData).forEach(([contractName, contractDetails]) => {
+        // Skip if not a contract object
+        if (!contractDetails || typeof contractDetails !== 'object' || !contractDetails.address) return;
+        
+        contracts.push({
+          name: contractName,
+          address: contractDetails.address,
+          type: determineContractType(contractName),
+          abi: contractDetails.abi || [],
+          deployBlock: contractDetails.block || null,
+          version: contractDetails.version || null,
+          chainId: chainId,
+          chainName: chainInfo.name,
+          explorer: chainInfo.explorer
+        });
       });
     });
 
@@ -77,7 +95,7 @@ const SmartContracts = () => {
 
   const contractsData = useMemo(() => {
     const network = networks[selectedNetwork];
-    return parseContracts(network.data);
+    return parseContracts(network.data, network);
   }, [selectedNetwork]);
 
   const filteredContracts = useMemo(() => {
@@ -136,7 +154,9 @@ const SmartContracts = () => {
               }}
             >
               <span className={styles.networkName}>{network.name}</span>
-              <span className={styles.chainId}>Chain ID: {network.chainId}</span>
+              <span className={styles.chainId}>
+                {Object.values(network.chains).map(chain => chain.name).join(' + ')}
+              </span>
             </button>
           ))}
         </div>
@@ -166,21 +186,17 @@ const SmartContracts = () => {
           <span className={styles.statValue}>{contractsData.length}</span>
         </div>
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Network</span>
+          <span className={styles.statLabel}>Domain</span>
           <span className={styles.statValue} style={{ color: networks[selectedNetwork].color }}>
             {networks[selectedNetwork].name}
           </span>
         </div>
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Explorer</span>
-          <a 
-            href={networks[selectedNetwork].explorer}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.explorerLink}
-          >
-            {selectedNetwork === 'mainnet' ? 'Polygonscan' : 'Amoy Testnet'}
-          </a>
+          <span className={styles.statLabel}>Chains</span>
+          <span className={styles.statValue}>
+            {Object.keys(networks[selectedNetwork].chains).length} 
+            {Object.keys(networks[selectedNetwork].chains).length === 1 ? ' Chain' : ' Chains'}
+          </span>
         </div>
       </div>
 
@@ -193,27 +209,32 @@ const SmartContracts = () => {
                 onClick={() => toggleContract(contract.name)}
               >
                 <div className={styles.contractMain}>
-                  <h3 className={styles.contractName}>{contract.name}</h3>
-                  <span className={styles.contractType}>{contract.type}</span>
-                </div>
-                <div className={styles.contractActions}>
-                  {contract.address && (
-                    <a
-                      href={`${networks[selectedNetwork].explorer}/address/${contract.address}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.viewButton}
-                      onClick={(e) => e.stopPropagation()}
+                  <div className={styles.contractInfo}>
+                    <h3 className={styles.contractName}>{contract.name}</h3>
+                    <div className={styles.contractMeta}>
+                      <span className={styles.contractType}>{contract.type}</span>
+                      <span className={styles.contractChain}>{contract.chainName}</span>
+                    </div>
+                  </div>
+                  <div className={styles.contractActions}>
+                    {contract.address && (
+                      <a
+                        href={`${contract.explorer}/address/${contract.address}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.viewButton}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        View on Explorer ↗
+                      </a>
+                    )}
+                    <button 
+                      className={styles.expandButton}
+                      aria-label={expandedContracts[contract.name] ? "Collapse" : "Expand"}
                     >
-                      View on Explorer ↗
-                    </a>
-                  )}
-                  <button 
-                    className={styles.expandButton}
-                    aria-label={expandedContracts[contract.name] ? "Collapse" : "Expand"}
-                  >
-                    {expandedContracts[contract.name] ? '−' : '+'}
-                  </button>
+                      {expandedContracts[contract.name] ? '−' : '+'}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -237,7 +258,7 @@ const SmartContracts = () => {
                     <div className={styles.detailRow}>
                       <span className={styles.detailLabel}>Deploy Block:</span>
                       <a
-                        href={`${networks[selectedNetwork].explorer}/block/${contract.deployBlock}`}
+                        href={`${contract.explorer}/block/${contract.deployBlock}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={styles.blockLink}
