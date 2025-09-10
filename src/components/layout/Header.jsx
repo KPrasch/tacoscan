@@ -59,7 +59,7 @@ const Header = () => {
                 <div className={styles.dropdownContent}>
                   <a href="https://playground.taco.build/">Playground</a>
                   <a href="/charts">Network Stats</a>
-                  <a href="https://github.com/nucypher/nucypher-contracts">Smart Contracts</a>
+                  <a href="/contracts">Smart Contracts</a>
                   <a href="https://docs.taco.build">Documentation</a>
                 </div>
               </div>

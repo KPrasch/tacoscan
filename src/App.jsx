@@ -14,6 +14,7 @@ import RitualDetail from './pages/RitualDetail';
 import NodesPage from './pages/home/nodes';
 import NodeDetail from './pages/NodeDetail';
 import NetworkActivity from './pages/NetworkActivity';
+import SmartContracts from './pages/SmartContracts';
 
 const queryClient = new QueryClient()
 
@@ -36,6 +37,7 @@ function App() {
                 <Route path="/stakers" element={<NodesPage />} />
                 <Route path="/address/:address" element={<NodeDetail />} />
                 <Route path="/activity" element={<NetworkActivity />} />
+                <Route path="/contracts" element={<SmartContracts />} />
               </Routes>
             </main>
             <Footer />
