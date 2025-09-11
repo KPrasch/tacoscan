@@ -357,6 +357,9 @@ export const formatRitualsData = (rawData, timeout) => {
         status = "TIME OUT";
       }
 
+      // Check if this is a heartbeat ritual (3 or fewer participants)
+      const isHeartbeat = ritual.participants?.length <= 3;
+      
       return {
         id: ritual.id,
         status: status,
@@ -383,7 +386,8 @@ export const formatRitualsData = (rawData, timeout) => {
         pendingAggregations: ritual.participants.filter(
           (participant) => !ritual.postedAggregations.includes(participant)
         ),
-        operatorAddresses: ritual.operatorAddresses || {} // Preserve operator addresses
+        operatorAddresses: ritual.operatorAddresses || {}, // Preserve operator addresses
+        isHeartbeat: isHeartbeat
       };
     })
     .sort((a, b) => b.id - a.id);

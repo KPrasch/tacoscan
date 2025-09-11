@@ -101,6 +101,22 @@ const RitualDetail = () => {
             <div className={styles.headerLeft}>
               <h1 className={styles.title}>
                 DKG Ritual <span className={styles.ritualId}>#{ritual.id}</span>
+                {ritual.totalParticipants <= 3 && (
+                  <span style={{
+                    background: 'rgba(107, 114, 128, 0.1)',
+                    color: '#6B7280',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    fontFamily: 'var(--font-mono)',
+                    letterSpacing: '0.025em',
+                    marginLeft: '12px',
+                    verticalAlign: 'middle'
+                  }}>
+                    Heartbeat
+                  </span>
+                )}
               </h1>
               <div className={styles.statusBadge} style={{ backgroundColor: getStatusColor(ritual.status) }}>
                 {ritual.status}

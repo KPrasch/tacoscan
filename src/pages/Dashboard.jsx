@@ -38,11 +38,12 @@ const Dashboard = () => {
       const formattedRituals = formatRitualsData(rituals, timeout);
       const { nodes } = formatNodes(rawNodes);
 
-      // Calculate real statistics
+      // Calculate real statistics (excluding heartbeats)
+      const nonHeartbeatRituals = formattedRituals.filter(r => r.totalParticipants > 3);
       // Use the actual total from ritualCounter if available, otherwise use formatted length
-      const totalRituals = ritualCounter?.total ? parseInt(ritualCounter.total) : formattedRituals.length;
-      const activeRituals = formattedRituals.filter(r => r.status === 'ACTIVE').length;
-      const successfulRituals = formattedRituals.filter(r => r.status === 'SUCCESSFUL').length;
+      const totalRituals = nonHeartbeatRituals.length;
+      const activeRituals = nonHeartbeatRituals.filter(r => r.status === 'ACTIVE').length;
+      const successfulRituals = nonHeartbeatRituals.filter(r => r.status === 'SUCCESSFUL').length;
       const totalNodes = nodes.length;
       
       // Calculate active nodes - let's try different approaches
@@ -57,25 +58,25 @@ const Dashboard = () => {
         r.updateTime > twoMonthsAgo
       );
       
-      // Use 8 weeks as the primary timeframe for active nodes
-      const recentActiveOrSuccessfulRituals = formattedRituals.filter(r => 
+      // Use 8 weeks as the primary timeframe for active nodes (excluding heartbeats)
+      const recentActiveOrSuccessfulRituals = nonHeartbeatRituals.filter(r => 
         (r.status === 'SUCCESSFUL' || r.status === 'ACTIVE') && 
         r.updateTime > eightWeeksAgo // Using 8 weeks for better coverage
       );
       
       // For comparison, let's keep different timeframe calculations
-      const twoWeekRituals = formattedRituals.filter(r => 
+      const twoWeekRituals = nonHeartbeatRituals.filter(r => 
         (r.status === 'SUCCESSFUL' || r.status === 'ACTIVE') && 
         r.updateTime > twoWeeksAgo
       );
       
-      const recentSuccessfulRituals = formattedRituals.filter(r => 
+      const recentSuccessfulRituals = nonHeartbeatRituals.filter(r => 
         r.status === 'SUCCESSFUL' && 
         r.updateTime > twoWeeksAgo
       );
       
       // Also get ALL successful or active rituals (no time limit) to see maximum participation
-      const allSuccessfulOrActiveRituals = formattedRituals.filter(r => 
+      const allSuccessfulOrActiveRituals = nonHeartbeatRituals.filter(r => 
         r.status === 'SUCCESSFUL' || r.status === 'ACTIVE'
       );
       
@@ -206,8 +207,8 @@ const Dashboard = () => {
         successRate
       });
 
-      // Get recent rituals for the table
-      setRecentRituals(formattedRituals.slice(0, 10));
+      // Get recent rituals for the table (already filtered above)
+      setRecentRituals(nonHeartbeatRituals.slice(0, 10));
 
       // Generate network activity summary from ritual data
       const now = Date.now();
@@ -257,7 +258,8 @@ const Dashboard = () => {
             ritual: `#${ritual.id}`,
             participants: ritual.totalParticipants || 0,
             time: ritual.updateTime,
-            status: 'success'
+            status: 'success',
+            isHeartbeat: ritual.totalParticipants <= 3
           });
         } else if (ritual.status === 'DKG AWAITING TRANSCRIPTS') {
           recentEvents.push({
@@ -265,7 +267,8 @@ const Dashboard = () => {
             ritual: `#${ritual.id}`,
             participants: ritual.totalPostedTranscripts || 0,
             time: ritual.updateTime,
-            status: 'pending'
+            status: 'pending',
+            isHeartbeat: ritual.totalParticipants <= 3
           });
         } else if (ritual.status === 'DKG AWAITING AGGREGATIONS') {
           recentEvents.push({
@@ -273,7 +276,8 @@ const Dashboard = () => {
             ritual: `#${ritual.id}`,
             participants: ritual.totalPostedAggregations || 0,
             time: ritual.updateTime,
-            status: 'pending'
+            status: 'pending',
+            isHeartbeat: ritual.totalParticipants <= 3
           });
         } else if (ritual.status === 'EXPIRED' || ritual.status === 'TIME OUT') {
           recentEvents.push({
@@ -281,7 +285,8 @@ const Dashboard = () => {
             ritual: `#${ritual.id}`,
             participants: ritual.totalParticipants || 0,
             time: ritual.updateTime,
-            status: 'failed'
+            status: 'failed',
+            isHeartbeat: ritual.totalParticipants <= 3
           });
         }
       });
@@ -367,8 +372,22 @@ const Dashboard = () => {
                   {recentRituals.map(ritual => (
                     <tr key={ritual.id}>
                       <td>
-                        <Link to={`/ritual/${ritual.id}`} className={styles.idLink}>
+                        <Link to={`/ritual/${ritual.id}`} className={styles.idLink} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           #{ritual.id}
+                          {ritual.totalParticipants <= 3 && (
+                            <span style={{
+                              background: 'rgba(107, 114, 128, 0.1)',
+                              color: '#6B7280',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              fontSize: '10px',
+                              fontWeight: 500,
+                              fontFamily: 'var(--font-mono)',
+                              letterSpacing: '0.025em'
+                            }}>
+                              HB
+                            </span>
+                          )}
                         </Link>
                       </td>
                       <td>

@@ -216,8 +216,23 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
             <RouterLink
               to={`/rituals/${row.id}`}
               className={styles.link}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               <span className={styles.numbers}>{row.id}</span>
+              {row.isHeartbeat && (
+                <span style={{
+                  background: 'rgba(107, 114, 128, 0.1)',
+                  color: '#6B7280',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.025em'
+                }}>
+                  Heartbeat
+                </span>
+              )}
             </RouterLink>
           </TableCell>
           <TableCell align="left" style={{ padding: "8px", whiteSpace: "nowrap" }}>
@@ -311,7 +326,23 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                           }}>
                             DKG ID
                           </div>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: '#111827', fontWeight: 500 }}>{row.id}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: '#111827', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {row.id}
+                            {row.isHeartbeat && (
+                              <span style={{
+                                background: 'rgba(107, 114, 128, 0.1)',
+                                color: '#6B7280',
+                                padding: '3px 8px',
+                                borderRadius: '4px',
+                                fontSize: '11px',
+                                fontWeight: 500,
+                                fontFamily: 'var(--font-mono)',
+                                letterSpacing: '0.025em'
+                              }}>
+                                Heartbeat
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <div>
                           <div style={{ 
