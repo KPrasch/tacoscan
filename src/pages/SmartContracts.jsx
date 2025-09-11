@@ -295,10 +295,19 @@ const SmartContracts = () => {
                             .slice(0, 10)
                             .map((func, idx) => (
                               <div key={idx} className={styles.methodItem}>
-                                <span className={styles.methodName}>{func.name}</span>
-                                <span className={styles.methodType}>
-                                  {func.stateMutability || 'nonpayable'}
-                                </span>
+                                <div className={styles.methodInfo}>
+                                  <span className={styles.methodName}>{func.name}</span>
+                                  <span className={styles.methodType}>
+                                    {func.stateMutability || 'nonpayable'}
+                                  </span>
+                                </div>
+                                <button
+                                  className={styles.copyFunctionBtn}
+                                  onClick={() => copyToClipboard(JSON.stringify(func, null, 2))}
+                                  title="Copy function ABI"
+                                >
+                                  📋
+                                </button>
                               </div>
                             ))}
                           {contract.abi.filter(item => item.type === 'function').length > 10 && (

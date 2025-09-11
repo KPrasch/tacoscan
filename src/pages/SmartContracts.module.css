@@ -173,6 +173,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: 20px;
+  align-items: start;
 }
 
 .contractCard {
@@ -438,6 +439,18 @@
   border-radius: 6px;
   font-family: var(--font-mono, 'Space Mono', monospace);
   border: 1px solid #E5E7EB;
+  transition: background 0.2s ease;
+}
+
+.methodItem:hover {
+  background: #F3F4F6;
+}
+
+.methodInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
 }
 
 .methodName {
@@ -452,6 +465,24 @@
   background: rgba(5, 150, 105, 0.1);
   color: #059669;
   border-radius: 4px;
+}
+
+.copyFunctionBtn {
+  padding: 4px 8px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.copyFunctionBtn:hover {
+  background: #E5E7EB;
+  color: #111827;
+  border-color: #D1D5DB;
 }
 
 .moreIndicator {
