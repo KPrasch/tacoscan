@@ -9,10 +9,12 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
         rowData: [],
         isLoading: false,
         pageNumber: 1,
-        ritualCounter: {}
+        ritualCounter: {},
+        heartbeatGroups: []
     });
-    const [showHeartbeats, setShowHeartbeats] = useState(false);
-    const [statusFilter, setStatusFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('successful'); // Default to successful
+    const [ritualTypeFilter, setRitualTypeFilter] = useState('regular'); // all, regular, heartbeats, failed-heartbeats
+    const [viewMode, setViewMode] = useState('list'); // list or groups (for heartbeats)
 
     useEffect(() => {
         setPageData((prevState) => ({
@@ -36,19 +38,36 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                 // Apply filters
                 let filteredData = formattedData;
                 
-                // Filter out heartbeats if not showing them
-                if (!showHeartbeats) {
-                    filteredData = filteredData.filter(ritual => !ritual.isHeartbeat);
+                // Apply ritual type filter first
+                switch (ritualTypeFilter) {
+                    case 'regular':
+                        // Show only non-heartbeat rituals
+                        filteredData = filteredData.filter(ritual => !ritual.isHeartbeat);
+                        break;
+                    case 'heartbeats':
+                        // Show only heartbeats
+                        filteredData = filteredData.filter(ritual => ritual.isHeartbeat);
+                        break;
+                    case 'failed-heartbeats':
+                        // Show only failed heartbeats
+                        filteredData = filteredData.filter(ritual => 
+                            ritual.isHeartbeat && (
+                                ritual.status === 'TIME OUT' || 
+                                ritual.status === 'EXPIRED' || 
+                                ritual.status === 'DKG INVALID' || 
+                                ritual.status === 'DKG ERROR' ||
+                                ritual.status === 'TIMEOUT'
+                            )
+                        );
+                        break;
+                    // 'all' shows everything, no filter needed
                 }
                 
-                // Apply status filter
+                // Apply status filter (works on already filtered data)
                 if (statusFilter !== 'all') {
                     switch (statusFilter) {
                         case 'successful':
                             filteredData = filteredData.filter(r => r.status === 'SUCCESSFUL' || r.status === 'ACTIVE');
-                            break;
-                        case 'timeout':
-                            filteredData = filteredData.filter(r => r.status === 'TIME OUT' || r.status === 'EXPIRED');
                             break;
                         case 'pending':
                             filteredData = filteredData.filter(r => 
@@ -68,8 +87,20 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                     }
                 }
                 
-                // Calculate counts for display (respecting heartbeat filter)
-                const dataForCounts = showHeartbeats ? formattedData : formattedData.filter(r => !r.isHeartbeat);
+                // Calculate counts for display based on ritual type filter
+                const dataForCounts = ritualTypeFilter === 'regular' 
+                    ? formattedData.filter(r => !r.isHeartbeat)
+                    : ritualTypeFilter === 'heartbeats' 
+                    ? formattedData.filter(r => r.isHeartbeat)
+                    : ritualTypeFilter === 'failed-heartbeats'
+                    ? formattedData.filter(r => r.isHeartbeat && (
+                        r.status === 'TIME OUT' || 
+                        r.status === 'EXPIRED' || 
+                        r.status === 'DKG INVALID' || 
+                        r.status === 'DKG ERROR' ||
+                        r.status === 'TIMEOUT'
+                    ))
+                    : formattedData;
                 
                 const successfulCount = dataForCounts.filter(r => 
                     r.status === 'SUCCESSFUL' || r.status === 'ACTIVE'
@@ -90,6 +121,11 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                 
                 const totalCount = dataForCounts.length;
                 
+                // Detect heartbeat groups if viewing heartbeats
+                const heartbeatGroups = (ritualTypeFilter === 'heartbeats' || ritualTypeFilter === 'failed-heartbeats') 
+                    ? Data.detectHeartbeatGroups(formattedData)
+                    : [];
+                
                 setPageData({
                     isLoading: false,
                     rowData: filteredData,
@@ -98,14 +134,196 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                         successful: successfulCount,
                         pending: pendingCount,
                         failed: failedCount
-                    }
+                    },
+                    heartbeatGroups: heartbeatGroups
                 });
             }
 
         });
 
-    }, [network, isSearch, showHeartbeats, statusFilter]);
+    }, [network, isSearch, statusFilter, ritualTypeFilter]);
 
+    // Component to display heartbeat groups
+    const HeartbeatGroupsView = ({ groups }) => {
+        return (
+            <div style={{
+                display: 'grid',
+                gap: '16px',
+                marginBottom: '32px'
+            }}>
+                {groups.map((group, idx) => (
+                    <div key={idx} style={{
+                        background: '#FFFFFF',
+                        border: '1px solid #E5E7EB',
+                        borderRadius: '8px',
+                        padding: '20px',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                        position: 'relative'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                            marginBottom: '16px'
+                        }}>
+                            <div>
+                                <h3 style={{
+                                    margin: 0,
+                                    fontSize: '16px',
+                                    fontWeight: 600,
+                                    color: '#111827'
+                                }}>
+                                    Monday, {new Date(group.mondayMidnight).toLocaleDateString('en-US', { 
+                                        month: 'long', 
+                                        day: 'numeric', 
+                                        year: 'numeric',
+                                        timeZone: 'UTC'
+                                    })}
+                                </h3>
+                                <p style={{
+                                    margin: '4px 0 0 0',
+                                    fontSize: '14px',
+                                    color: '#6B7280'
+                                }}>
+                                    {group.weekNumber === 0 ? 'This Week' : 
+                                     group.weekNumber === 1 ? 'Last Week' :
+                                     `${group.weekNumber} Weeks Ago`} • {group.rituals.length} heartbeat rituals
+                                </p>
+                            </div>
+                        </div>
+                        
+                        {/* Warning icon if group has unusually few rituals */}
+                        {group.rituals.length < 10 && (
+                            <div 
+                                title={`Only ${group.rituals.length} ritual${group.rituals.length !== 1 ? 's' : ''} (expected 10+)`}
+                                style={{
+                                    position: 'absolute',
+                                    top: '20px',
+                                    right: '60px',
+                                    width: '20px',
+                                    height: '20px',
+                                    background: '#FBBF24',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold',
+                                    color: '#FFFFFF',
+                                    cursor: 'help',
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                                }}>
+                                ⚠
+                            </div>
+                        )}
+                        
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                            gap: '12px',
+                            marginBottom: '16px'
+                        }}>
+                            <div>
+                                <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '2px' }}>Total</div>
+                                <div style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>{group.stats.total}</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '2px' }}>Successful</div>
+                                <div style={{ fontSize: '20px', fontWeight: 600, color: '#059669' }}>{group.stats.successful}</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '2px' }}>Failed</div>
+                                <div style={{ fontSize: '20px', fontWeight: 600, color: '#DC2626' }}>{group.stats.failed}</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '2px' }}>Success Rate</div>
+                                <div style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>{group.stats.successRate}%</div>
+                            </div>
+                        </div>
+                        
+                        <details style={{ marginTop: '12px' }}>
+                            <summary style={{
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                color: '#4B5563',
+                                fontWeight: 500,
+                                userSelect: 'none'
+                            }}>
+                                View {group.rituals.length} Rituals (IDs: #{group.rituals[0]?.id} - #{group.rituals[group.rituals.length - 1]?.id})
+                            </summary>
+                            <div style={{
+                                marginTop: '12px',
+                                paddingTop: '12px',
+                                borderTop: '1px solid #E5E7EB'
+                            }}>
+                                {/* Show time range of rituals */}
+                                <div style={{
+                                    marginBottom: '12px',
+                                    padding: '8px',
+                                    background: '#F9FAFB',
+                                    borderRadius: '4px',
+                                    fontSize: '12px',
+                                    color: '#6B7280'
+                                }}>
+                                    <strong>Execution Window:</strong> {new Date(group.rituals[0]?.initTimeStamp).toLocaleString('en-US', {
+                                        timeZone: 'UTC',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        timeZoneName: 'short'
+                                    })} - {new Date(group.rituals[group.rituals.length - 1]?.initTimeStamp).toLocaleString('en-US', {
+                                        timeZone: 'UTC',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        timeZoneName: 'short'
+                                    })}
+                                </div>
+                                {group.rituals.map(ritual => (
+                                    <div key={ritual.id} style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: '8px 0',
+                                        borderBottom: '1px solid #F3F4F6'
+                                    }}>
+                                        <a
+                                            href={`/ritual/${ritual.id}`}
+                                            style={{
+                                                color: '#3B82F6',
+                                                textDecoration: 'none',
+                                                fontSize: '14px',
+                                                fontFamily: 'var(--font-mono)'
+                                            }}
+                                        >
+                                            #{ritual.id}
+                                        </a>
+                                        <span style={{
+                                            fontSize: '13px',
+                                            padding: '2px 8px',
+                                            borderRadius: '4px',
+                                            background: ritual.status === 'SUCCESSFUL' || ritual.status === 'ACTIVE' ? '#D1FAE5' :
+                                                       ritual.status.includes('TIME OUT') || ritual.status === 'EXPIRED' ? '#FEE2E2' :
+                                                       '#F3F4F6',
+                                            color: ritual.status === 'SUCCESSFUL' || ritual.status === 'ACTIVE' ? '#065F46' :
+                                                   ritual.status.includes('TIME OUT') || ritual.status === 'EXPIRED' ? '#991B1B' :
+                                                   '#4B5563'
+                                        }}>
+                                            {ritual.status}
+                                        </span>
+                                        <span style={{
+                                            fontSize: '13px',
+                                            color: '#6B7280'
+                                        }}>
+                                            {ritual.totalParticipants} participants
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </details>
+                    </div>
+                ))}
+            </div>
+        );
+    };
 
     return (
         <div style={{ background: "#F9FAFB", minHeight: "100vh", paddingBottom: "60px" }}>
@@ -162,11 +380,12 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                 flexWrap: "wrap",
                 gap: "16px"
             }}>
-                {/* Status Filter Buttons */}
+                {/* Left side: Status filters */}
                 <div style={{
                     display: "flex",
                     gap: "8px",
-                    flexWrap: "wrap"
+                    flexWrap: "wrap",
+                    alignItems: "center"
                 }}>
                     <button
                         onClick={() => setStatusFilter('all')}
@@ -220,11 +439,11 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                         Pending ({pageData.ritualCounter?.pending || 0})
                     </button>
                     <button
-                        onClick={() => setStatusFilter('timeout')}
+                        onClick={() => setStatusFilter('failed')}
                         style={{
                             padding: "8px 16px",
-                            background: statusFilter === 'timeout' ? "#059669" : "#FFFFFF",
-                            color: statusFilter === 'timeout' ? "#FFFFFF" : "#6B7280",
+                            background: statusFilter === 'failed' ? "#059669" : "#FFFFFF",
+                            color: statusFilter === 'failed' ? "#FFFFFF" : "#6B7280",
                             border: "1px solid #E5E7EB",
                             borderRadius: "6px",
                             fontSize: "14px",
@@ -234,41 +453,123 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                             transition: "all 0.2s ease"
                         }}
                     >
-                        Timed Out ({pageData.ritualCounter?.failed || 0})
+                        Failed ({pageData.ritualCounter?.failed || 0})
                     </button>
                 </div>
 
-                {/* Heartbeat Toggle */}
-                <button
-                    onClick={() => setShowHeartbeats(!showHeartbeats)}
-                    style={{
-                        padding: "8px 16px",
-                        background: showHeartbeats ? "#059669" : "#FFFFFF",
-                        color: showHeartbeats ? "#FFFFFF" : "#6B7280",
-                        border: "1px solid #E5E7EB",
-                        borderRadius: "6px",
-                        fontSize: "14px",
-                        fontWeight: 500,
-                        fontFamily: "var(--font-mono)",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
+                {/* Right side: Ritual type dropdown and view toggle */}
+                <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "16px"
+                }}>
+                    <div style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "6px"
-                    }}
-                >
-                    {showHeartbeats ? "Hide" : "Show"} Heartbeats
-                </button>
+                        gap: "12px"
+                    }}>
+                        <label style={{
+                            fontSize: "14px",
+                            fontWeight: 500,
+                            color: "#374151"
+                        }}>
+                            Show:
+                        </label>
+                        <select
+                            value={ritualTypeFilter}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setRitualTypeFilter(value);
+                                // Reset to 'all' status when viewing failed heartbeats
+                                if (value === 'failed-heartbeats') {
+                                    setStatusFilter('all');
+                                }
+                                // Auto-switch to group view for heartbeats
+                                if (value === 'heartbeats' || value === 'failed-heartbeats') {
+                                    setViewMode('groups');
+                                } else {
+                                    setViewMode('list');
+                                }
+                            }}
+                            style={{
+                                padding: "8px 12px",
+                                background: "#FFFFFF",
+                                border: "1px solid #E5E7EB",
+                                borderRadius: "6px",
+                                fontSize: "14px",
+                                fontWeight: 500,
+                                fontFamily: "var(--font-mono)",
+                                color: "#374151",
+                                cursor: "pointer",
+                                minWidth: "200px",
+                                outline: "none"
+                            }}
+                        >
+                            <option value="all">All Rituals</option>
+                            <option value="regular">Regular Rituals Only</option>
+                            <option value="heartbeats">Heartbeats Only</option>
+                            <option value="failed-heartbeats">Failed Heartbeats</option>
+                        </select>
+                    </div>
+                    
+                    {/* View mode toggle for heartbeats */}
+                    {(ritualTypeFilter === 'heartbeats' || ritualTypeFilter === 'failed-heartbeats') && (
+                        <div style={{
+                            display: "flex",
+                            background: "#F3F4F6",
+                            borderRadius: "6px",
+                            padding: "2px"
+                        }}>
+                            <button
+                                onClick={() => setViewMode('groups')}
+                                style={{
+                                    padding: "6px 12px",
+                                    background: viewMode === 'groups' ? "#FFFFFF" : "transparent",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    fontSize: "13px",
+                                    fontWeight: 500,
+                                    color: viewMode === 'groups' ? "#111827" : "#6B7280",
+                                    cursor: "pointer",
+                                    transition: "all 0.2s ease"
+                                }}
+                            >
+                                Weekly Groups
+                            </button>
+                            <button
+                                onClick={() => setViewMode('list')}
+                                style={{
+                                    padding: "6px 12px",
+                                    background: viewMode === 'list' ? "#FFFFFF" : "transparent",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    fontSize: "13px",
+                                    fontWeight: 500,
+                                    color: viewMode === 'list' ? "#111827" : "#6B7280",
+                                    cursor: "pointer",
+                                    transition: "all 0.2s ease"
+                                }}
+                            >
+                                List View
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <div className={styles.table_content} style={{ marginTop: "0" }}>
-                <RitualTable
-                    columns={Data.ritual_columns}
-                    data={pageData.rowData}
-                    isLoading={pageData.isLoading}
-                    network={network}
-                />
-            </div>
+            {/* Show heartbeat groups or regular table based on view mode */}
+            {viewMode === 'groups' && (ritualTypeFilter === 'heartbeats' || ritualTypeFilter === 'failed-heartbeats') ? (
+                <HeartbeatGroupsView groups={pageData.heartbeatGroups} />
+            ) : (
+                <div className={styles.table_content} style={{ marginTop: "0" }}>
+                    <RitualTable
+                        columns={Data.ritual_columns}
+                        data={pageData.rowData}
+                        isLoading={pageData.isLoading}
+                        network={network}
+                    />
+                </div>
+            )}
             </div>
         </div>
     );

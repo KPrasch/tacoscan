@@ -335,6 +335,131 @@ export function convertToLittleEndian(txHash) {
   return "";
 }
 
+// Detect heartbeat groups based on timing and participant patterns
+export const detectHeartbeatGroups = (rituals) => {
+  const heartbeats = rituals.filter(r => r.isHeartbeat);
+  if (heartbeats.length === 0) return [];
+  
+  // March 17, 2025 is the first heartbeat group - don't go farther back
+  const cutoffDate = new Date('2025-03-17T00:00:00Z').getTime();
+
+  // Heartbeats run on Mondays around midnight UTC
+  // Group them by Monday batches (within 6-hour window around Monday midnight UTC)
+  const groups = [];
+  const sixHours = 6 * 60 * 60 * 1000; // Wider window to catch all rituals in a batch
+  
+  // Sort heartbeats by timestamp and filter out those before cutoff
+  const sortedHeartbeats = [...heartbeats]
+    .filter(hb => hb.initTimeStamp >= cutoffDate)
+    .sort((a, b) => a.initTimeStamp - b.initTimeStamp);
+  
+  sortedHeartbeats.forEach(hb => {
+    let addedToGroup = false;
+    
+    // Find the Monday midnight UTC for this ritual
+    const hbDate = new Date(hb.initTimeStamp);
+    const dayOfWeek = hbDate.getUTCDay();
+    const hoursFromMidnight = hbDate.getUTCHours();
+    
+    // Check if this is near a Monday (day 1) midnight UTC
+    // Consider Sunday late night (day 0, hour 22-24) and Monday early morning (day 1, hour 0-6)
+    const isNearMondayMidnight = 
+      (dayOfWeek === 0 && hoursFromMidnight >= 22) || // Sunday 22:00 - 24:00 UTC
+      (dayOfWeek === 1 && hoursFromMidnight <= 6) ||  // Monday 00:00 - 06:00 UTC
+      (dayOfWeek === 2 && hoursFromMidnight <= 2);    // Tuesday 00:00 - 02:00 UTC (for late runs)
+    
+    // Find the nearest Monday midnight for grouping
+    let mondayMidnight = new Date(hb.initTimeStamp);
+    if (dayOfWeek === 0 && hoursFromMidnight >= 22) {
+      // Sunday night - next day is Monday
+      mondayMidnight.setUTCDate(mondayMidnight.getUTCDate() + 1);
+    } else if (dayOfWeek === 2 && hoursFromMidnight <= 2) {
+      // Tuesday early morning - previous day was Monday
+      mondayMidnight.setUTCDate(mondayMidnight.getUTCDate() - 1);
+    } else if (dayOfWeek !== 1) {
+      // Find the previous Monday
+      const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      mondayMidnight.setUTCDate(mondayMidnight.getUTCDate() - daysToSubtract);
+    }
+    mondayMidnight.setUTCHours(0, 0, 0, 0);
+    
+    // Look for an existing group near this Monday
+    for (let group of groups) {
+      // Check if this ritual belongs to an existing Monday batch
+      const groupMondayTime = group.mondayMidnight.getTime();
+      const timeDiff = Math.abs(mondayMidnight.getTime() - groupMondayTime);
+      
+      // If it's the same Monday batch (within a day)
+      if (timeDiff < 24 * 60 * 60 * 1000) {
+        group.rituals.push(hb);
+        addedToGroup = true;
+        break;
+      }
+    }
+    
+    if (!addedToGroup) {
+      groups.push({
+        rituals: [hb],
+        timestamp: hb.initTimeStamp,
+        mondayMidnight: mondayMidnight,
+        weekNumber: null // Will calculate after all groups are formed
+      });
+    }
+  });
+  
+  // Sort groups by Monday date (most recent first)
+  groups.sort((a, b) => b.mondayMidnight.getTime() - a.mondayMidnight.getTime());
+  
+  if (groups.length > 0) {
+    const mostRecentMonday = groups[0].mondayMidnight.getTime();
+    const oneWeek = 7 * 24 * 60 * 60 * 1000;
+    
+    groups.forEach(group => {
+      // Calculate weeks since most recent batch
+      const weeksAgo = Math.round((mostRecentMonday - group.mondayMidnight.getTime()) / oneWeek);
+      group.weekNumber = weeksAgo;
+      
+      // Sort rituals within group by ID
+      group.rituals.sort((a, b) => a.id - b.id);
+      
+      // Calculate group statistics
+      const successful = group.rituals.filter(r => 
+        r.status === 'SUCCESSFUL' || r.status === 'ACTIVE'
+      ).length;
+      const failed = group.rituals.filter(r => 
+        r.status === 'TIME OUT' || r.status === 'EXPIRED' || 
+        r.status === 'DKG INVALID' || r.status === 'DKG ERROR' ||
+        r.status === 'TIMEOUT'
+      ).length;
+      const pending = group.rituals.filter(r => 
+        r.status === 'DKG AWAITING TRANSCRIPTS' || 
+        r.status === 'DKG AWAITING AGGREGATIONS'
+      ).length;
+      
+      group.stats = {
+        total: group.rituals.length,
+        successful,
+        failed,
+        pending,
+        successRate: group.rituals.length > 0 
+          ? ((successful / group.rituals.length) * 100).toFixed(1) 
+          : '0.0'
+      };
+      
+      // Overall status is no longer needed since partial failures are expected
+      
+      // Get unique participants across all rituals in the group
+      const allParticipants = new Set();
+      group.rituals.forEach(r => {
+        r.participants.forEach(p => allParticipants.add(p));
+      });
+      group.uniqueParticipants = Array.from(allParticipants);
+    });
+  }
+  
+  return groups;
+};
+
 export const formatRitualsData = (rawData, timeout) => {
   if (rawData === undefined) {
     return [];
@@ -406,15 +531,17 @@ export const formatNodes = (rawData) => {
     };
   }
 
-  const nodes = rawData.map((item) => ({
-    id: item.id.split('-')[0],
-    registeredOperatorAddress: item.tacoOperator?.operator,
-    isOperatorConfirmed: item.tacoOperator?.confirmed,
-    isAuthorized: parseFloat(item.amount) > 0,
-    authorizedAmount: parseFloat(item.amount) || 0,
-    stakedAmount: parseFloat(item.stake?.stakedAmount) || 0,
-    bondedAt: item.tacoOperator?.bondedTimestamp * 1000,
-  }))
+  const nodes = rawData
+    .filter(item => parseFloat(item.amount) > 0) // Exclude deauthorized nodes (amount = 0)
+    .map((item) => ({
+      id: item.id.split('-')[0],
+      registeredOperatorAddress: item.tacoOperator?.operator,
+      isOperatorConfirmed: item.tacoOperator?.confirmed,
+      isAuthorized: true, // Always true since we filtered above
+      authorizedAmount: parseFloat(item.amount) || 0,
+      stakedAmount: parseFloat(item.stake?.stakedAmount) || 0,
+      bondedAt: item.tacoOperator?.bondedTimestamp * 1000,
+    }))
 
   const statsRecord = {
     numBondedOperators: 0,
