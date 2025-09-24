@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './SigningCohorts.module.css';
 import { formatString, formatDate, calculateTimeMoment } from './data';
 import { getAllSigningCohorts } from '../utils/contractReader';
 import { getCurrentNetwork } from '../utils/dataSource';
 
 const SigningCohorts = () => {
+  const navigate = useNavigate();
   const [cohorts, setCohorts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('id');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [expandedConditions, setExpandedConditions] = useState({});
 
   useEffect(() => {
     const fetchCohorts = async () => {
@@ -134,6 +137,7 @@ const SigningCohorts = () => {
               <th onClick={() => handleSort('state')} className={styles.sortable}>
                 State {sortBy === 'state' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
+              <th>Conditions</th>
               <th onClick={() => handleSort('isActive')} className={styles.sortable}>
                 Status {sortBy === 'isActive' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
@@ -141,7 +145,11 @@ const SigningCohorts = () => {
           </thead>
           <tbody>
             {sortedCohorts.map((cohort) => (
-              <tr key={cohort.id}>
+              <tr
+                key={cohort.id}
+                onClick={() => navigate(`/cohort/${cohort.id}`)}
+                className={styles.clickableRow}
+              >
                 <td className={styles.idCell}>{cohort.id}</td>
                 <td className={styles.nameCell}>{cohort.name}</td>
                 <td className={styles.membersCell}>
@@ -152,6 +160,86 @@ const SigningCohorts = () => {
                 </td>
                 <td className={styles.stateCell}>
                   {cohort.state || 'Unknown'}
+                </td>
+                <td className={styles.conditionsCell}>
+                  {cohort.conditions && typeof cohort.conditions === 'object' && Object.keys(cohort.conditions).length > 0 ? (
+                    <div className={styles.conditionsWrapper}>
+                      <button
+                        className={styles.conditionsToggle}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedConditions(prev => ({
+                            ...prev,
+                            [cohort.id]: !prev[cohort.id]
+                          }));
+                        }}
+                      >
+                        <span className={styles.conditionsBadge}>
+                          {Object.keys(cohort.conditions).length} chain{Object.keys(cohort.conditions).length !== 1 ? 's' : ''}
+                        </span>
+                        <span className={styles.expandIcon}>
+                          {expandedConditions[cohort.id] ? '▼' : '▶'}
+                        </span>
+                      </button>
+                      {expandedConditions[cohort.id] && (
+                        <div className={styles.conditionsDropdown}>
+                          {Object.entries(cohort.conditions).map(([chainId, chainConditions]) => {
+                            const chainName =
+                              chainId === '11155111' ? 'Sepolia' :
+                              chainId === '80002' ? 'Polygon Amoy' :
+                              chainId === '84532' ? 'Base Sepolia' :
+                              chainId === '1' ? 'Ethereum' :
+                              `Chain ${chainId}`;
+
+                            return (
+                              <div key={chainId} className={styles.chainConditionGroup}>
+                                <div className={styles.chainConditionHeader}>{chainName}</div>
+                                {(() => {
+                                  const conditionData = chainConditions?.decoded || chainConditions;
+
+                                  if (typeof conditionData === 'object' && conditionData !== null) {
+                                    const entries = Object.entries(conditionData).filter(([key]) => key !== 'raw');
+                                    if (entries.length > 0) {
+                                      return entries.map(([key, value]) => (
+                                        <div key={key} className={styles.conditionItem}>
+                                          <span className={styles.conditionKey}>{key}:</span>
+                                          <span className={styles.conditionValue}>
+                                            {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                                          </span>
+                                        </div>
+                                      ));
+                                    }
+                                  }
+
+                                  if (typeof conditionData === 'string' && conditionData.length > 0) {
+                                    return (
+                                      <div className={styles.conditionItem}>
+                                        <span className={styles.conditionValue}>{conditionData}</span>
+                                      </div>
+                                    );
+                                  }
+
+                                  if (chainConditions?.raw && chainConditions.raw !== '0x') {
+                                    return (
+                                      <div className={styles.conditionItem}>
+                                        <span className={styles.conditionValue} style={{fontSize: '10px'}}>
+                                          {chainConditions.raw.slice(0, 20)}...
+                                        </span>
+                                      </div>
+                                    );
+                                  }
+
+                                  return <span className={styles.noConditions}>No data</span>;
+                                })()}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span className={styles.noConditions}>None</span>
+                  )}
                 </td>
                 <td className={styles.statusCell}>
                   <span className={`${styles.status} ${cohort.isActive ? styles.active : styles.inactive}`}>

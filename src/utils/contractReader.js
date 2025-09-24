@@ -4,6 +4,48 @@ import lynxArtifacts from '../artifacts/lynx-signing.json';
 import tapirArtifacts from '../artifacts/tapir.json';
 import { getCurrentNetwork } from './dataSource';
 
+// Helper function to try decoding bytes data
+const tryDecodeBytes = (bytesData) => {
+  if (!bytesData || bytesData === '0x' || bytesData === '0x00') {
+    return null;
+  }
+
+  try {
+    const web3 = new Web3();
+
+    // Try to decode as UTF-8 string using Web3 utils
+    const decoded = web3.utils.hexToUtf8(bytesData);
+
+    // Check if it looks like valid JSON
+    try {
+      return JSON.parse(decoded);
+    } catch {
+      // If not JSON, return as string if it's printable
+      if (decoded && /^[\x20-\x7E\n\r\t]+$/.test(decoded)) {
+        return decoded;
+      }
+    }
+  } catch (error) {
+    // If hexToUtf8 fails, try hexToAscii
+    try {
+      const web3 = new Web3();
+      const decoded = web3.utils.hexToAscii(bytesData);
+      if (decoded && decoded.trim().length > 0) {
+        try {
+          return JSON.parse(decoded);
+        } catch {
+          return decoded;
+        }
+      }
+    } catch {
+      console.log('Could not decode bytes data');
+    }
+  }
+
+  // Return the raw hex if we couldn't decode it
+  return bytesData;
+};
+
 // Get TACoApplication ABI and address
 const getTACoApplication = (network = 'mainnet') => {
   let artifacts;
@@ -65,6 +107,7 @@ const getSigningCoordinator = (network = 'mainnet') => {
 
   switch (network) {
     case 'lynx':
+      // SigningCoordinator is on Sepolia (11155111) for lynx
       artifacts = lynxArtifacts['11155111'];
       break;
     case 'tapir':
@@ -80,6 +123,27 @@ const getSigningCoordinator = (network = 'mainnet') => {
   }
 
   return artifacts.SigningCoordinator;
+};
+
+// Get SigningCoordinatorChild contracts for different chains
+const getSigningCoordinatorChild = (chainId) => {
+  const artifacts = lynxArtifacts[String(chainId)];
+
+  if (!artifacts?.SigningCoordinatorChild) {
+    console.log("SigningCoordinatorChild not found for chain:", chainId);
+    return null;
+  }
+
+  return artifacts.SigningCoordinatorChild;
+};
+
+// Get supported chain IDs for signing cohorts
+const getSupportedChainIds = (network = "mainnet") => {
+  if (network === "lynx" || network === "tapir") {
+    // Return all chain IDs from lynx artifacts
+    return Object.keys(lynxArtifacts).map(id => parseInt(id));
+  }
+  return [1]; // Mainnet only supports Ethereum mainnet
 };
 
 // Get RPC URL for network
@@ -422,17 +486,39 @@ export const getAllSigningCohorts = async (network = "mainnet") => {
         const isActive = await contract.methods.isCohortActive(i).call();
 
         // Get signers for this cohort
-        const signers = await contract.methods.getSigners(i).call();
+        const signerParticipants = await contract.methods.getSigners(i).call();
+        const signers = signerParticipants.map(p => ({
+          provider: p.provider || p[0],
+          operator: p.operator || p[1],
+          signature: p.signature || p[2],
+          address: p.provider || p[0]
+        }));
 
         // Get threshold
         const threshold = await contract.methods.getThreshold(i).call();
 
-        // Try to get conditions if they exist
-        let conditions = null;
-        try {
-          conditions = await contract.methods.getSigningCohortConditions(i).call();
-        } catch {
-          // Conditions might not be set for all cohorts
+        // Try to get conditions for each supported chain
+        let conditions = {};
+        const supportedChainIds = getSupportedChainIds(network);
+
+        for (const chainId of supportedChainIds) {
+          try {
+            const chainConditions = await contract.methods.getSigningCohortConditions(i, chainId).call();
+            console.log(`Cohort ${i} chain ${chainId} conditions:`, chainConditions);
+            // getSigningCohortConditions returns bytes data
+            if (chainConditions && chainConditions !== '0x' && chainConditions !== '0x00') {
+              // Store the raw bytes data - we'll decode it in the UI if needed
+              conditions[chainId] = {
+                raw: chainConditions,
+                // Try to decode as UTF-8 string if possible
+                decoded: tryDecodeBytes(chainConditions)
+              };
+              console.log(`Decoded conditions for cohort ${i} chain ${chainId}:`, conditions[chainId].decoded);
+            }
+          } catch (error) {
+            // Conditions might not be set for this chain
+            console.log(`No conditions for cohort ${i} on chain ${chainId}:`, error.message);
+          }
         }
 
         cohorts.push({
@@ -442,7 +528,7 @@ export const getAllSigningCohorts = async (network = "mainnet") => {
           signers,
           threshold: parseInt(threshold),
           conditions,
-          signersCount: signers.length
+          signersCount: signerParticipants.length
         });
       } catch (error) {
         console.error(`Error fetching cohort ${i}:`, error);
@@ -475,19 +561,18 @@ export const getSigningCohortDetails = async (cohortId, network = "mainnet") => 
     const isActive = await contract.methods.isCohortActive(cohortId).call();
 
     // Get signers and their details
-    const signerAddresses = await contract.methods.getSigners(cohortId).call();
+    const signerParticipants = await contract.methods.getSigners(cohortId).call();
     const signers = [];
 
-    for (const address of signerAddresses) {
-      try {
-        const signerDetails = await contract.methods.getSigner(cohortId, address).call();
-        signers.push({
-          address,
-          ...signerDetails
-        });
-      } catch {
-        signers.push({ address });
-      }
+    // getSigners returns array of {provider, operator, signature}
+    for (const participant of signerParticipants) {
+      signers.push({
+        provider: participant.provider || participant[0],
+        operator: participant.operator || participant[1],
+        signature: participant.signature || participant[2],
+        // For display, we'll use the provider address as the main address
+        address: participant.provider || participant[0]
+      });
     }
 
     // Get threshold
@@ -501,12 +586,26 @@ export const getSigningCohortDetails = async (cohortId, network = "mainnet") => 
       // May not be available for all cohorts
     }
 
-    // Try to get conditions
-    let conditions = null;
-    try {
-      conditions = await contract.methods.getSigningCohortConditions(cohortId).call();
-    } catch {
-      // Conditions might not be set
+    // Try to get conditions for each supported chain
+    let conditions = {};
+    const supportedChainIds = getSupportedChainIds(network);
+
+    for (const chainId of supportedChainIds) {
+      try {
+        const chainConditions = await contract.methods.getSigningCohortConditions(cohortId, chainId).call();
+        // getSigningCohortConditions returns bytes data
+        if (chainConditions && chainConditions !== '0x' && chainConditions !== '0x00') {
+          // Store the raw bytes data - we'll decode it in the UI if needed
+          conditions[chainId] = {
+            raw: chainConditions,
+            // Try to decode as UTF-8 string if possible
+            decoded: tryDecodeBytes(chainConditions)
+          };
+        }
+      } catch (error) {
+        // Conditions might not be set for this chain
+        console.log(`No conditions for cohort ${cohortId} on chain ${chainId}:`, error.message);
+      }
     }
 
     return {

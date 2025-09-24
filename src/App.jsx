@@ -18,6 +18,7 @@ import NetworkActivity from './pages/NetworkActivity';
 import SmartContracts from './pages/SmartContracts';
 import HeartbeatGroupDetail from './pages/HeartbeatGroupDetail';
 import SigningCohorts from './pages/SigningCohorts';
+import SigningCohortDetail from './pages/SigningCohortDetail';
 
 const queryClient = new QueryClient()
 
@@ -42,6 +43,7 @@ function App() {
                 <Route path="/stakers" element={<NodesPage />} />
                 <Route path="/address/:address" element={<NodeDetail />} />
                 <Route path="/cohorts" element={<SigningCohorts />} />
+                <Route path="/cohort/:id" element={<SigningCohortDetail />} />
                 <Route path="/activity" element={<NetworkActivity />} />
                 <Route path="/contracts" element={<SmartContracts />} />
               </Routes>

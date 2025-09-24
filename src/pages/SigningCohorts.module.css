@@ -125,16 +125,17 @@
   color: #059669;
 }
 
-.table tbody tr {
+.clickableRow {
+  cursor: pointer;
   border-bottom: 1px solid #E5E7EB;
   transition: background-color 0.2s;
 }
 
-.table tbody tr:hover {
+.clickableRow:hover {
   background: #F9FAFB;
 }
 
-.table tbody tr:last-child {
+.clickableRow:last-child {
   border-bottom: none;
 }
 
@@ -183,6 +184,120 @@
 
 .statusCell {
   text-align: center;
+}
+
+.conditionsCell {
+  text-align: center;
+  position: relative;
+}
+
+.conditionsWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.conditionsToggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+
+.conditionsToggle:hover {
+  opacity: 0.8;
+}
+
+.conditionsBadge {
+  display: inline-block;
+  background: #DBEAFE;
+  color: #1E40AF;
+  border: 1px solid #93C5FD;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.expandIcon {
+  color: #1E40AF;
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+.conditionsDropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 8px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+  min-width: 250px;
+  max-width: 400px;
+  padding: 12px;
+  text-align: left;
+}
+
+.conditionItem {
+  display: flex;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #F3F4F6;
+  font-size: 12px;
+}
+
+.conditionItem:last-child {
+  border-bottom: none;
+}
+
+.conditionKey {
+  font-weight: 600;
+  color: #374151;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  min-width: 80px;
+}
+
+.conditionValue {
+  color: #059669;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  word-break: break-all;
+  flex: 1;
+}
+
+.noConditions {
+  color: #9CA3AF;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.chainConditionGroup {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.chainConditionGroup:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.chainConditionHeader {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #059669;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
 }
 
 .status {
