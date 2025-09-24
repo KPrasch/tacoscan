@@ -288,6 +288,43 @@
   letter-spacing: 0.5px;
 }
 
+/* Condition rendering styles */
+.conditionBlock {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  padding: 12px;
+  margin: 8px 0;
+}
+
+.conditionType {
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.conditionField {
+  font-size: 13px;
+  color: #374151;
+  margin: 6px 0;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.nestedCondition {
+  margin-left: 16px;
+  padding-left: 12px;
+  border-left: 2px solid #E5E7EB;
+  margin-top: 8px;
+}
+
+.nestedValue {
+  margin-left: 12px;
+  margin-top: 4px;
+}
+
 /* Table */
 .tableContainer {
   overflow-x: auto;

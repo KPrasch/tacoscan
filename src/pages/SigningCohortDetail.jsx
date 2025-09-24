@@ -5,6 +5,84 @@ import { formatString, formatDate, calculateTimeMoment } from './data';
 import { getSigningCohortDetails } from '../utils/contractReader';
 import { getCurrentNetwork } from '../utils/dataSource';
 
+// Helper function to render condition details
+const renderConditionDetails = (conditionData) => {
+  if (!conditionData) return null;
+
+  // If it has a condition property (from ConditionExpression)
+  if (conditionData.condition) {
+    return renderConditionObject(conditionData.condition);
+  }
+
+  // Otherwise render the object directly
+  return renderConditionObject(conditionData);
+};
+
+// Recursively render condition objects
+const renderConditionObject = (obj) => {
+  if (!obj || typeof obj !== 'object') {
+    return <span className={styles.conditionValue}>{String(obj)}</span>;
+  }
+
+  // Special handling for known condition types
+  if (obj.conditionType) {
+    return (
+      <div className={styles.conditionBlock}>
+        <div className={styles.conditionType}>Type: {obj.conditionType}</div>
+        {obj.chain && <div className={styles.conditionField}>Chain ID: {obj.chain}</div>}
+        {obj.contractAddress && (
+          <div className={styles.conditionField}>
+            Contract: {formatString(obj.contractAddress)}
+          </div>
+        )}
+        {obj.functionAbi && (
+          <div className={styles.conditionField}>
+            Function: {obj.functionAbi.name || 'Unknown'}
+          </div>
+        )}
+        {obj.parameters && (
+          <div className={styles.conditionField}>
+            Parameters: {JSON.stringify(obj.parameters)}
+          </div>
+        )}
+        {obj.returnValueTest && (
+          <div className={styles.conditionField}>
+            Test: {obj.returnValueTest.comparator} {obj.returnValueTest.value}
+          </div>
+        )}
+        {obj.operands && (
+          <div className={styles.conditionField}>
+            <div>Operands:</div>
+            {obj.operands.map((operand, idx) => (
+              <div key={idx} className={styles.nestedCondition}>
+                {renderConditionObject(operand)}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Default object rendering
+  return (
+    <div className={styles.conditionsList}>
+      {Object.entries(obj).map(([key, value]) => (
+        <div key={key} className={styles.conditionItem}>
+          <span className={styles.conditionKey}>{key}:</span>
+          {typeof value === 'object' ? (
+            <div className={styles.nestedValue}>
+              {renderConditionObject(value)}
+            </div>
+          ) : (
+            <span className={styles.conditionValue}>{String(value)}</span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const SigningCohortDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -160,23 +238,8 @@ const SigningCohortDetail = () => {
                         {(() => {
                           const conditionData = chainConditions?.decoded || chainConditions;
 
-                          if (typeof conditionData === 'object' && conditionData !== null) {
-                            // If decoded is an object, display its properties
-                            const entries = Object.entries(conditionData).filter(([key]) => key !== 'raw');
-                            if (entries.length > 0) {
-                              return (
-                                <div className={styles.conditionsList}>
-                                  {entries.map(([key, value]) => (
-                                    <div key={key} className={styles.conditionItem}>
-                                      <span className={styles.conditionKey}>{key}:</span>
-                                      <span className={styles.conditionValue}>
-                                        {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              );
-                            }
+                          if (conditionData && typeof conditionData === 'object') {
+                            return renderConditionDetails(conditionData);
                           }
 
                           if (typeof conditionData === 'string' && conditionData.length > 0) {
@@ -192,7 +255,7 @@ const SigningCohortDetail = () => {
                             // If we only have raw hex data, display it
                             return (
                               <div className={styles.conditionsRaw}>
-                                <pre>{chainConditions.raw}</pre>
+                                <pre>{chainConditions.raw.slice(0, 100)}...</pre>
                               </div>
                             );
                           }

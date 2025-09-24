@@ -300,6 +300,26 @@
   letter-spacing: 0.5px;
 }
 
+.conditionSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.conditionType {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1E40AF;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.conditionVersion {
+  font-size: 10px;
+  color: #6B7280;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
 .status {
   display: inline-block;
   padding: 4px 12px;

@@ -3,42 +3,44 @@ import mainnetArtifacts from '../artifacts/mainnet.json';
 import lynxArtifacts from '../artifacts/lynx-signing.json';
 import tapirArtifacts from '../artifacts/tapir.json';
 import { getCurrentNetwork } from './dataSource';
+import { conditions } from '@nucypher/taco';
+import { fromHexString } from '@nucypher/shared';
 
-// Helper function to try decoding bytes data
-const tryDecodeBytes = (bytesData) => {
+// Helper function to try decoding bytes data as conditions
+const tryDecodeConditions = (bytesData) => {
   if (!bytesData || bytesData === '0x' || bytesData === '0x00') {
     return null;
   }
 
   try {
-    const web3 = new Web3();
+    // First try to decode as ConditionExpression from taco-web
+    const bytes = fromHexString(bytesData);
+    const jsonString = new TextDecoder().decode(bytes);
 
-    // Try to decode as UTF-8 string using Web3 utils
-    const decoded = web3.utils.hexToUtf8(bytesData);
+    // Parse JSON and create ConditionExpression
+    const conditionExpr = conditions.conditionExpr.ConditionExpression.fromJSON(jsonString);
 
-    // Check if it looks like valid JSON
-    try {
-      return JSON.parse(decoded);
-    } catch {
-      // If not JSON, return as string if it's printable
-      if (decoded && /^[\x20-\x7E\n\r\t]+$/.test(decoded)) {
-        return decoded;
-      }
-    }
+    // Return the condition object
+    return conditionExpr.toObj();
   } catch (error) {
-    // If hexToUtf8 fails, try hexToAscii
+    console.log('Could not decode as ConditionExpression:', error.message);
+
+    // Fallback: try to decode as plain JSON
     try {
       const web3 = new Web3();
-      const decoded = web3.utils.hexToAscii(bytesData);
-      if (decoded && decoded.trim().length > 0) {
-        try {
-          return JSON.parse(decoded);
-        } catch {
+      const decoded = web3.utils.hexToUtf8(bytesData);
+
+      // Try to parse as JSON
+      try {
+        return JSON.parse(decoded);
+      } catch {
+        // If not JSON, return as string if it's printable
+        if (decoded && /^[\x20-\x7E\n\r\t]+$/.test(decoded)) {
           return decoded;
         }
       }
-    } catch {
-      console.log('Could not decode bytes data');
+    } catch (error) {
+      console.log('Could not decode bytes data:', error.message);
     }
   }
 
@@ -510,8 +512,8 @@ export const getAllSigningCohorts = async (network = "mainnet") => {
               // Store the raw bytes data - we'll decode it in the UI if needed
               conditions[chainId] = {
                 raw: chainConditions,
-                // Try to decode as UTF-8 string if possible
-                decoded: tryDecodeBytes(chainConditions)
+                // Try to decode as ConditionExpression
+                decoded: tryDecodeConditions(chainConditions)
               };
               console.log(`Decoded conditions for cohort ${i} chain ${chainId}:`, conditions[chainId].decoded);
             }
@@ -598,8 +600,8 @@ export const getSigningCohortDetails = async (cohortId, network = "mainnet") => 
           // Store the raw bytes data - we'll decode it in the UI if needed
           conditions[chainId] = {
             raw: chainConditions,
-            // Try to decode as UTF-8 string if possible
-            decoded: tryDecodeBytes(chainConditions)
+            // Try to decode as ConditionExpression
+            decoded: tryDecodeConditions(chainConditions)
           };
         }
       } catch (error) {

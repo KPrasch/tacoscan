@@ -197,24 +197,27 @@ const SigningCohorts = () => {
                                 {(() => {
                                   const conditionData = chainConditions?.decoded || chainConditions;
 
-                                  if (typeof conditionData === 'object' && conditionData !== null) {
-                                    const entries = Object.entries(conditionData).filter(([key]) => key !== 'raw');
-                                    if (entries.length > 0) {
-                                      return entries.map(([key, value]) => (
-                                        <div key={key} className={styles.conditionItem}>
-                                          <span className={styles.conditionKey}>{key}:</span>
-                                          <span className={styles.conditionValue}>
-                                            {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                                          </span>
-                                        </div>
-                                      ));
-                                    }
+                                  if (conditionData && typeof conditionData === 'object') {
+                                    // Show condition type or summary
+                                    const conditionType = conditionData.condition?.conditionType ||
+                                                        conditionData.conditionType ||
+                                                        'Complex Condition';
+                                    const version = conditionData.version || '';
+
+                                    return (
+                                      <div className={styles.conditionSummary}>
+                                        <div className={styles.conditionType}>{conditionType}</div>
+                                        {version && (
+                                          <div className={styles.conditionVersion}>v{version}</div>
+                                        )}
+                                      </div>
+                                    );
                                   }
 
                                   if (typeof conditionData === 'string' && conditionData.length > 0) {
                                     return (
                                       <div className={styles.conditionItem}>
-                                        <span className={styles.conditionValue}>{conditionData}</span>
+                                        <span className={styles.conditionValue}>{conditionData.slice(0, 50)}...</span>
                                       </div>
                                     );
                                   }
@@ -223,7 +226,7 @@ const SigningCohorts = () => {
                                     return (
                                       <div className={styles.conditionItem}>
                                         <span className={styles.conditionValue} style={{fontSize: '10px'}}>
-                                          {chainConditions.raw.slice(0, 20)}...
+                                          Encrypted conditions
                                         </span>
                                       </div>
                                     );
