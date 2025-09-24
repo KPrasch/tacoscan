@@ -36,7 +36,7 @@ const Dashboard = () => {
 
       // Format both rituals and nodes data for display
       const formattedRituals = formatRitualsData(rituals, timeout);
-      const { nodes } = formatNodes(rawNodes);
+      const { nodes } = await formatNodes(rawNodes);
 
       // Calculate real statistics (excluding heartbeats)
       const nonHeartbeatRituals = formattedRituals.filter(r => r.totalParticipants > 3);

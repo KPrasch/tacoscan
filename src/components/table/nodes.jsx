@@ -150,17 +150,36 @@ export const NodesTable = ({ columns, data, isLoading, network }) => {
           className={open ? styles.rowSeleted : null}
         >
           <TableCell align="left">
-            <RouterLink
-              to={`/node/${row.id}`}
-              className={styles.link}
-            >
-              {Data.formatString(row.id)}
-            </RouterLink>
-            <Tooltip title="Copied">
-              <CopyButton
-                onClick={(e) => copyToClipBoard(row.id)}
-              />
-            </Tooltip>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <RouterLink
+                to={`/node/${row.id}`}
+                className={styles.link}
+              >
+                {Data.formatString(row.id)}
+              </RouterLink>
+              {row.isBetaStaker && (
+                <span style={{
+                  background: '#6366F1',
+                  color: '#FFFFFF',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.025em',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <span style={{ fontSize: '12px' }}>⭐</span> BETA
+                </span>
+              )}
+              <Tooltip title="Copied">
+                <CopyButton
+                  onClick={(e) => copyToClipBoard(row.id)}
+                />
+              </Tooltip>
+            </div>
           </TableCell>
           <TableCell align="left">
             <RouterLink

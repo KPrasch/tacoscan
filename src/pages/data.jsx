@@ -8,6 +8,36 @@ import web3Cache from "../utils/web3Cache";
 import BatchProcessor from "../utils/batchProcessor";
 import { getStakingProviderInfo } from "../utils/contractReader";
 
+// Beta stakers list - cached in memory
+let betaStakers = null;
+
+// Load beta stakers from file
+export const loadBetaStakers = async () => {
+  if (betaStakers !== null) return betaStakers;
+  
+  try {
+    const response = await fetch('/beta_stakers.txt');
+    const text = await response.text();
+    betaStakers = new Set(
+      text.split('\n')
+        .map(addr => addr.trim().toLowerCase())
+        .filter(addr => addr.length > 0)
+    );
+    console.log(`Loaded ${betaStakers.size} beta stakers`);
+    return betaStakers;
+  } catch (error) {
+    console.warn('Could not load beta stakers list:', error);
+    betaStakers = new Set();
+    return betaStakers;
+  }
+};
+
+// Check if an address is a beta staker
+export const isBetaStaker = async (address) => {
+  const stakers = await loadBetaStakers();
+  return stakers.has(address.toLowerCase());
+};
+
 const tacoAddr = "0x347cc7ede7e5517bd47d20620b2cf1b406edcf07".toLowerCase()
 export const ritual_columns = [
   {
@@ -336,7 +366,7 @@ export function convertToLittleEndian(txHash) {
 }
 
 // Detect heartbeat groups based on timing and participant patterns
-export const detectHeartbeatGroups = (rituals) => {
+export const detectHeartbeatGroups = (rituals, timeout) => {
   const heartbeats = rituals.filter(r => r.isHeartbeat);
   if (heartbeats.length === 0) return [];
   
@@ -344,9 +374,11 @@ export const detectHeartbeatGroups = (rituals) => {
   const cutoffDate = new Date('2025-03-17T00:00:00Z').getTime();
 
   // Heartbeats run on Mondays around midnight UTC
-  // Group them by Monday batches (within 6-hour window around Monday midnight UTC)
+  // All DKG heartbeats have the duration of the DKG_TIMEOUT set on the coordinator
   const groups = [];
-  const sixHours = 6 * 60 * 60 * 1000; // Wider window to catch all rituals in a batch
+  const dkgTimeoutMs = parseFloat(timeout || 0) * 1000; // Convert timeout to milliseconds
+  // Use DKG timeout as the window for grouping, or fallback to 4 hours if not available
+  const groupingWindow = dkgTimeoutMs || (4 * 60 * 60 * 1000);
   
   // Sort heartbeats by timestamp and filter out those before cutoff
   const sortedHeartbeats = [...heartbeats]
@@ -390,10 +422,18 @@ export const detectHeartbeatGroups = (rituals) => {
       const timeDiff = Math.abs(mondayMidnight.getTime() - groupMondayTime);
       
       // If it's the same Monday batch (within a day)
+      // Also check if rituals are within the DKG timeout window of each other
       if (timeDiff < 24 * 60 * 60 * 1000) {
-        group.rituals.push(hb);
-        addedToGroup = true;
-        break;
+        // Check if this ritual is within the DKG timeout window of the first ritual in the group
+        const firstRitualTime = group.rituals[0].initTimeStamp;
+        const ritualTimeDiff = Math.abs(hb.initTimeStamp - firstRitualTime);
+        
+        // Group rituals that start within the DKG timeout window
+        if (ritualTimeDiff <= groupingWindow) {
+          group.rituals.push(hb);
+          addedToGroup = true;
+          break;
+        }
       }
     }
     
@@ -518,7 +558,7 @@ export const formatRitualsData = (rawData, timeout) => {
     .sort((a, b) => b.id - a.id);
 };
 
-export const formatNodes = (rawData) => {
+export const formatNodes = async (rawData) => {
   // Handle null or undefined data
   if (!rawData || !Array.isArray(rawData)) {
     return {
@@ -531,16 +571,19 @@ export const formatNodes = (rawData) => {
     };
   }
 
+  // Load beta stakers list
+  const betaStakersList = await loadBetaStakers();
+
   const nodes = rawData
-    .filter(item => parseFloat(item.amount) > 0) // Exclude deauthorized nodes (amount = 0)
     .map((item) => ({
       id: item.id.split('-')[0],
       registeredOperatorAddress: item.tacoOperator?.operator,
       isOperatorConfirmed: item.tacoOperator?.confirmed,
-      isAuthorized: true, // Always true since we filtered above
+      isAuthorized: parseFloat(item.amount) > 0,
       authorizedAmount: parseFloat(item.amount) || 0,
       stakedAmount: parseFloat(item.stake?.stakedAmount) || 0,
       bondedAt: item.tacoOperator?.bondedTimestamp * 1000,
+      isBetaStaker: betaStakersList.has(item.id.split('-')[0].toLowerCase())
     }))
 
   const statsRecord = {
@@ -915,6 +958,106 @@ export const getRitualsByStakingProvider = async (searchInput) => {
     console.log("error to fetch ritual data " + e);
   }
   return emptyData;
+};
+
+// Fetch all network events from multiple contracts
+export const getAllNetworkEvents = async () => {
+  try {
+    // Fetch all app authorizations with their events
+    const appAuthsQuery = `
+      query GetAllEvents {
+        appAuthorizations(first: 100, orderBy: id) {
+          id
+          amount
+          tacoOperator {
+            operator
+            bondedTimestamp
+            confirmed
+          }
+          stake {
+            stakeHistory(first: 100, orderBy: timestamp, orderDirection: desc) {
+              eventType
+              eventAmount
+              timestamp
+              blockNumber
+              txHash
+            }
+          }
+        }
+        appAuthHistories(first: 500, orderBy: timestamp, orderDirection: desc) {
+          eventType
+          eventAmount
+          timestamp
+          blockNumber
+          txHash
+          appAuthorization {
+            id
+          }
+        }
+      }
+    `;
+
+    const response = await fetch('https://gateway-arbitrum.network.thegraph.com/api/f49026e5653284c96b9798f93567eaa1/subgraphs/id/6VFbgC6JWwPQkqCxdVDNSieW8bwLdoVBtimVm3F2WV86', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: appAuthsQuery })
+    });
+
+    const data = await response.json();
+    
+    if (data?.data) {
+      const events = [];
+      
+      // Add stake history events
+      data.data.appAuthorizations?.forEach(auth => {
+        auth.stake?.stakeHistory?.forEach(event => {
+          events.push({
+            type: event.eventType,
+            contract: 'TokenStaking',
+            stakingProvider: auth.id.split('-')[0],
+            amount: event.eventAmount,
+            timestamp: parseInt(event.timestamp) * 1000,
+            blockNumber: event.blockNumber,
+            txHash: event.txHash
+          });
+        });
+        
+        // Add OperatorBonded events
+        if (auth.tacoOperator?.bondedTimestamp) {
+          events.push({
+            type: 'OperatorBonded',
+            contract: 'TACoApplication',
+            stakingProvider: auth.id.split('-')[0],
+            operator: auth.tacoOperator.operator,
+            timestamp: parseInt(auth.tacoOperator.bondedTimestamp) * 1000,
+            blockNumber: null,
+            txHash: null
+          });
+        }
+      });
+      
+      // Add app authorization history events
+      data.data.appAuthHistories?.forEach(event => {
+        events.push({
+          type: event.eventType,
+          contract: 'TACoApplication',
+          stakingProvider: event.appAuthorization?.id?.split('-')[0],
+          amount: event.eventAmount,
+          timestamp: parseInt(event.timestamp) * 1000,
+          blockNumber: event.blockNumber,
+          txHash: event.txHash
+        });
+      });
+      
+      // Sort by timestamp descending
+      return events.sort((a, b) => b.timestamp - a.timestamp);
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error fetching network events:', error);
+    return [];
+  }
 };
 
 export const getNodes = async (isSearch, searchInput) => {

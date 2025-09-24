@@ -36,8 +36,8 @@ const NodesPage = ({ network = 'polygon', isSearch = false, searchInput = '' } =
       isLoading: true,
     }));
 
-    Data.getNodes(isSearch, searchInput).then((info) => {
-      const {nodes, statsRecord} = Data.formatNodes(info?.appAuthorizations || []);
+    Data.getNodes(isSearch, searchInput).then(async (info) => {
+      const {nodes, statsRecord} = await Data.formatNodes(info?.appAuthorizations || []);
       const totalNodes = nodes.length;
       
       // Store raw data for filtering
@@ -77,23 +77,27 @@ const NodesPage = ({ network = 'polygon', isSearch = false, searchInput = '' } =
   useEffect(() => {
     if (!rawData.length) return;
     
-    if (selectedFilter === 'all') {
-      const {nodes} = Data.formatNodes(rawData);
-      setPageData(prev => ({
-        ...prev,
-        rowData: nodes,
-        totalNodes: nodes.length
-      }));
-    } else {
-      const filteredAuths = filterNodesByStatus(rawData, selectedFilter);
-      const {nodes} = Data.formatNodes(filteredAuths);
-      
-      setPageData(prev => ({
-        ...prev,
-        rowData: nodes,
-        totalNodes: nodes.length
-      }));
-    }
+    const updateFilteredNodes = async () => {
+      if (selectedFilter === 'all') {
+        const {nodes} = await Data.formatNodes(rawData);
+        setPageData(prev => ({
+          ...prev,
+          rowData: nodes,
+          totalNodes: nodes.length
+        }));
+      } else {
+        const filteredAuths = filterNodesByStatus(rawData, selectedFilter);
+        const {nodes} = await Data.formatNodes(filteredAuths);
+        
+        setPageData(prev => ({
+          ...prev,
+          rowData: nodes,
+          totalNodes: nodes.length
+        }));
+      }
+    };
+    
+    updateFilteredNodes();
   }, [selectedFilter, rawData]);
 
   return (

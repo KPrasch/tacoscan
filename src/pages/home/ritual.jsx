@@ -123,7 +123,7 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                 
                 // Detect heartbeat groups if viewing heartbeats
                 const heartbeatGroups = (ritualTypeFilter === 'heartbeats' || ritualTypeFilter === 'failed-heartbeats') 
-                    ? Data.detectHeartbeatGroups(formattedData)
+                    ? Data.detectHeartbeatGroups(formattedData, timeout)
                     : [];
                 
                 setPageData({
@@ -158,7 +158,21 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                         borderRadius: '8px',
                         padding: '20px',
                         boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                        position: 'relative'
+                        position: 'relative',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                    }}
+                    onClick={() => {
+                        const mondayDate = new Date(group.mondayMidnight).toISOString().split('T')[0];
+                        window.location.href = `/heartbeat-group/${mondayDate}`;
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+                        e.currentTarget.style.transform = 'translateY(0)';
                     }}>
                         <div style={{
                             display: 'flex',
@@ -171,7 +185,10 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                                     margin: 0,
                                     fontSize: '16px',
                                     fontWeight: 600,
-                                    color: '#111827'
+                                    color: '#111827',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
                                 }}>
                                     Monday, {new Date(group.mondayMidnight).toLocaleDateString('en-US', { 
                                         month: 'long', 
@@ -179,6 +196,7 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                                         year: 'numeric',
                                         timeZone: 'UTC'
                                     })}
+                                    <span style={{ fontSize: '12px', color: '#6B7280' }}>→</span>
                                 </h3>
                                 <p style={{
                                     margin: '4px 0 0 0',
@@ -492,17 +510,32 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                                 }
                             }}
                             style={{
-                                padding: "8px 12px",
+                                padding: "8px 12px 8px 12px",
+                                paddingRight: "32px",
                                 background: "#FFFFFF",
-                                border: "1px solid #E5E7EB",
-                                borderRadius: "6px",
+                                border: "1px solid #D1D5DB",
+                                borderRadius: "8px",
                                 fontSize: "14px",
-                                fontWeight: 500,
-                                fontFamily: "var(--font-mono)",
-                                color: "#374151",
+                                fontWeight: 400,
+                                fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif",
+                                color: "#111827",
                                 cursor: "pointer",
-                                minWidth: "200px",
-                                outline: "none"
+                                minWidth: "220px",
+                                outline: "none",
+                                appearance: "none",
+                                backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                                backgroundRepeat: "no-repeat",
+                                backgroundPosition: "right 8px center",
+                                backgroundSize: "20px",
+                                transition: "all 0.2s ease"
+                            }}
+                            onFocus={(e) => {
+                                e.target.style.borderColor = "#9CA3AF";
+                                e.target.style.boxShadow = "0 0 0 3px rgba(156, 163, 175, 0.1)";
+                            }}
+                            onBlur={(e) => {
+                                e.target.style.borderColor = "#D1D5DB";
+                                e.target.style.boxShadow = "none";
                             }}
                         >
                             <option value="all">All Rituals</option>

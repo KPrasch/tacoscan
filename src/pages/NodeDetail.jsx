@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getNodeDetail, getTimeout } from './data';
+import { getNodeDetail, getTimeout, isBetaStaker } from './data';
 import { formatString, formatWeiDecimal, formatTimeToText } from './data';
 import styles from './NodeDetail.module.css';
 
@@ -15,7 +15,7 @@ const NodeDetail = () => {
       try {
         const data = await getNodeDetail(address);
         if (data) {
-          const formatted = formatNodeDetail(data);
+          const formatted = await formatNodeDetail(data);
           
           // Also fetch rituals for this node and timeout value
           try {
@@ -95,11 +95,14 @@ const NodeDetail = () => {
     fetchNodeData();
   }, [address]);
 
-  const formatNodeDetail = (data) => {
+  const formatNodeDetail = async (data) => {
     if (!data || !data.appAuthorization) return null;
     
     const auth = data.appAuthorization;
     const stakingProvider = auth.id?.split('-')[0] || address;
+    
+    // Check if this is a beta staker
+    const isBeta = await isBetaStaker(stakingProvider);
     
     // Use BigInt for accurate wei to token conversion
     const formatAmount = (weiAmount) => {
@@ -129,6 +132,20 @@ const NodeDetail = () => {
       return 0;
     };
     
+    // Collect all events
+    const allEvents = [...(data.appAuthHistories || []), ...(auth.stake?.stakeHistory || [])];
+    
+    // Add OperatorBonded event if available
+    if (auth.tacoOperator?.bondedTimestamp) {
+      allEvents.push({
+        eventType: 'OperatorBonded',
+        operator: auth.tacoOperator.operator,
+        timestamp: auth.tacoOperator.bondedTimestamp,
+        blockNumber: null, // Not available in current data
+        txHash: null // Not available in current data
+      });
+    }
+    
     return {
       id: stakingProvider,
       operator: auth.tacoOperator?.operator || '-',
@@ -138,9 +155,11 @@ const NodeDetail = () => {
       historicalStake: getHistoricalStake(),
       isDeauthorized: hasBeenDeauthorized && formatAmount(auth.amount) === 0,
       bondedAt: auth.tacoOperator?.bondedTimestamp ? new Date(auth.tacoOperator.bondedTimestamp * 1000) : null,
-      events: [...(data.appAuthHistories || []), ...(auth.stake?.stakeHistory || [])].map(event => ({
+      isBetaStaker: isBeta,
+      events: allEvents.map(event => ({
         type: event.eventType,
         amount: event.eventAmount || event.amount,
+        operator: event.operator || null,
         timestamp: event.timestamp ? parseInt(event.timestamp) * 1000 : Date.now(),
         blockNumber: event.blockNumber,
         txHash: event.txHash || null
@@ -178,6 +197,24 @@ const NodeDetail = () => {
           <div className={styles.titleSection}>
             <h1 className={styles.title}>Node Operator</h1>
             <div className={styles.badge}>
+              {nodeData.isBetaStaker && (
+                <span style={{
+                  background: '#6366F1',
+                  color: '#FFFFFF',
+                  padding: '4px 12px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.025em',
+                  marginRight: '8px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  <span style={{ fontSize: '14px' }}>⭐</span> Beta Staker
+                </span>
+              )}
               {nodeData.isDeauthorized ? (
                 <span className={styles.deauthorizedBadge}>Deauthorized</span>
               ) : nodeData.isConfirmed ? (

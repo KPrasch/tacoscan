@@ -15,6 +15,7 @@ import NodesPage from './pages/home/nodes';
 import NodeDetail from './pages/NodeDetail';
 import NetworkActivity from './pages/NetworkActivity';
 import SmartContracts from './pages/SmartContracts';
+import HeartbeatGroupDetail from './pages/HeartbeatGroupDetail';
 
 const queryClient = new QueryClient()
 
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/rituals" element={<RitualsPage />} />
                 <Route path="/ritual/:id" element={<RitualDetail />} />
                 <Route path="/rituals/:id" element={<RitualDetail />} />
+                <Route path="/heartbeat-group/:weekId" element={<HeartbeatGroupDetail />} />
                 <Route path="/nodes" element={<NodesPage />} />
                 <Route path="/node/:address" element={<NodeDetail />} />
                 <Route path="/staker/:address" element={<NodeDetail />} />
