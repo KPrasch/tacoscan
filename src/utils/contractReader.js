@@ -1,6 +1,6 @@
 import Web3 from "web3";
 import mainnetArtifacts from '../artifacts/mainnet.json';
-import lynxArtifacts from '../artifacts/lynx.json';
+import lynxArtifacts from '../artifacts/lynx-signing.json';
 import tapirArtifacts from '../artifacts/tapir.json';
 import { getCurrentNetwork } from './dataSource';
 
@@ -57,6 +57,29 @@ const getTestnetStaking = (network = 'mainnet') => {
   }
 
   return artifacts.TestnetThresholdStaking;
+};
+
+// Get SigningCoordinator contract for testnets
+const getSigningCoordinator = (network = 'mainnet') => {
+  let artifacts;
+
+  switch (network) {
+    case 'lynx':
+      artifacts = lynxArtifacts['11155111'];
+      break;
+    case 'tapir':
+      artifacts = tapirArtifacts['11155111'];
+      break;
+    default:
+      return null; // Only testnets have SigningCoordinator for now
+  }
+
+  if (!artifacts || !artifacts.SigningCoordinator) {
+    console.warn(`SigningCoordinator not found for network ${network}`);
+    return null;
+  }
+
+  return artifacts.SigningCoordinator;
 };
 
 // Get RPC URL for network
@@ -369,5 +392,135 @@ export const getAllRituals = async (network = 'mainnet') => {
   } catch (error) {
     console.error('Error fetching all rituals:', error);
     return [];
+  }
+};
+
+// Get all signing cohorts
+export const getAllSigningCohorts = async (network = "mainnet") => {
+  try {
+    const signingCoordinator = getSigningCoordinator(network);
+
+    if (!signingCoordinator) {
+      console.log("SigningCoordinator not found for network:", network);
+      return [];
+    }
+
+    const rpcUrl = getRpcUrl(network);
+    const web3 = new Web3(rpcUrl);
+    const contract = new web3.eth.Contract(signingCoordinator.abi, signingCoordinator.address);
+
+    // Get total number of cohorts
+    const numCohorts = await contract.methods.numberOfSigningCohorts().call();
+    console.log(`Found ${numCohorts} signing cohorts on ${network}`);
+
+    // Fetch each cohorts data
+    const cohorts = [];
+    for (let i = 0; i < numCohorts; i++) {
+      try {
+        // Get cohort state
+        const state = await contract.methods.getSigningCohortState(i).call();
+        const isActive = await contract.methods.isCohortActive(i).call();
+
+        // Get signers for this cohort
+        const signers = await contract.methods.getSigners(i).call();
+
+        // Get threshold
+        const threshold = await contract.methods.getThreshold(i).call();
+
+        // Try to get conditions if they exist
+        let conditions = null;
+        try {
+          conditions = await contract.methods.getSigningCohortConditions(i).call();
+        } catch {
+          // Conditions might not be set for all cohorts
+        }
+
+        cohorts.push({
+          id: i,
+          state,
+          isActive,
+          signers,
+          threshold: parseInt(threshold),
+          conditions,
+          signersCount: signers.length
+        });
+      } catch (error) {
+        console.error(`Error fetching cohort ${i}:`, error);
+      }
+    }
+
+    return cohorts;
+  } catch (error) {
+    console.error("Error fetching signing cohorts:", error);
+    return [];
+  }
+};
+
+// Get signing cohort details
+export const getSigningCohortDetails = async (cohortId, network = "mainnet") => {
+  try {
+    const signingCoordinator = getSigningCoordinator(network);
+
+    if (!signingCoordinator) {
+      console.log("SigningCoordinator not found for network:", network);
+      return null;
+    }
+
+    const rpcUrl = getRpcUrl(network);
+    const web3 = new Web3(rpcUrl);
+    const contract = new web3.eth.Contract(signingCoordinator.abi, signingCoordinator.address);
+
+    // Get cohort state
+    const state = await contract.methods.getSigningCohortState(cohortId).call();
+    const isActive = await contract.methods.isCohortActive(cohortId).call();
+
+    // Get signers and their details
+    const signerAddresses = await contract.methods.getSigners(cohortId).call();
+    const signers = [];
+
+    for (const address of signerAddresses) {
+      try {
+        const signerDetails = await contract.methods.getSigner(cohortId, address).call();
+        signers.push({
+          address,
+          ...signerDetails
+        });
+      } catch {
+        signers.push({ address });
+      }
+    }
+
+    // Get threshold
+    const threshold = await contract.methods.getThreshold(cohortId).call();
+
+    // Get chains this cohort operates on
+    let chains = [];
+    try {
+      chains = await contract.methods.getChains(cohortId).call();
+    } catch {
+      // May not be available for all cohorts
+    }
+
+    // Try to get conditions
+    let conditions = null;
+    try {
+      conditions = await contract.methods.getSigningCohortConditions(cohortId).call();
+    } catch {
+      // Conditions might not be set
+    }
+
+    return {
+      id: cohortId,
+      state,
+      isActive,
+      signers,
+      signersCount: signers.length,
+      threshold: parseInt(threshold),
+      chains,
+      conditions
+    };
+  } catch (error) {
+    console.error("Error fetching cohort details:", error);
+    return null;
   }
 };

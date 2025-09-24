@@ -49,6 +49,7 @@ const Header = () => {
                 <div className={styles.dropdownContent}>
                   <a href="/rituals">DKG Rituals</a>
                   <a href="/nodes">Nodes</a>
+                  <a href="/cohorts">Signing Cohorts</a>
                   <a href="/activity">Network Activity</a>
                 </div>
               </div>
