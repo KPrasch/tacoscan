@@ -8,6 +8,7 @@ import { config } from './config/wagmi'
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import NetworkSwitcher from './components/NetworkSwitcher';
+import TestnetNotice from './components/TestnetNotice';
 import Dashboard from './pages/Dashboard';
 import RitualsPage from './pages/home/ritual';
 import RitualDetail from './pages/RitualDetail';
@@ -26,6 +27,7 @@ function App() {
         <Router>
           <div className="app">
             <Header />
+            <TestnetNotice />
             <main className="main-content">
               <Routes>
                 <Route path="/" element={<Dashboard />} />

@@ -843,6 +843,38 @@ const getAllRitualsWithPagination = async () => {
 
 export const getRituals = async (isSearch, searchInput) => {
     const emptyData = { rituals: [] };
+
+    // Check if we're on a testnet without subgraph
+    const { shouldUseContractReads, getCurrentNetwork } = await import('../utils/dataSource');
+    const { getAllRituals } = await import('../utils/contractReader');
+    const currentNetwork = getCurrentNetwork();
+
+    if (shouldUseContractReads(currentNetwork)) {
+        // For testnets, fetch directly from contracts
+        console.log(`Fetching rituals from ${currentNetwork} contracts...`);
+        try {
+            const rituals = await getAllRituals(currentNetwork);
+            console.log(`Found ${rituals.length} rituals on ${currentNetwork}`);
+
+            // If searching, filter by ID or authority
+            if (isSearch && searchInput) {
+                const filtered = rituals.filter(r =>
+                    r.id?.toString() === searchInput ||
+                    r.authority?.toLowerCase() === searchInput.toLowerCase()
+                );
+                return { rituals: filtered };
+            }
+
+            return { rituals };
+        } catch (error) {
+            console.error('Error fetching rituals from contract:', error);
+            return {
+                rituals: [],
+                _testnetMessage: `Error fetching data from ${currentNetwork} contracts: ${error.message}`
+            };
+        }
+    }
+
     try {
         let data;
         if (!isSearch) {
@@ -1062,6 +1094,60 @@ export const getAllNetworkEvents = async () => {
 
 export const getNodes = async (isSearch, searchInput) => {
   const emptyData = { appAuthorizations: [] };
+
+  // Check if we're on a testnet without subgraph
+  const { shouldUseContractReads, getCurrentNetwork } = await import('../utils/dataSource');
+  const { getAllStakingProviders, getStakingProviderInfo } = await import('../utils/contractReader');
+  const currentNetwork = getCurrentNetwork();
+
+  if (shouldUseContractReads(currentNetwork)) {
+    // For testnets, fetch directly from contracts
+    console.log(`Fetching nodes from ${currentNetwork} contracts...`);
+    try {
+      if (isSearch && searchInput) {
+        // If searching for a specific provider
+        const info = await getStakingProviderInfo(searchInput, currentNetwork);
+        if (info && info.authorized !== '0') {
+          return {
+            appAuthorizations: [{
+              id: `${searchInput.toLowerCase()}-0x347cc7ede7e5517bd47d20620b2cf1b406edcf07`,
+              stakingProvider: searchInput,
+              amount: info.authorized,
+              amountDeauthorizing: info.deauthorizing,
+              operator: info.operator,
+              isOperatorConfirmed: info.operatorConfirmed,
+              ...info
+            }]
+          };
+        }
+        return emptyData;
+      } else {
+        // Fetch all staking providers
+        const providers = await getAllStakingProviders(currentNetwork);
+        console.log(`Found ${providers.length} nodes on ${currentNetwork}`);
+
+        // Format to match subgraph structure
+        const appAuthorizations = providers.map(p => ({
+          id: `${p.stakingProvider.toLowerCase()}-0x347cc7ede7e5517bd47d20620b2cf1b406edcf07`,
+          stakingProvider: p.stakingProvider,
+          amount: p.authorized,
+          amountDeauthorizing: p.deauthorizing,
+          operator: p.operator,
+          isOperatorConfirmed: p.operatorConfirmed,
+          ...p
+        }));
+
+        return { appAuthorizations };
+      }
+    } catch (error) {
+      console.error('Error fetching nodes from contract:', error);
+      return {
+        appAuthorizations: [],
+        _testnetMessage: `Error fetching data from ${currentNetwork} contracts: ${error.message}`
+      };
+    }
+  }
+
   try {
     let data;
     if (!isSearch) {
