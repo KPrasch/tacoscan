@@ -89,6 +89,7 @@ const SigningCohortDetail = () => {
   const [cohort, setCohort] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showRawJson, setShowRawJson] = useState({});
 
   useEffect(() => {
     const fetchCohortDetails = async () => {
@@ -221,7 +222,27 @@ const SigningCohortDetail = () => {
           {/* Conditions Card */}
           {cohort?.conditions && Object.keys(cohort.conditions).length > 0 && (
             <div className={styles.card}>
-              <h2 className={styles.cardTitle}>On-Chain Conditions</h2>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>On-Chain Conditions</h2>
+                <button
+                  className={styles.globalJsonToggle}
+                  onClick={() => {
+                    const allChainIds = Object.keys(cohort.conditions);
+                    const allShowing = allChainIds.every(id => showRawJson[id]);
+                    const newState = {};
+                    allChainIds.forEach(id => {
+                      newState[id] = !allShowing;
+                    });
+                    setShowRawJson(newState);
+                  }}
+                  title="Toggle all JSON views"
+                >
+                  <svg className={styles.jsonIcon} viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd"/>
+                  </svg>
+                  {Object.values(showRawJson).some(v => v) ? 'Hide All JSON' : 'Show All JSON'}
+                </button>
+              </div>
               <div className={styles.cardContent}>
                 {Object.entries(cohort.conditions).map(([chainId, chainConditions]) => {
                   const chainName =
@@ -233,11 +254,65 @@ const SigningCohortDetail = () => {
 
                   return (
                     <div key={chainId} className={styles.chainConditions}>
-                      <h3 className={styles.chainTitle}>{chainName}</h3>
+                      <div className={styles.chainConditionsHeader}>
+                        <h3 className={styles.chainTitle}>{chainName}</h3>
+                        {chainConditions?.decoded && (
+                          <button
+                            className={styles.jsonToggle}
+                            onClick={() => setShowRawJson(prev => ({
+                              ...prev,
+                              [chainId]: !prev[chainId]
+                            }))}
+                            title={showRawJson[chainId] ? "Show formatted view" : "Show raw JSON"}
+                          >
+                            {showRawJson[chainId] ? (
+                              <>
+                                <svg className={styles.jsonIcon} viewBox="0 0 20 20" fill="currentColor">
+                                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                                  <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/>
+                                </svg>
+                                View
+                              </>
+                            ) : (
+                              <>
+                                <svg className={styles.jsonIcon} viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd"/>
+                                </svg>
+                                JSON
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </div>
                       <div className={styles.conditionsContainer}>
                         {(() => {
                           const conditionData = chainConditions?.decoded || chainConditions;
 
+                          // Show raw JSON if toggle is active
+                          if (showRawJson[chainId] && conditionData) {
+                            // Format JSON with custom replacer for better readability
+                            const formatJSON = (obj) => {
+                              const json = JSON.stringify(obj, null, 2);
+                              // Highlight property names and values
+                              return json
+                                .replace(/"([^"]+)":/g, '<span class="' + styles.jsonKey + '">"$1"</span>:')
+                                .replace(/:"([^"]+)"/g, ': <span class="' + styles.jsonString + '">"$1"</span>')
+                                .replace(/:(\d+)/g, ': <span class="' + styles.jsonNumber + '">$1</span>')
+                                .replace(/:(true|false)/g, ': <span class="' + styles.jsonBoolean + '">$1</span>')
+                                .replace(/:(null)/g, ': <span class="' + styles.jsonNull + '">$1</span>');
+                            };
+
+                            return (
+                              <div className={styles.jsonContainer}>
+                                <pre
+                                  className={styles.jsonContent}
+                                  dangerouslySetInnerHTML={{ __html: formatJSON(conditionData) }}
+                                />
+                              </div>
+                            );
+                          }
+
+                          // Show formatted view
                           if (conditionData && typeof conditionData === 'object') {
                             return renderConditionDetails(conditionData);
                           }

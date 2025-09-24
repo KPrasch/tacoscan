@@ -149,7 +149,8 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.cardTitle {
+/* Fix for cards without header */
+.card > h2.cardTitle {
   font-size: 18px;
   font-weight: 600;
   padding: 16px 20px;
@@ -158,6 +159,52 @@
   background: #F9FAFB;
   color: #1F2937;
   font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #E5E7EB;
+  background: #F9FAFB;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #1F2937;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.globalJsonToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.globalJsonToggle:hover {
+  background: #D1FAE5;
+  border-color: #10B981;
+  color: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.globalJsonToggle .jsonIcon {
+  width: 16px;
+  height: 16px;
 }
 
 .cardContent {
@@ -278,14 +325,127 @@
   margin-bottom: 0;
 }
 
+.chainConditionsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
 .chainTitle {
   font-size: 14px;
   font-weight: 600;
   color: #1F2937;
-  margin: 0 0 12px 0;
+  margin: 0;
   font-family: var(--font-mono, 'Space Mono', monospace);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* JSON Toggle Button */
+.jsonToggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.jsonToggle:hover {
+  background: #F9FAFB;
+  border-color: #059669;
+  color: #059669;
+}
+
+.jsonToggle:active {
+  transform: scale(0.98);
+}
+
+.jsonIcon {
+  width: 14px;
+  height: 14px;
+  color: currentColor;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.jsonToggle:hover .jsonIcon,
+.globalJsonToggle:hover .jsonIcon {
+  opacity: 1;
+}
+
+/* JSON Container */
+.jsonContainer {
+  background: #F9FAFB;
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid #E5E7EB;
+}
+
+.jsonContent {
+  margin: 0;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.6;
+  white-space: pre;
+}
+
+/* JSON Syntax Highlighting */
+.jsonKey {
+  color: #059669;
+  font-weight: 600;
+}
+
+.jsonString {
+  color: #DC2626;
+}
+
+.jsonNumber {
+  color: #7C3AED;
+}
+
+.jsonBoolean {
+  color: #2563EB;
+  font-weight: 600;
+}
+
+.jsonNull {
+  color: #6B7280;
+  font-style: italic;
+}
+
+/* Custom scrollbar for JSON container */
+.jsonContainer::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.jsonContainer::-webkit-scrollbar-track {
+  background: #F3F4F6;
+  border-radius: 4px;
+}
+
+.jsonContainer::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 4px;
+}
+
+.jsonContainer::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
 }
 
 /* Condition rendering styles */
