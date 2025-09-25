@@ -452,37 +452,544 @@
 .conditionBlock {
   background: #FFFFFF;
   border: 1px solid #E5E7EB;
-  border-radius: 4px;
-  padding: 12px;
+  border-radius: 6px;
+  overflow: hidden;
   margin: 8px 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
-.conditionType {
+.conditionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #E5E7EB;
+  background: #F9FAFB;
+}
+
+.conditionHeaderText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.conditionDescription {
+  font-size: 12px;
+  font-weight: 400;
+  color: #6B7280;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  margin-bottom: 8px;
+}
+
+.conditionIcon {
+  font-size: 18px;
+}
+
+.conditionTypeName {
   font-size: 12px;
   font-weight: 600;
-  color: #059669;
-  margin-bottom: 8px;
-  text-transform: uppercase;
+  font-family: var(--font-mono, 'Space Mono', monospace);
   letter-spacing: 0.3px;
+  text-transform: lowercase;
 }
 
-.conditionField {
-  font-size: 13px;
-  color: #374151;
-  margin: 6px 0;
+/* Condition type colors - matching app style guide */
+.typeContract { background: #F3F4F6; color: #374151; }
+.typeTime { background: #F3F4F6; color: #374151; }
+.typeCompound { background: #E9D5FF; color: #6B21A8; }
+.typeJwt { background: #F3F4F6; color: #374151; }
+.typeJson { background: #F3F4F6; color: #374151; }
+.typeRpc { background: #F3F4F6; color: #374151; }
+.typeContext { background: #F3F4F6; color: #374151; }
+.typeSigning { background: #FEE2E2; color: #991B1B; }
+.typeEcdsa { background: #F3F4F6; color: #374151; }
+.typeDefault { background: #F3F4F6; color: #374151; }
+
+.conditionSection {
+  padding: 12px 16px;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.conditionSection:last-child {
+  border-bottom: none;
+}
+
+.sectionTitle {
+  font-size: 10px;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
-.nestedCondition {
-  margin-left: 16px;
-  padding-left: 12px;
-  border-left: 2px solid #E5E7EB;
+.conditionField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 13px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.fieldLabel {
+  font-weight: 500;
+  color: #6B7280;
+  min-width: 80px;
+}
+
+.fieldValue {
+  color: #1F2937;
+}
+
+.addressLink {
+  color: #059669;
+  text-decoration: none;
+  transition: color 0.2s;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.addressLink:hover {
+  color: #047857;
+  text-decoration: underline;
+}
+
+.chainBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Function signature styling */
+.functionSignature {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin: 6px 0;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 12px;
+}
+
+.functionName {
+  color: #6B21A8;
+  font-weight: 600;
+}
+
+.functionParams {
+  color: #6B7280;
+  margin-left: 4px;
+}
+
+.parametersList {
   margin-top: 8px;
+}
+
+.parameter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 4px 16px;
+  font-size: 12px;
+}
+
+.paramName {
+  color: #6B7280;
+  font-size: 12px;
+  min-width: 80px;
+}
+
+.paramIndex {
+  color: #9CA3AF;
+  font-size: 11px;
+}
+
+.paramValue {
+  color: #059669;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  word-break: break-all;
+}
+
+/* Compound condition styles - new layout */
+.compoundContainer {
+  margin-top: 12px;
+}
+
+.operandBlock {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.operandNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  background: #059669;
+  color: #FFFFFF;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: 12px;
+}
+
+.operandConditionContent {
+  flex: 1;
+}
+
+.operandConditionContent > .conditionBlock:first-child {
+  margin-top: 0;
+}
+
+.operatorDivider {
+  display: flex;
+  align-items: center;
+  margin: 16px 0 16px 36px;
+}
+
+.operatorText {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #059669;
+  color: #FFFFFF;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  letter-spacing: 0.5px;
+}
+
+/* Compact inline display for nested compounds */
+.compactCompound {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 12px;
+}
+
+.inlineOperator {
+  color: #059669;
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+.compactCondition {
+  padding: 2px 8px;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  color: #6B7280;
+  font-size: 11px;
+}
+
+/* Style nested conditions to be visually connected */
+.operandConditionContent .conditionBlock {
+  margin: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  border: 1px solid #E5E7EB;
+  background: #FFFFFF;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.operandConditionContent .conditionHeader {
+  background: inherit;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 10px 12px;
+}
+
+.operandConditionContent .conditionSection {
+  padding: 12px 16px;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.operandConditionContent .conditionSection:last-child {
+  border-bottom: none;
+}
+
+/* Depth limit indicator */
+.depthLimited {
+  padding: 6px 10px;
+  background: #F9FAFB;
+  border: 1px dashed #D1D5DB;
+  border-radius: 4px;
+  margin: 4px 0;
+  display: inline-block;
+}
+
+.depthLimitedMessage {
+  color: #6B7280;
+  font-style: italic;
+  font-size: 11px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+/* Compact operand display */
+.compactOperands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.compactOperandItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.operandNumberCompact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: #059669;
+  color: #FFFFFF;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.operandTypeCompact {
+  color: #6B7280;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 11px;
+}
+
+/* Parameter validation styles */
+.validationItem {
+  background: #F9FAFB;
+  border-left: 3px solid #059669;
+  padding: 8px 12px;
+  margin: 6px 0;
+  font-size: 12px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.validationLabel {
+  color: #374151;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.validationOperator {
+  color: #059669;
+  font-weight: 600;
+  margin: 0 6px;
+}
+
+.validationValue {
+  color: #059669;
+  font-weight: 600;
+}
+
+/* ECDSA specific */
+.publicKey {
+  color: #059669;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 12px;
+}
+
+.curveBadge {
+  display: inline-block;
+  background: #E5E7EB;
+  color: #374151;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+/* Signing attribute specific */
+.attributeBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #FEF3C7;
+  color: #92400E;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Standard contract badge */
+.standardBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #D1FAE5;
+  color: #065F46;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Context values */
+.contextValue {
+  color: #2563EB;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 12px;
+}
+
+/* Test expression */
+.testExpression {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 13px;
+}
+
+.testLabel {
+  color: #6B7280;
+}
+
+.testOperator {
+  color: #DC2626;
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+.testValue {
+  color: #059669;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Time range */
+.timeRange {
+  background: #F9FAFB;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.timeValue {
+  color: #1F2937;
+  font-size: 12px;
+}
+
+/* Operands list */
+.operandsList {
+  margin-top: 8px;
+}
+
+.operandItem {
+  display: flex;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.operandNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  background: #059669;
+  color: #FFFFFF;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.operandContent {
+  flex: 1;
+}
+
+/* API details */
+.endpointUrl {
+  color: #2563EB;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.methodBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #DBEAFE;
+  color: #1E40AF;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .nestedValue {
   margin-left: 12px;
   margin-top: 4px;
+}
+
+/* ABI Call Validation */
+.abiCallValidation {
+  margin: 12px 0;
+  padding: 12px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+}
+
+.validationsList {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.validationItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 12px;
+}
+
+.validationLabel {
+  color: #6B7280;
+  font-weight: 500;
+  min-width: 120px;
+}
+
+.validationOperator {
+  color: #DC2626;
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+.validationValue {
+  color: #059669;
+  font-weight: 600;
 }
 
 /* Table */
@@ -543,10 +1050,11 @@
   color: #059669;
   text-decoration: none;
   transition: color 0.2s;
+  font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
 .addressLink:hover {
-  color: #10B981;
+  color: #047857;
   text-decoration: underline;
 }
 

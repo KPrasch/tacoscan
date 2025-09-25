@@ -198,15 +198,130 @@ const SigningCohorts = () => {
                                   const conditionData = chainConditions?.decoded || chainConditions;
 
                                   if (conditionData && typeof conditionData === 'object') {
-                                    // Show condition type or summary
-                                    const conditionType = conditionData.condition?.conditionType ||
-                                                        conditionData.conditionType ||
-                                                        'Complex Condition';
+                                    // Extract condition details
+                                    const condition = conditionData.condition || conditionData;
+                                    const conditionType = condition.conditionType || 'Complex Condition';
                                     const version = conditionData.version || '';
+
+                                    // Get icon for condition type
+                                    const getIcon = (type) => {
+                                      const typeLower = type.toLowerCase();
+                                      if (typeLower.includes('contract')) return '📜';
+                                      if (typeLower.includes('time')) return '⏰';
+                                      if (typeLower.includes('compound')) return '🔗';
+                                      if (typeLower.includes('signing')) return '✍️';
+                                      return '📋';
+                                    };
+
+                                    // Get summary details
+                                    const getSummary = () => {
+                                      // ECDSA conditions
+                                      if (condition.verifyingKey) {
+                                        return `Key: ${formatString(condition.verifyingKey)}`;
+                                      }
+
+                                      // Signing ABI attribute conditions (calldata checks)
+                                      if (condition.abiValidation?.allowedAbiCalls) {
+                                        const abiCalls = Object.entries(condition.abiValidation.allowedAbiCalls);
+                                        if (abiCalls.length > 0) {
+                                          const [signature] = abiCalls[0];
+                                          const funcMatch = signature.match(/^(\w+)\(/);
+                                          const funcName = funcMatch ? funcMatch[1] : signature;
+
+                                          // Describe common patterns
+                                          if (funcName === 'transfer' || funcName === 'transferFrom') {
+                                            return '💸 Max transfer';
+                                          } else if (funcName === 'approve') {
+                                            return '✅ Approval limit';
+                                          } else if (funcName === 'execute' || funcName === 'execTransaction') {
+                                            // Check if there's a value limit in the validations
+                                            const [, validations] = abiCalls[0];
+                                            const hasValueLimit = validations?.some(v =>
+                                              v.indexWithinTuple === 1 || // uint256 value in tuple
+                                              (v.parameterIndex === 0 && v.returnValueTest?.comparator === '<') // or limiting the whole param
+                                            );
+                                            return hasValueLimit ? '💰 Max transaction value' : '🔒 Execute limits';
+                                          } else if (funcName.includes('swap')) {
+                                            return '🔄 Swap limits';
+                                          } else if (funcName === 'withdraw') {
+                                            return '🏦 Withdrawal limit';
+                                          } else if (funcName === 'stake' || funcName === 'unstake') {
+                                            return `🎯 ${funcName} limit`;
+                                          } else if (funcName === 'multicall' || funcName === 'batchExecute') {
+                                            return '📦 Batch limits';
+                                          } else {
+                                            return `🔧 ${funcName} limits`;
+                                          }
+                                        }
+                                      }
+
+                                      // Regular signing attribute conditions
+                                      if (condition.attributeName) {
+                                        const attr = condition.attributeName;
+                                        if (attr === 'call_data' && !condition.abiValidation) {
+                                          return 'Calldata validation';
+                                        }
+                                        if (attr === 'balance' && condition.returnValueTest) {
+                                          const val = condition.returnValueTest.value;
+                                          if (val > 1e15) {
+                                            return `ETH ${condition.returnValueTest.comparator} ${(val / 1e18).toFixed(4)}`;
+                                          }
+                                        }
+                                        return `Check: ${attr}`;
+                                      }
+
+                                      // Contract function calls
+                                      if (condition.functionAbi?.name) {
+                                        const funcName = condition.functionAbi.name;
+                                        if (funcName === 'balanceOf') {
+                                          return 'Token balance check';
+                                        } else if (funcName === 'ownerOf') {
+                                          return 'NFT ownership check';
+                                        } else if (funcName === 'hasRole') {
+                                          return 'Role verification';
+                                        }
+                                        return `${funcName}()`;
+                                      }
+
+                                      // Time conditions
+                                      if (condition.timeframe) {
+                                        if (condition.timeframe.start && condition.timeframe.end) {
+                                          return 'Time window';
+                                        }
+                                        return 'Time check';
+                                      }
+
+                                      // Compound conditions
+                                      if (condition.operands?.length) {
+                                        return `${condition.operator || 'Compound'}: ${condition.operands.length} conditions`;
+                                      }
+
+                                      if (condition.endpoint) {
+                                        try {
+                                          return new URL(condition.endpoint).hostname;
+                                        } catch {
+                                          return 'API call';
+                                        }
+                                      }
+
+                                      if (condition.contractAddress) {
+                                        return formatString(condition.contractAddress);
+                                      }
+
+                                      return null;
+                                    };
+
+                                    const summary = getSummary();
 
                                     return (
                                       <div className={styles.conditionSummary}>
-                                        <div className={styles.conditionType}>{conditionType}</div>
+                                        <div className={styles.conditionTypeRow}>
+                                          <span className={styles.conditionIcon}>{getIcon(conditionType)}</span>
+                                          <span className={styles.conditionType}>{conditionType}</span>
+                                        </div>
+                                        {summary && (
+                                          <div className={styles.conditionDetail}>{summary}</div>
+                                        )}
                                         {version && (
                                           <div className={styles.conditionVersion}>v{version}</div>
                                         )}
@@ -255,14 +370,6 @@ const SigningCohorts = () => {
         </table>
       </div>
 
-      <div className={styles.info}>
-        <p>
-          Signing cohorts are groups of node operators authorized to perform threshold
-          signing operations. Each cohort consists of nodes that can collaborate to
-          produce valid signatures using their individual key shares, without requiring
-          a DKG ritual.
-        </p>
-      </div>
       </div>
     </div>
   );

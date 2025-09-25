@@ -307,6 +307,16 @@
   padding: 4px 0;
 }
 
+.conditionTypeRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.conditionIcon {
+  font-size: 14px;
+}
+
 .conditionType {
   font-size: 11px;
   font-weight: 600;
@@ -314,10 +324,18 @@
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
+.conditionDetail {
+  font-size: 10px;
+  color: #059669;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  margin-left: 18px;
+}
+
 .conditionVersion {
   font-size: 10px;
   color: #6B7280;
   font-family: var(--font-mono, 'Space Mono', monospace);
+  margin-left: 18px;
 }
 
 .status {
