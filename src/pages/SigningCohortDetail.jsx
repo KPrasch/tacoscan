@@ -18,6 +18,40 @@ const renderConditionDetails = (conditionData) => {
   return renderConditionObject(conditionData);
 };
 
+// Helper to categorize conditions
+const categorizeCondition = (obj) => {
+  if (!obj || !obj.conditionType) return null;
+
+  const type = obj.conditionType.toLowerCase();
+
+  // Authorization conditions
+  if (type.includes('ecdsa') ||
+      type.includes('jwt') ||
+      type.includes('time') && !obj.returnValueTest ||
+      type.includes('context') ||
+      type.includes('json-rpc') && obj.endpoint?.includes('auth')) {
+    return 'authorization';
+  }
+
+  // Transaction/Usage limits
+  if (type.includes('signing-abi-attribute') ||
+      type.includes('contract') && obj.returnValueTest?.comparator?.includes('<') ||
+      (obj.attributeName === 'call_data' && obj.abiValidation) ||
+      (obj.functionAbi?.name && ['transfer', 'approve', 'execute'].includes(obj.functionAbi.name))) {
+    return 'limits';
+  }
+
+  // Compound conditions - check operands
+  if (type === 'compound' && obj.operands) {
+    const categories = obj.operands.map(op => categorizeCondition(op)).filter(Boolean);
+    if (categories.every(c => c === 'authorization')) return 'authorization';
+    if (categories.every(c => c === 'limits')) return 'limits';
+    return 'mixed';
+  }
+
+  return 'authorization'; // Default
+};
+
 // Recursively render condition objects with depth limit
 const renderConditionObject = (obj, depth = 0) => {
   if (!obj || typeof obj !== 'object') {
@@ -30,8 +64,73 @@ const renderConditionObject = (obj, depth = 0) => {
     return (
       <div className={styles.depthLimited}>
         <span className={styles.depthLimitedMessage}>
-          [+ More conditions]
+          [+ More policies]
         </span>
+      </div>
+    );
+  }
+
+  // Special handling for compound conditions - render operands grouped by category
+  if (obj.conditionType === 'compound' && obj.operands && depth === 0) {
+    // Group operands by category
+    const authConditions = [];
+    const limitConditions = [];
+
+    obj.operands.forEach((operand, idx) => {
+      const category = categorizeCondition(operand);
+      const conditionWithIndex = { ...operand, originalIndex: idx + 1 };
+
+      if (category === 'limits') {
+        limitConditions.push(conditionWithIndex);
+      } else {
+        authConditions.push(conditionWithIndex);
+      }
+    });
+
+    return (
+      <div className={styles.compoundContainer}>
+        {/* Authorization Conditions */}
+        {authConditions.length > 0 && (
+          <>
+            <div className={styles.categoryHeader}>
+              <span className={styles.categoryIcon}>✓</span>
+              <span className={styles.categoryLabel}>AUTHORIZATION</span>
+              <span className={styles.categoryDescription}>Who can request & when</span>
+            </div>
+            {authConditions.map((operand, idx) => (
+              <div key={`auth-${idx}`} className={styles.conditionCard}>
+                <span className={styles.conditionCardNumber}>{operand.originalIndex}</span>
+                {renderConditionObject(operand, depth + 1)}
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* Show operator between categories if both exist */}
+        {authConditions.length > 0 && limitConditions.length > 0 && (
+          <div className={styles.operatorDivider}>
+            <span className={styles.operatorText}>
+              {obj.operator ? obj.operator.toUpperCase() : 'AND'}
+            </span>
+          </div>
+        )}
+
+        {/* Transaction/Usage Limits */}
+        {limitConditions.length > 0 && (
+          <>
+            <div className={styles.categoryHeader}>
+              <span className={styles.categoryIcon}>⚠</span>
+              <span className={styles.categoryLabel}>TRANSACTION LIMITS</span>
+              <span className={styles.categoryDescription}>How much & how often</span>
+            </div>
+            {limitConditions.map((operand, idx) => (
+              <div key={`limit-${idx}`} className={styles.conditionCard}>
+                <span className={styles.conditionCardNumber}>{operand.originalIndex}</span>
+                {renderConditionObject(operand, depth + 1)}
+              </div>
+            ))}
+          </>
+        )}
       </div>
     );
   }
@@ -174,12 +273,30 @@ const renderConditionObject = (obj, depth = 0) => {
 
     const descriptions = getConditionDescription();
 
+    // Skip rendering wrapper for top-level compound conditions (already handled above)
+    if (conditionType === 'compound' && depth === 0) {
+      return null;
+    }
+
+    // Get category for badge display
+    const category = categorizeCondition(obj);
+
+    // For transaction limits, skip redundant header info
+    const isTransactionLimit = category === 'limits' && conditionType === 'signing-abi-attribute';
+
     return (
       <div className={styles.conditionBlock}>
-        <div className={`${styles.conditionHeader} ${style.color}`}>
-          <span className={styles.conditionIcon}>{style.icon}</span>
-          <span className={styles.conditionTypeName}>{conditionType}</span>
-        </div>
+        {!isTransactionLimit && (
+          <div className={`${styles.conditionHeader} ${style.color}`}>
+            <span className={styles.conditionIcon}>{style.icon}</span>
+            <span className={styles.conditionTypeName}>{conditionType}</span>
+            {category && depth === 0 && (
+              <span className={`${styles.categoryBadge} ${styles[`category${category.charAt(0).toUpperCase() + category.slice(1)}`]}`}>
+                {category === 'limits' ? 'LIMIT' : 'AUTH'}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* ECDSA-specific fields */}
         {obj.verifyingKey && (
@@ -234,9 +351,11 @@ const renderConditionObject = (obj, depth = 0) => {
         {/* Signing ABI Attribute fields (calldata validation) */}
         {obj.abiValidation?.allowedAbiCalls && (
           <div className={styles.conditionSection}>
-            <div className={styles.sectionTitle}>
-              {obj.attributeName === 'call_data' ? 'Transaction Calldata Validation' : 'ABI Validation'}
-            </div>
+            {!isTransactionLimit && (
+              <div className={styles.sectionTitle}>
+                {obj.attributeName === 'call_data' ? 'Transaction Calldata Validation' : 'ABI Validation'}
+              </div>
+            )}
             {Object.entries(obj.abiValidation.allowedAbiCalls).map(([signature, validations]) => {
               // Parse the function signature
               const funcMatch = signature.match(/^(\w+)\((.*)\)$/);
@@ -481,10 +600,12 @@ const renderConditionObject = (obj, depth = 0) => {
 
               return (
                 <div key={signature} className={styles.abiCallValidation}>
-                  <div className={styles.functionSignature}>
-                    <span className={styles.functionName}>{funcName}</span>
-                    <span className={styles.functionParams}> ({funcParams})</span>
-                  </div>
+                  {!isTransactionLimit && (
+                    <div className={styles.functionSignature}>
+                      <span className={styles.functionName}>{funcName}</span>
+                      <span className={styles.functionParams}> ({funcParams})</span>
+                    </div>
+                  )}
 
                   {validationDescriptions && validationDescriptions.length > 0 && (
                     <div className={styles.validationsList}>
@@ -770,47 +891,23 @@ const renderConditionObject = (obj, depth = 0) => {
           </div>
         )}
 
-        {/* Compound condition operands - show with operator between */}
-        {obj.operands && obj.operands.length > 0 && (
+        {/* For nested compound conditions, show inline */}
+        {obj.operands && obj.operands.length > 0 && depth > 0 && (
           <div className={styles.conditionSection}>
-            {depth === 0 ? (
-              // Top level - show full operands with operator between
-              <div className={styles.compoundContainer}>
-                {obj.operands.map((operand, idx) => (
-                  <React.Fragment key={idx}>
-                    {idx > 0 && (
-                      <div className={styles.operatorDivider}>
-                        <span className={styles.operatorText}>
-                          {obj.operator ? obj.operator.toUpperCase() : 'AND'}
-                        </span>
-                      </div>
-                    )}
-                    <div className={styles.operandBlock}>
-                      <span className={styles.operandNumber}>{idx + 1}</span>
-                      <div className={styles.operandConditionContent}>
-                        {renderConditionObject(operand, depth + 1)}
-                      </div>
-                    </div>
-                  </React.Fragment>
-                ))}
-              </div>
-            ) : (
-              // Nested - show compact inline display
-              <div className={styles.compactCompound}>
-                {obj.operands.map((operand, idx) => (
-                  <React.Fragment key={idx}>
-                    {idx > 0 && (
-                      <span className={styles.inlineOperator}>
-                        {obj.operator ? obj.operator.toLowerCase() : 'and'}
-                      </span>
-                    )}
-                    <span className={styles.compactCondition}>
-                      {operand.conditionType || 'condition'}
+            <div className={styles.compactCompound}>
+              {obj.operands.map((operand, idx) => (
+                <React.Fragment key={idx}>
+                  {idx > 0 && (
+                    <span className={styles.inlineOperator}>
+                      {obj.operator ? obj.operator.toLowerCase() : 'and'}
                     </span>
-                  </React.Fragment>
-                ))}
-              </div>
-            )}
+                  )}
+                  <span className={styles.compactCondition}>
+                    {operand.conditionType || 'policy'}
+                  </span>
+                </React.Fragment>
+              ))}
+            </div>
           </div>
         )}
 
@@ -860,6 +957,7 @@ const SigningCohortDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showRawJson, setShowRawJson] = useState({});
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     const fetchCohortDetails = async () => {
@@ -944,56 +1042,160 @@ const SigningCohortDetail = () => {
           </div>
         </div>
 
+        {/* Tab Navigation */}
+        <div className={styles.tabNavigation}>
+          <button
+            className={`${styles.tab} ${activeTab === 'overview' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('overview')}
+          >
+            Overview
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'policies' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('policies')}
+          >
+            Policies
+            {cohort?.conditions && Object.keys(cohort.conditions).length > 0 && (
+              <span className={styles.tabBadge}>
+                {Object.keys(cohort.conditions).length}
+              </span>
+            )}
+          </button>
+        </div>
+
         {/* Main Content Grid */}
         <div className={styles.mainContent}>
-          {/* Overview Card */}
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Overview</h2>
-            <div className={styles.cardContent}>
-              <div className={styles.infoGrid}>
-                <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>Cohort ID</span>
-                  <span className={styles.infoValue}>{cohort?.id}</span>
-                </div>
-                <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>Total Signers</span>
-                  <span className={styles.infoValue}>{cohort?.signersCount}</span>
-                </div>
-                <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>Signature Threshold</span>
-                  <span className={styles.infoValue}>{cohort?.threshold}</span>
-                </div>
-                <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>Active Status</span>
-                  <span className={styles.infoValue}>
-                    {cohort?.isActive ? 'Yes' : 'No'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Chains Card */}
-          {cohort?.chains && cohort.chains.length > 0 && (
-            <div className={styles.card}>
-              <h2 className={styles.cardTitle}>Supported Chains</h2>
-              <div className={styles.cardContent}>
-                <div className={styles.chainsList}>
-                  {cohort.chains.map((chain, index) => (
-                    <div key={index} className={styles.chainItem}>
-                      <span className={styles.chainId}>Chain ID: {chain}</span>
+          {/* Overview Tab Content */}
+          {activeTab === 'overview' && (
+            <>
+              {/* Overview Card */}
+              <div className={styles.card}>
+                <h2 className={styles.cardTitle}>Overview</h2>
+                <div className={styles.cardContent}>
+                  <div className={styles.infoGrid}>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Cohort ID</span>
+                      <span className={styles.infoValue}>{cohort?.id}</span>
                     </div>
-                  ))}
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Total Signers</span>
+                      <span className={styles.infoValue}>{cohort?.signersCount}</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Signature Threshold</span>
+                      <span className={styles.infoValue}>{cohort?.threshold}</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Active Status</span>
+                      <span className={styles.infoValue}>
+                        {cohort?.isActive ? 'Yes' : 'No'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+
+              {/* Chains Card */}
+              {cohort?.chains && cohort.chains.length > 0 && (
+                <div className={styles.card}>
+                  <h2 className={styles.cardTitle}>Supported Chains</h2>
+                  <div className={styles.cardContent}>
+                    <div className={styles.chainsList}>
+                      {cohort.chains.map((chain, index) => (
+                        <div key={index} className={styles.chainItem}>
+                          <span className={styles.chainId}>Chain ID: {chain}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Signers Table */}
+              <div className={styles.card}>
+                <h2 className={styles.cardTitle}>Signers ({cohort?.signersCount || 0})</h2>
+                <div className={styles.cardContent}>
+                  {cohort?.signers && cohort.signers.length > 0 ? (
+                    <div className={styles.tableContainer}>
+                      <table className={styles.table}>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Provider</th>
+                            <th>Operator</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {cohort.signers.map((signer, index) => (
+                            <tr key={index}>
+                              <td className={styles.indexCell}>{index + 1}</td>
+                              <td className={styles.addressCell}>
+                                <a
+                                  href={`/address/${signer.provider || signer.address || signer}`}
+                                  className={styles.addressLink}
+                                >
+                                  {formatString(signer.provider || signer.address || signer)}
+                                </a>
+                              </td>
+                              <td className={styles.addressCell}>
+                                {signer.operator ? (
+                                  <a
+                                    href={`/address/${signer.operator}`}
+                                    className={styles.addressLink}
+                                  >
+                                    {formatString(signer.operator)}
+                                  </a>
+                                ) : (
+                                  <span className={styles.noData}>-</span>
+                                )}
+                              </td>
+                              <td className={styles.statusCell}>
+                                <span className={styles.signerStatus}>
+                                  Active
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className={styles.noData}>No signers found</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Technical Details */}
+              <div className={styles.card}>
+                <h2 className={styles.cardTitle}>Technical Details</h2>
+                <div className={styles.cardContent}>
+                  <div className={styles.technicalDetails}>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Cohort State</span>
+                      <span className={styles.detailValue}>{cohort?.state}</span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Is Active</span>
+                      <span className={styles.detailValue}>{String(cohort?.isActive)}</span>
+                    </div>
+                    {cohort?.dataHash && (
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Data Hash</span>
+                        <span className={styles.detailValue}>{cohort.dataHash}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
           )}
 
-          {/* Conditions Card */}
-          {cohort?.conditions && Object.keys(cohort.conditions).length > 0 && (
+          {/* Policies Tab Content */}
+          {activeTab === 'policies' && cohort?.conditions && Object.keys(cohort.conditions).length > 0 && (
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}>On-Chain Conditions</h2>
+                <h2 className={styles.cardTitle}>Policies</h2>
                 <button
                   className={styles.globalJsonToggle}
                   onClick={() => {
@@ -1023,9 +1225,9 @@ const SigningCohortDetail = () => {
                     `Chain ${chainId}`;
 
                   return (
-                    <div key={chainId} className={styles.chainConditions}>
-                      <div className={styles.chainConditionsHeader}>
-                        <h3 className={styles.chainTitle}>{chainName}</h3>
+                    <div key={chainId} className={styles.chainSection}>
+                      <div className={styles.chainHeader}>
+                        <span className={styles.chainLabel}>{chainName.toUpperCase()}</span>
                         {chainConditions?.decoded && (
                           <button
                             className={styles.jsonToggle}
@@ -1115,83 +1317,14 @@ const SigningCohortDetail = () => {
             </div>
           )}
 
-          {/* Signers Table */}
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Signers ({cohort?.signersCount || 0})</h2>
-            <div className={styles.cardContent}>
-              {cohort?.signers && cohort.signers.length > 0 ? (
-                <div className={styles.tableContainer}>
-                  <table className={styles.table}>
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Provider</th>
-                        <th>Operator</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {cohort.signers.map((signer, index) => (
-                        <tr key={index}>
-                          <td className={styles.indexCell}>{index + 1}</td>
-                          <td className={styles.addressCell}>
-                            <a
-                              href={`/address/${signer.provider || signer.address || signer}`}
-                              className={styles.addressLink}
-                            >
-                              {formatString(signer.provider || signer.address || signer)}
-                            </a>
-                          </td>
-                          <td className={styles.addressCell}>
-                            {signer.operator ? (
-                              <a
-                                href={`/address/${signer.operator}`}
-                                className={styles.addressLink}
-                              >
-                                {formatString(signer.operator)}
-                              </a>
-                            ) : (
-                              <span className={styles.noData}>-</span>
-                            )}
-                          </td>
-                          <td className={styles.statusCell}>
-                            <span className={styles.signerStatus}>
-                              Active
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className={styles.noData}>No signers found</div>
-              )}
-            </div>
-          </div>
-
-          {/* Technical Details */}
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Technical Details</h2>
-            <div className={styles.cardContent}>
-              <div className={styles.technicalDetails}>
-                <div className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Cohort State</span>
-                  <span className={styles.detailValue}>{cohort?.state}</span>
-                </div>
-                <div className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Is Active</span>
-                  <span className={styles.detailValue}>{String(cohort?.isActive)}</span>
-                </div>
-                {cohort?.dataHash && (
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Data Hash</span>
-                    <span className={styles.detailValue}>{cohort.dataHash}</span>
-                  </div>
-                )}
+          {/* Empty state for policies tab */}
+          {activeTab === 'policies' && (!cohort?.conditions || Object.keys(cohort.conditions).length === 0) && (
+            <div className={styles.card}>
+              <div className={styles.emptyState}>
+                <p className={styles.emptyStateText}>No policies configured for this cohort</p>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Back Button */}

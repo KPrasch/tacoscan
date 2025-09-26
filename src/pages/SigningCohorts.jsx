@@ -137,7 +137,7 @@ const SigningCohorts = () => {
               <th onClick={() => handleSort('state')} className={styles.sortable}>
                 State {sortBy === 'state' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
-              <th>Conditions</th>
+              <th>Policies</th>
               <th onClick={() => handleSort('isActive')} className={styles.sortable}>
                 Status {sortBy === 'isActive' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
@@ -293,7 +293,7 @@ const SigningCohorts = () => {
 
                                       // Compound conditions
                                       if (condition.operands?.length) {
-                                        return `${condition.operator || 'Compound'}: ${condition.operands.length} conditions`;
+                                        return `${condition.operator || 'Compound'}: ${condition.operands.length} policies`;
                                       }
 
                                       if (condition.endpoint) {
@@ -312,6 +312,18 @@ const SigningCohorts = () => {
                                     };
 
                                     const summary = getSummary();
+
+                                    // For signing-abi-attribute, just show the limit summary
+                                    if (conditionType === 'signing-abi-attribute' && summary) {
+                                      return (
+                                        <div className={styles.conditionSummary}>
+                                          <div className={styles.conditionDetail} style={{marginLeft: 0}}>
+                                            <span className={styles.conditionIcon}>{getIcon(conditionType)}</span>
+                                            {' '}{summary}
+                                          </div>
+                                        </div>
+                                      );
+                                    }
 
                                     return (
                                       <div className={styles.conditionSummary}>
@@ -341,7 +353,7 @@ const SigningCohorts = () => {
                                     return (
                                       <div className={styles.conditionItem}>
                                         <span className={styles.conditionValue} style={{fontSize: '10px'}}>
-                                          Encrypted conditions
+                                          Encrypted policies
                                         </span>
                                       </div>
                                     );
