@@ -4,6 +4,7 @@ import styles from './SigningCohortDetail.module.css';
 import { formatString, formatDate, calculateTimeMoment } from './data';
 import { getSigningCohortDetails } from '../utils/contractReader';
 import { getCurrentNetwork } from '../utils/dataSource';
+import PolicyComposer from '../components/PolicyComposer';
 
 // Helper function to render condition details
 const renderConditionDetails = (conditionData) => {
@@ -610,10 +611,32 @@ const renderConditionObject = (obj, depth = 0) => {
                   {validationDescriptions && validationDescriptions.length > 0 && (
                     <div className={styles.validationsList}>
                       {validationDescriptions.map((desc, idx) => (
-                        <div key={idx} className={styles.validationItem}>
-                          <span className={styles.validationLabel}>{desc.label}:</span>
-                          <span className={styles.validationOperator}> {desc.operator} </span>
-                          <span className={styles.validationValue}>{desc.value}</span>
+                        <div key={idx} className={`${styles.validationItem} ${isTransactionLimit ? styles.limitItem : ''}`}>
+                          {isTransactionLimit ? (
+                            // For transaction limits, show a simplified view
+                            <>
+                              <span className={styles.limitIcon}>
+                                {desc.label.includes('Maximum Transaction') ? '💰' :
+                                 desc.label.includes('Maximum Amount') ? '💸' :
+                                 desc.label.includes('Approval') ? '✅' :
+                                 desc.label.includes('Swap') ? '🔄' :
+                                 desc.label.includes('Withdrawal') ? '🏦' :
+                                 '📊'}
+                              </span>
+                              <span className={styles.limitDescription}>
+                                {desc.label}
+                              </span>
+                              <span className={styles.limitOperator}>{desc.operator}</span>
+                              <span className={styles.limitValue}>{desc.value}</span>
+                            </>
+                          ) : (
+                            // For other validations, show the full details
+                            <>
+                              <span className={styles.validationLabel}>{desc.label}:</span>
+                              <span className={styles.validationOperator}> {desc.operator} </span>
+                              <span className={styles.validationValue}>{desc.value}</span>
+                            </>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -958,6 +981,7 @@ const SigningCohortDetail = () => {
   const [error, setError] = useState(null);
   const [showRawJson, setShowRawJson] = useState({});
   const [activeTab, setActiveTab] = useState('overview');
+  const [showPolicyComposer, setShowPolicyComposer] = useState(false);
 
   useEffect(() => {
     const fetchCohortDetails = async () => {
@@ -1192,29 +1216,62 @@ const SigningCohortDetail = () => {
           )}
 
           {/* Policies Tab Content */}
-          {activeTab === 'policies' && cohort?.conditions && Object.keys(cohort.conditions).length > 0 && (
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}>Policies</h2>
-                <button
-                  className={styles.globalJsonToggle}
-                  onClick={() => {
-                    const allChainIds = Object.keys(cohort.conditions);
-                    const allShowing = allChainIds.every(id => showRawJson[id]);
-                    const newState = {};
-                    allChainIds.forEach(id => {
-                      newState[id] = !allShowing;
-                    });
-                    setShowRawJson(newState);
-                  }}
-                  title="Toggle all JSON views"
-                >
-                  <svg className={styles.jsonIcon} viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd"/>
-                  </svg>
-                  {Object.values(showRawJson).some(v => v) ? 'Hide All JSON' : 'Show All JSON'}
-                </button>
+          {activeTab === 'policies' && (
+            <>
+              {/* Add New Policy Section */}
+              <div className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <h2 className={styles.cardTitle}>Add New Policy</h2>
+                  <button
+                    className={styles.toggleButton}
+                    onClick={() => setShowPolicyComposer(!showPolicyComposer)}
+                    title={showPolicyComposer ? "Collapse" : "Expand"}
+                  >
+                    <svg className={styles.toggleIcon} viewBox="0 0 20 20" fill="currentColor">
+                      {showPolicyComposer ? (
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      ) : (
+                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                      )}
+                    </svg>
+                  </button>
+                </div>
+                {showPolicyComposer && (
+                  <PolicyComposer
+                    onSave={(policyData) => {
+                      console.log('New policy created:', policyData);
+                      // TODO: Send to blockchain or save to state
+                      setShowPolicyComposer(false);
+                    }}
+                    chainId={cohort?.chains?.[0] || '11155111'}
+                  />
+                )}
               </div>
+
+              {/* Existing Policies */}
+              {cohort?.conditions && Object.keys(cohort.conditions).length > 0 && (
+                <div className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <h2 className={styles.cardTitle}>Existing Policies</h2>
+                    <button
+                      className={styles.globalJsonToggle}
+                      onClick={() => {
+                        const allChainIds = Object.keys(cohort.conditions);
+                        const allShowing = allChainIds.every(id => showRawJson[id]);
+                        const newState = {};
+                        allChainIds.forEach(id => {
+                          newState[id] = !allShowing;
+                        });
+                        setShowRawJson(newState);
+                      }}
+                      title="Toggle all JSON views"
+                    >
+                      <svg className={styles.jsonIcon} viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd"/>
+                      </svg>
+                      {Object.values(showRawJson).some(v => v) ? 'Hide All JSON' : 'Show All JSON'}
+                    </button>
+                  </div>
               <div className={styles.cardContent}>
                 {Object.entries(cohort.conditions).map(([chainId, chainConditions]) => {
                   const chainName =
@@ -1315,16 +1372,22 @@ const SigningCohortDetail = () => {
                 })}
               </div>
             </div>
+              )}
+
+              {/* Empty state - only show when no existing policies */}
+              {(!cohort?.conditions || Object.keys(cohort.conditions).length === 0) && (
+                <div className={styles.card}>
+                  <div className={styles.emptyState}>
+                    <p className={styles.emptyStateText}>No existing policies</p>
+                    <p className={styles.emptyStateDescription}>
+                      Use the form above to create transaction limits and access controls for this cohort.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
-          {/* Empty state for policies tab */}
-          {activeTab === 'policies' && (!cohort?.conditions || Object.keys(cohort.conditions).length === 0) && (
-            <div className={styles.card}>
-              <div className={styles.emptyState}>
-                <p className={styles.emptyStateText}>No policies configured for this cohort</p>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Back Button */}
@@ -1334,6 +1397,7 @@ const SigningCohortDetail = () => {
           </button>
         </div>
       </div>
+
     </div>
   );
 };
