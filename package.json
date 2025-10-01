@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "@graphprotocol/client-cli": "^2.2.16",
+    "@nucypher/shared": "0.6.0-alpha.2",
+    "@nucypher/taco": "0.7.0-alpha.2",
     "@tanstack/react-query": "^5.65.1",
     "@testing-library/jest-dom": "5.12.0",
     "@testing-library/react": "11.2.6",
