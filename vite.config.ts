@@ -9,7 +9,7 @@ export default defineConfig({
         port: 4001
     },
     plugins: [
-        react(), 
+        react(),
         svgr(),
         visualizer({
             filename: 'dist/stats.html',
@@ -18,6 +18,7 @@ export default defineConfig({
             brotliSize: true
         })
     ],
+    publicDir: 'public',
     build: {
         rollupOptions: {
             output: {
