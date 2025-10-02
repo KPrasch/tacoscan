@@ -42,11 +42,23 @@
   letter-spacing: 0.5px;
 }
 
-.networkButton:hover {
+.networkButton:hover:not(:disabled) {
   background: rgba(150, 255, 94, 0.1);
   border-color: var(--network-color, #96FF5E);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.networkButton.active {
+  background: var(--network-color, #96FF5E);
+  border-color: var(--network-color, #96FF5E);
+  color: #FFFFFF;
+  cursor: default;
+  opacity: 0.9;
+}
+
+.networkButton:disabled {
+  cursor: default;
 }
 
 .dot {
