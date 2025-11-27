@@ -541,7 +541,29 @@
   gap: 8px;
   padding: 10px 12px;
   border-bottom: 1px solid #E5E7EB;
-  background: #F9FAFB;
+  background: #F3F4F6;
+}
+
+.headerLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6B7280;
+  margin-right: 6px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.headerVarBadge {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%);
+  color: #5B21B6;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  border: 1px solid #C4B5FD;
+  margin-right: 12px;
 }
 
 .conditionHeaderText {
@@ -601,7 +623,7 @@
 .typeJson { background: #F3F4F6; color: #374151; }
 .typeRpc { background: #F3F4F6; color: #374151; }
 .typeContext { background: #F3F4F6; color: #374151; }
-.typeSigning { background: #FEE2E2; color: #991B1B; }
+.typeSigning { background: #F3F4F6; color: #374151; }
 .typeEcdsa { background: #F3F4F6; color: #374151; }
 .typeDefault { background: #F3F4F6; color: #374151; }
 
@@ -668,23 +690,26 @@
 
 /* Function signature styling */
 .functionSignature {
-  background: #F9FAFB;
-  border: 1px solid #E5E7EB;
-  border-radius: 4px;
-  padding: 6px 10px;
-  margin: 6px 0;
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  padding: 8px 14px;
+  margin: 8px 0 12px 0;
   font-family: var(--font-mono, 'Space Mono', monospace);
-  font-size: 12px;
+  font-size: 13px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .functionName {
   color: #6B21A8;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .functionParams {
   color: #6B7280;
-  margin-left: 4px;
+  font-weight: 500;
 }
 
 .parametersList {
@@ -772,8 +797,8 @@
 
 .conditionCardNumber {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  top: 8px;
+  left: 12px;
   z-index: 1;
   display: inline-flex;
   align-items: center;
@@ -791,11 +816,19 @@
   border: none;
   box-shadow: none;
   margin: 0;
-  padding-left: 48px;
+}
+
+.conditionCard .sequentialContainer {
+  border: none;
+  box-shadow: none;
 }
 
 .conditionCard .conditionHeader {
-  padding-left: 0;
+  padding-left: 48px;
+}
+
+.conditionCard .conditionSection {
+  padding-left: 48px;
 }
 
 /* Clean display for transaction limits without redundant info */
@@ -842,6 +875,15 @@
   align-items: center;
   justify-content: center;
   margin: 20px 0;
+  gap: 16px;
+}
+
+.operatorDivider::before,
+.operatorDivider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #E5E7EB;
 }
 
 .operatorText {
@@ -998,13 +1040,14 @@
 
 .curveBadge {
   display: inline-block;
-  background: #E5E7EB;
+  background: linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%);
   color: #374151;
-  padding: 2px 8px;
+  padding: 4px 10px;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
   font-family: var(--font-mono, 'Space Mono', monospace);
+  border: 1px solid #D1D5DB;
 }
 
 /* Signing attribute specific */
@@ -1164,21 +1207,30 @@
 
 /* Simplified display for transaction limits */
 .limitItem {
-  background: #F0FDF4;
-  padding: 10px 12px;
-  border-radius: 6px;
-  border: none;
-  margin: 6px 0;
-  border-left: 3px solid #059669;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #D1FAE5;
+  margin: 8px 0;
+  box-shadow: 0 1px 2px rgba(5, 150, 105, 0.05);
 }
 
 .limitIcon {
-  font-size: 16px;
-  margin-right: 4px;
+  font-size: 18px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #D1FAE5;
+  border-radius: 6px;
 }
 
 .limitDescription {
-  flex: 1;
   color: #065F46;
   font-weight: 600;
   font-family: var(--font-mono, 'Space Mono', monospace);
@@ -1187,16 +1239,55 @@
 
 .limitOperator {
   color: #059669;
-  font-weight: 600;
-  padding: 0 8px;
+  font-weight: 700;
+  font-size: 14px;
   font-family: var(--font-mono, 'Space Mono', monospace);
+  background: #D1FAE5;
+  padding: 4px 10px;
+  border-radius: 4px;
 }
 
 .limitValue {
-  color: #059669;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Transaction limits wrapper */
+.transactionLimitsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+/* Signing context field at bottom */
+.signingContextField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #E5E7EB;
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.signingContextLabel {
+  font-weight: 500;
+}
+
+.signingContextBadge {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  color: #92400E;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
   font-family: var(--font-mono, 'Space Mono', monospace);
-  font-size: 14px;
+  border: 1px solid #FCD34D;
 }
 
 /* Modal overlay */
@@ -1400,6 +1491,255 @@
 .backButton:hover {
   background: #10B981;
   transform: translateY(-1px);
+}
+
+/* ============================
+   CONTEXT VARIABLE STYLES
+   ============================ */
+
+.contextVarRef {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%);
+  border: 1px solid #C4B5FD;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.contextVarIcon {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.contextVarName {
+  color: #5B21B6;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.contextVarDesc {
+  color: #6B7280;
+  font-size: 11px;
+  font-style: italic;
+  margin-left: 4px;
+}
+
+.contextVarSource {
+  color: #7C3AED;
+  font-size: 11px;
+  font-weight: 500;
+  background: rgba(124, 58, 237, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.fieldOperator {
+  color: #059669;
+  font-weight: 600;
+  margin: 0 6px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.limitOperator {
+  color: #059669;
+  font-weight: 600;
+  margin: 0 8px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.amountValue {
+  color: #059669;
+  font-weight: 600;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.nestedValidation {
+  margin: 8px 0;
+}
+
+.nestedValidation .nestedChildren {
+  margin-left: 16px;
+  padding-left: 12px;
+  border-left: 2px solid #E5E7EB;
+}
+
+/* ============================
+   SEQUENTIAL CONDITION STYLES
+   ============================ */
+
+.sequentialContainer {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.typeSequential {
+  background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
+  color: #3730A3;
+}
+
+.stepCount {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.sequentialSteps {
+  padding: 16px;
+}
+
+.sequentialStep {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 0;
+}
+
+.sequentialStep:last-child .stepLine {
+  display: none;
+}
+
+.stepConnector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 32px;
+  position: relative;
+}
+
+.stepNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #4F46E5;
+  color: #FFFFFF;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  /* Position to vertically center with the header bar (padding: 10px + ~10px line-height) */
+  margin-top: 6px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  flex-shrink: 0;
+}
+
+.stepLine {
+  width: 2px;
+  flex: 1;
+  min-height: 20px;
+  background: linear-gradient(to bottom, #4F46E5, #A5B4FC);
+  margin: 8px 0;
+}
+
+.stepContent {
+  flex: 1;
+  padding-bottom: 16px;
+}
+
+.sequentialStep:last-child .stepContent {
+  padding-bottom: 0;
+}
+
+.variableAssignment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #EDE9FE;
+  border: 1px solid #C4B5FD;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.variableIcon {
+  font-size: 12px;
+}
+
+.variableName {
+  color: #5B21B6;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ============================
+   NESTED COMPOUND STYLES
+   ============================ */
+
+.nestedCompound {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.compoundOperands {
+  padding: 16px;
+}
+
+.operandCard {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.operandCard .conditionBlock {
+  border: none;
+  margin: 0;
+  box-shadow: none;
+}
+
+.operandCard .conditionHeader {
+  border-radius: 0;
+}
+
+.operatorBadge {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.operatorBadge span {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #059669;
+  color: #FFFFFF;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  letter-spacing: 0.5px;
+}
+
+/* ============================
+   NESTED CHILDREN (generic)
+   ============================ */
+
+.nestedChildren {
+  padding: 12px 16px;
+  background: #F9FAFB;
+  border-top: 1px solid #E5E7EB;
+}
+
+.nestedChild {
+  margin-bottom: 12px;
+}
+
+.nestedChild:last-child {
+  margin-bottom: 0;
+}
+
+.nestedChild .conditionBlock {
+  margin: 0;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  overflow: hidden;
 }
 
 /* Responsive Design */

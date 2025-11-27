@@ -844,152 +844,58 @@ const getAllRitualsWithPagination = async () => {
 export const getRituals = async (isSearch, searchInput) => {
     const emptyData = { rituals: [] };
 
-    // Check if we're on a testnet without subgraph
-    const { shouldUseContractReads, getCurrentNetwork } = await import('../utils/dataSource');
+    // Since the taco-matic subgraph is no longer available,
+    // always use contract reads for ritual data
+    const { getCurrentNetwork } = await import('../utils/dataSource');
     const { getAllRituals } = await import('../utils/contractReader');
     const currentNetwork = getCurrentNetwork();
 
-    if (shouldUseContractReads(currentNetwork)) {
-        // For testnets, fetch directly from contracts
-        console.log(`Fetching rituals from ${currentNetwork} contracts...`);
-        try {
-            const rituals = await getAllRituals(currentNetwork);
-            console.log(`Found ${rituals.length} rituals on ${currentNetwork}`);
-
-            // If searching, filter by ID or authority
-            if (isSearch && searchInput) {
-                const filtered = rituals.filter(r =>
-                    r.id?.toString() === searchInput ||
-                    r.authority?.toLowerCase() === searchInput.toLowerCase()
-                );
-                return { rituals: filtered };
-            }
-
-            return { rituals };
-        } catch (error) {
-            console.error('Error fetching rituals from contract:', error);
-            return {
-                rituals: [],
-                _testnetMessage: `Error fetching data from ${currentNetwork} contracts: ${error.message}`
-            };
-        }
-    }
-
+    console.log(`Fetching rituals from ${currentNetwork} contracts...`);
     try {
-        let data;
-        if (!isSearch) {
-            // Try paginated fetch first, fallback to single query if it fails
-            console.log('Fetching all rituals with pagination...');
-            try {
-                const ritualsData = await getAllRitualsWithPagination();
-                data = { data: ritualsData };
-            } catch (paginationError) {
-                console.warn('Pagination failed, falling back to single query:', paginationError.message);
-                // Fallback to original single query without pagination
-                const fallbackQuery = () => client.execute(client.GetAllRitualsQueryDocument, { skip: 0 });
-                data = await retryQuery(fallbackQuery, 2); // Fewer retries for fallback
-            }
-        } else {
-            const fundingTxHashHex = convertToLittleEndian(searchInput.toLowerCase());
-            data = await retryQuery(() => client.execute(client.GetRitualsQueryByUserDocument, {
-                authority: searchInput.toLowerCase(),
-                id: searchInput.toLowerCase(),
-                txHash: fundingTxHashHex,
-            }));
+        const rituals = await getAllRituals(currentNetwork);
+        console.log(`Found ${rituals.length} rituals on ${currentNetwork}`);
+
+        // If searching, filter by ID or authority
+        if (isSearch && searchInput) {
+            const filtered = rituals.filter(r =>
+                r.id?.toString() === searchInput ||
+                r.authority?.toLowerCase() === searchInput.toLowerCase()
+            );
+            return { rituals: filtered };
         }
-        
-        console.log("GraphQL Response:", data);
-        
-        // Check for GraphQL errors
-        if (data.errors) {
-            console.error("GraphQL errors:", data.errors);
-            return emptyData;
-        }
-        
-        if (data.data !== undefined && data.data !== null) {
-            // Fetch operator addresses for all participants
-            const stakersData = await client.execute(client.GetAllStakersQueryDocument, {});
-            const operatorMap = {};
-            
-            if (stakersData.data?.appAuthorizations) {
-                stakersData.data.appAuthorizations.forEach(auth => {
-                    if (auth.tacoOperator) {
-                        const stakerId = auth.id.split('-')[0].toLowerCase();
-                        operatorMap[stakerId] = {
-                            operator: auth.tacoOperator.operator,
-                            confirmed: auth.tacoOperator.confirmed
-                        };
-                    }
-                });
-            }
-            
-            // Add operatorMap to each ritual WITHOUT fetching feeModel
-            // feeModel will be fetched on-demand when ritual details are expanded
-            if (data.data.rituals) {
-                data.data.rituals = data.data.rituals.map(ritual => ({
-                    ...ritual,
-                    feeModel: null, // Will be fetched lazily when needed
-                    operatorAddresses: ritual.participants.reduce((acc, participant) => {
-                        const operatorInfo = operatorMap[participant.toLowerCase()];
-                        acc[participant] = operatorInfo && operatorInfo.confirmed ? operatorInfo.operator : "-";
-                        return acc;
-                    }, {})
-                }));
-            }
-            
-            return data.data;
-        }
-    } catch (e) {
-        console.error("error to fetch ritual data:", e);
-        // Return empty but properly structured data to prevent null reference errors
-        return emptyData;
+
+        return { rituals };
+    } catch (error) {
+        console.error('Error fetching rituals from contract:', error);
+        return {
+            rituals: [],
+            _errorMessage: `Error fetching ritual data from ${currentNetwork} contracts: ${error.message}`
+        };
     }
-    return emptyData;
 };
 
 export const getRitualsByStakingProvider = async (searchInput) => {
-  const emptyData = JSON.parse(`[]`);
+  // Since the taco-matic subgraph is no longer available,
+  // use contract reads and filter by participant
   try {
-    let data;
-    data = await client.execute(client.GetRitualsQueryByStakingProviderDocument, {
-      id: searchInput.toLowerCase(),
-    });
+    const { getCurrentNetwork } = await import('../utils/dataSource');
+    const { getAllRituals } = await import('../utils/contractReader');
+    const currentNetwork = getCurrentNetwork();
 
-    if (data.data !== undefined) {
-      // Fetch operator addresses for all participants
-      const stakersData = await client.execute(client.GetAllStakersQueryDocument, {});
-      const operatorMap = {};
-      
-      if (stakersData.data?.appAuthorizations) {
-        stakersData.data.appAuthorizations.forEach(auth => {
-          if (auth.tacoOperator) {
-            const stakerId = auth.id.split('-')[0].toLowerCase();
-            operatorMap[stakerId] = {
-              operator: auth.tacoOperator.operator,
-              confirmed: auth.tacoOperator.confirmed
-            };
-          }
-        });
-      }
-      
-      // Add operatorMap to each ritual
-      if (data.data.rituals) {
-        data.data.rituals = data.data.rituals.map(ritual => ({
-          ...ritual,
-          operatorAddresses: ritual.participants.reduce((acc, participant) => {
-            const operatorInfo = operatorMap[participant.toLowerCase()];
-            acc[participant] = operatorInfo && operatorInfo.confirmed ? operatorInfo.operator : "-";
-            return acc;
-          }, {})
-        }));
-      }
+    const allRituals = await getAllRituals(currentNetwork);
 
-      return data.data;
-    }
+    // Filter rituals where searchInput is in participants
+    const filteredRituals = allRituals.filter(ritual =>
+      ritual.participants?.some(p =>
+        p.toLowerCase() === searchInput.toLowerCase()
+      )
+    );
+
+    return { rituals: filteredRituals };
   } catch (e) {
-    console.log("error to fetch ritual data " + e);
+    console.log("error to fetch ritual data by staking provider: " + e);
+    return { rituals: [] };
   }
-  return emptyData;
 };
 
 // Fetch all network events from multiple contracts
