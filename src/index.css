@@ -1,133 +1,127 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
 
 /* TACo Style Guide - Light Theme */
 :root {
-  /* Typography */
-  --font-mono: 'Space Mono', monospace;
-  
-  /* Background Colors */
-  --color-primary-bg: #FFFFFF;
-  --color-secondary-bg: #F8F9FA;
-  --color-tertiary-bg: #F4F4F4;
-  
-  /* Text Colors */
-  --color-primary-text: #0A0A0A;
-  --color-secondary-text: #5A5A5A;
-  --color-tertiary-text: #909090;
-  --color-inverse-text: #FFFFFF;
-  
-  /* Accent Colors */
-  --color-primary-accent: #96FF5E;
-  --color-secondary-accent: #7ACC47;
-  --color-tertiary-accent: #B8FF8F;
-  
-  /* Functional Colors */
-  --color-border-default: #E5E7EB;
-  --color-border-focus: #96FF5E;
-  --color-error: #EF4444;
-  --color-success: #96FF5E;
-  --color-info: #3B82F6;
-  
-  /* Dark Sections */
-  --color-dark-bg: #0A0A0A;
-  --color-dark-surface: #1A1A1A;
-  --color-dark-border: #2A2A2A;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 6px rgba(0,0,0,0.08);
-  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
-}
+    /* Typography */
+    --font-mono: "Space Mono", monospace;
 
-/* Apply 90% zoom on desktop only */
-@media (min-width: 1024px) {
-  html {
-    zoom: 0.9;
-    -moz-transform: scale(0.9);
-    -moz-transform-origin: 0 0;
-  }
+    /* Background Colors */
+    --color-primary-bg: #ffffff;
+    --color-secondary-bg: #f8f9fa;
+    --color-tertiary-bg: #f4f4f4;
+
+    /* Text Colors */
+    --color-primary-text: #0a0a0a;
+    --color-secondary-text: #5a5a5a;
+    --color-tertiary-text: #909090;
+    --color-inverse-text: #ffffff;
+
+    /* Accent Colors */
+    --color-primary-accent: #96ff5e;
+    --color-secondary-accent: #7acc47;
+    --color-tertiary-accent: #b8ff8f;
+
+    /* Functional Colors */
+    --color-border-default: #e5e7eb;
+    --color-border-focus: #96ff5e;
+    --color-error: #ef4444;
+    --color-success: #96ff5e;
+    --color-info: #3b82f6;
+
+    /* Dark Sections */
+    --color-dark-bg: #0a0a0a;
+    --color-dark-surface: #1a1a1a;
+    --color-dark-border: #2a2a2a;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 
 body {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-feature-settings: "ss02" 1, "onum" 1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: var(--color-secondary-bg);
-  color: var(--color-primary-text);
-  min-height: 100vh;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-feature-settings:
+        "ss02" 1,
+        "onum" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--color-secondary-bg);
+    color: var(--color-primary-text);
+    min-height: 100vh;
 }
 
 button:focus {
-  outline: none;
+    outline: none;
 }
 
 code {
-  font-family: var(--font-mono);
+    font-family: var(--font-mono);
 }
 
 /* Typography Scale */
 .headline {
-  font-family: var(--font-mono);
-  font-weight: 700;
+    font-family: var(--font-mono);
+    font-weight: 700;
 }
 
 /* Desktop sizes */
 @media (min-width: 1024px) {
-  .text-hero {
-    font-size: 5rem;
-    line-height: 4.8rem;
-    letter-spacing: -0.15rem;
-  }
-  
-  .text-section {
-    font-size: 1.6rem;
-    line-height: 1.8rem;
-    letter-spacing: -0.03rem;
-  }
-  
-  .text-body {
-    font-size: 0.938rem;
-    line-height: 1rem;
-  }
+    .text-hero {
+        font-size: 5rem;
+        line-height: 4.8rem;
+        letter-spacing: -0.15rem;
+    }
+
+    .text-section {
+        font-size: 1.6rem;
+        line-height: 1.8rem;
+        letter-spacing: -0.03rem;
+    }
+
+    .text-body {
+        font-size: 0.938rem;
+        line-height: 1rem;
+    }
 }
 
 /* Mobile sizes */
 @media (max-width: 1023px) {
-  .text-hero {
-    font-size: 2.2rem;
-    line-height: 2.1rem;
-    letter-spacing: -0.02rem;
-  }
-  
-  .text-section {
-    font-size: 1.25rem;
-    line-height: 1.4rem;
-    letter-spacing: -0.02rem;
-  }
-  
-  .text-body {
-    font-size: 0.938rem;
-  }
+    .text-hero {
+        font-size: 2.2rem;
+        line-height: 2.1rem;
+        letter-spacing: -0.02rem;
+    }
+
+    .text-section {
+        font-size: 1.25rem;
+        line-height: 1.4rem;
+        letter-spacing: -0.02rem;
+    }
+
+    .text-body {
+        font-size: 0.938rem;
+    }
 }
 
 /* Fade animations */
 .fade-element {
-  opacity: 0;
-  transform: translateY(50px);
-  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    transform: translateY(50px);
+    transition:
+        opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .fade-in {
-  opacity: 1 !important;
-  transform: translateY(0) !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
 }
 
 /* Highlight effect */
 .highlight {
-  color: var(--color-primary-accent);
-  transition: color 0.8s ease-in-out;
-  transition-delay: 0.4s;
+    color: var(--color-primary-accent);
+    transition: color 0.8s ease-in-out;
+    transition-delay: 0.4s;
 }

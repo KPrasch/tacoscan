@@ -20,7 +20,7 @@
 }
 
 .header {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto 32px;
 }
 
@@ -58,7 +58,7 @@
 }
 
 .statsGrid {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto 24px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -104,7 +104,7 @@
 }
 
 .section {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto 24px;
   background: #FFFFFF;
   border: 1px solid #E5E7EB;

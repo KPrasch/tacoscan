@@ -102,7 +102,7 @@ const NodesPage = ({ network = 'polygon', isSearch = false, searchInput = '' } =
 
   return (
     <div style={{ background: "#F9FAFB", minHeight: "100vh", paddingBottom: "60px" }}>
-      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "24px 20px" }}>
+      <div style={{ maxWidth: "1600px", margin: "0 auto", padding: "24px 20px" }}>
         {isSearch ? (
           <h3 style={{ margin: 0, color: "#0A0A0A" }}>Search Results: {searchInput}</h3>
         ) : (
