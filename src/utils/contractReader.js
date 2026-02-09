@@ -382,19 +382,20 @@ const getCoordinator = (network = 'mainnet') => {
 
   switch (network) {
     case 'lynx':
-      // Check if Lynx has a Coordinator contract
-      artifacts = lynxArtifacts['11155111'];
+      // Coordinator is on Polygon Amoy (80002) for lynx
+      artifacts = lynxArtifacts['80002'];
       break;
     case 'tapir':
-      // Check if Tapir has a Coordinator contract
-      artifacts = tapirArtifacts['11155111'];
+      // Coordinator is on Polygon Amoy (80002) for tapir
+      artifacts = tapirArtifacts['80002'];
       break;
     case 'polygon':
       artifacts = mainnetArtifacts['137'];
       break;
     case 'mainnet':
     default:
-      artifacts = mainnetArtifacts['1'];
+      // Coordinator is on Polygon (137) for mainnet
+      artifacts = mainnetArtifacts['137'];
       break;
   }
 
@@ -422,7 +423,8 @@ export const getAllRituals = async (network = 'mainnet') => {
       return [];
     }
 
-    const rpcUrl = getRpcUrl(network);
+    // Rituals are always on Polygon/Polygon Amoy, use Polygon RPC
+    const rpcUrl = import.meta.env.VITE_RPC_ETH_POLYGON || 'https://polygon-rpc.com';
     const web3 = new Web3(rpcUrl);
     const contract = new web3.eth.Contract(coordinator.abi, coordinator.address);
 
