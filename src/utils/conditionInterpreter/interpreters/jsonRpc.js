@@ -4,6 +4,8 @@
  * Handles JSON and RPC API call conditions.
  */
 
+import { parseContextVariable } from "../formatters.js";
+
 /**
  * Interpret a JSON-RPC condition
  * @param {Object} condition
@@ -15,67 +17,75 @@ export function interpretJsonRpc(condition) {
 
   if (condition.endpoint) {
     fields.push({
-      label: 'Endpoint',
+      label: "Endpoint",
       value: condition.endpoint,
-      type: 'text'
+      type: "text",
     });
   }
 
   if (condition.method) {
     fields.push({
-      label: 'Method',
+      label: "Method",
       value: condition.method,
-      type: 'badge'
+      type: "badge",
     });
   }
 
   // JSON query path
   if (condition.query) {
     fields.push({
-      label: 'Query',
+      label: "Query",
       value: condition.query,
-      type: 'text'
+      type: "text",
     });
   }
 
   // Data source
   if (condition.data) {
     fields.push({
-      label: 'Data',
+      label: "Data",
       value: condition.data,
-      type: 'text'
+      type: "text",
     });
   }
 
   // Return value test
   if (condition.returnValueTest) {
     let formattedValue = condition.returnValueTest.value;
+    const ctxVar = parseContextVariable(formattedValue);
+    if (ctxVar.isContextVar) {
+      formattedValue = `:${ctxVar.varName}`;
+    }
 
     // Handle operations
     if (condition.returnValueTest.operations) {
-      const ops = condition.returnValueTest.operations.map(o => o.operation).join(', ');
+      const ops = condition.returnValueTest.operations
+        .map((o) => o.operation)
+        .join(", ");
       fields.push({
-        label: 'Operations',
+        label: "Operations",
         value: ops,
-        type: 'badge'
+        type: "badge",
       });
     }
 
     test = {
       comparator: condition.returnValueTest.comparator,
       value: String(formattedValue),
-      label: 'Result',
-      rawValue: condition.returnValueTest.value
+      label: "Result",
+      rawValue: condition.returnValueTest.value,
     };
   }
 
-  const type = condition.conditionType?.toLowerCase().includes('rpc') ? 'rpc' : 'json';
+  const type = condition.conditionType?.toLowerCase().includes("rpc")
+    ? "rpc"
+    : "json";
 
   const result = {
     type,
-    label: type === 'rpc' ? 'RPC Call' : 'JSON Query',
+    label: type === "rpc" ? "RPC Call" : "JSON Query",
     fields,
-    raw: condition
+    raw: condition,
   };
 
   if (test) {

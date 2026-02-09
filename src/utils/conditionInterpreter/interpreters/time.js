@@ -4,7 +4,7 @@
  * Handles time-based conditions with timeframes.
  */
 
-import { formatTimestamp } from '../formatters.js';
+import { formatTimestamp, parseContextVariable } from "../formatters.js";
 
 /**
  * Interpret a time condition
@@ -20,18 +20,18 @@ export function interpretTime(condition) {
     if (condition.timeframe.start) {
       const formatted = formatTimestamp(condition.timeframe.start);
       fields.push({
-        label: 'Start',
+        label: "Start",
         value: `${formatted.absolute} (${formatted.relative})`,
-        type: 'timestamp'
+        type: "timestamp",
       });
     }
 
     if (condition.timeframe.end) {
       const formatted = formatTimestamp(condition.timeframe.end);
       fields.push({
-        label: 'End',
+        label: "End",
         value: `${formatted.absolute} (${formatted.relative})`,
-        type: 'timestamp'
+        type: "timestamp",
       });
     }
   }
@@ -41,19 +41,23 @@ export function interpretTime(condition) {
     const comp = condition.returnValueTest.comparator;
     const val = condition.returnValueTest.value;
 
-    let label = 'Time';
-    if (comp === '<' || comp === '<=') {
-      label = 'Before';
-    } else if (comp === '>' || comp === '>=') {
-      label = 'After';
+    let label = "Time";
+    if (comp === "<" || comp === "<=") {
+      label = "Before";
+    } else if (comp === ">" || comp === ">=") {
+      label = "After";
     }
 
     let formattedValue;
-    if (!isNaN(val) && val >= 0) {
+    const ctxVar = parseContextVariable(val);
+    if (ctxVar.isContextVar) {
+      formattedValue = `:${ctxVar.varName}`;
+    } else if (!isNaN(val) && val >= 0) {
       const formatted = formatTimestamp(val);
-      formattedValue = val === 0
-        ? `0 (${formatted.absolute})`
-        : `${val} (${formatted.absolute} - ${formatted.relative})`;
+      formattedValue =
+        val === 0
+          ? `0 (${formatted.absolute})`
+          : `${val} (${formatted.absolute} - ${formatted.relative})`;
     } else {
       formattedValue = String(val);
     }
@@ -62,15 +66,15 @@ export function interpretTime(condition) {
       comparator: comp,
       value: formattedValue,
       label,
-      rawValue: val
+      rawValue: val,
     };
   }
 
   const result = {
-    type: 'time',
-    label: 'Time Condition',
+    type: "time",
+    label: "Time Condition",
     fields,
-    raw: condition
+    raw: condition,
   };
 
   if (test) {
