@@ -436,43 +436,6 @@ const SigningCohortDetail = () => {
 
                                   // Show raw JSON if toggle is active
                                   if (showRawJson[chainId] && conditionData) {
-                                    // Format JSON with custom replacer for better readability
-                                    const formatJSON = (obj) => {
-                                      const json = JSON.stringify(obj, null, 2);
-                                      // Highlight property names and values
-                                      return json
-                                        .replace(
-                                          /"([^"]+)":/g,
-                                          '<span class="' +
-                                            styles.jsonKey +
-                                            '">"$1"</span>:',
-                                        )
-                                        .replace(
-                                          /:"([^"]+)"/g,
-                                          ': <span class="' +
-                                            styles.jsonString +
-                                            '">"$1"</span>',
-                                        )
-                                        .replace(
-                                          /:(\d+)/g,
-                                          ': <span class="' +
-                                            styles.jsonNumber +
-                                            '">$1</span>',
-                                        )
-                                        .replace(
-                                          /:(true|false)/g,
-                                          ': <span class="' +
-                                            styles.jsonBoolean +
-                                            '">$1</span>',
-                                        )
-                                        .replace(
-                                          /:(null)/g,
-                                          ': <span class="' +
-                                            styles.jsonNull +
-                                            '">$1</span>',
-                                        );
-                                    };
-
                                     return (
                                       <div className={styles.jsonContainer}>
                                         <div className={styles.jsonHeader}>
@@ -492,12 +455,13 @@ const SigningCohortDetail = () => {
                                             Copy JSON
                                           </button>
                                         </div>
-                                        <pre
-                                          className={styles.jsonContent}
-                                          dangerouslySetInnerHTML={{
-                                            __html: formatJSON(conditionData),
-                                          }}
-                                        />
+                                        <pre className={styles.jsonContent}>
+                                          {JSON.stringify(
+                                            conditionData,
+                                            null,
+                                            2,
+                                          )}
+                                        </pre>
                                       </div>
                                     );
                                   }

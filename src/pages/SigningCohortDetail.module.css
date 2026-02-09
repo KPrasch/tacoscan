@@ -504,30 +504,6 @@
     white-space: pre;
 }
 
-/* JSON Syntax Highlighting */
-.jsonKey {
-    color: #059669;
-    font-weight: 600;
-}
-
-.jsonString {
-    color: #dc2626;
-}
-
-.jsonNumber {
-    color: #7c3aed;
-}
-
-.jsonBoolean {
-    color: #2563eb;
-    font-weight: 600;
-}
-
-.jsonNull {
-    color: #6b7280;
-    font-style: italic;
-}
-
 /* Custom scrollbar for JSON container */
 .jsonContainer::-webkit-scrollbar {
     width: 8px;
