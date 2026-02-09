@@ -1,13 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { getRituals, formatRitualsData, getTimeout, formatTimeToText, getAllNetworkEvents, formatString, formatWeiDecimal } from './data';
-import styles from './NetworkActivity.module.css';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import {
+  getRituals,
+  formatRitualsData,
+  getTimeout,
+  formatTimeToText,
+  getAllNetworkEvents,
+  formatString,
+  formatWeiDecimal,
+} from "./data";
+import styles from "./NetworkActivity.module.css";
 
 const NetworkActivity = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
 
@@ -18,9 +26,9 @@ const NetworkActivity = () => {
   const fetchNetworkActivity = async () => {
     try {
       const [ritualsData, timeout, allEvents] = await Promise.all([
-        getRituals(false, ''),
+        getRituals(false, ""),
         getTimeout(),
-        getAllNetworkEvents()
+        getAllNetworkEvents(),
       ]);
 
       const rituals = ritualsData?.rituals ? ritualsData.rituals : [];
@@ -28,12 +36,12 @@ const NetworkActivity = () => {
 
       // Combine all events from different sources
       const networkActivities = [];
-      
-      // Add real events from the blockchain
-      allEvents.forEach(event => {
+
+      // Add real events from the blockchain subgraph
+      allEvents.forEach((event, idx) => {
         networkActivities.push({
-          id: `event-${event.timestamp}-${Math.random()}`,
-          txHash: event.txHash || `0x${Math.random().toString(16).substr(2, 8)}...`,
+          id: `event-${event.timestamp}-${idx}`,
+          txHash: event.txHash || null,
           event: event.type,
           contract: event.contract,
           method: event.type,
@@ -41,123 +49,72 @@ const NetworkActivity = () => {
           stakingProvider: event.stakingProvider,
           operator: event.operator || null,
           amount: event.amount,
-          status: 'Success',
+          status: "Success",
           blockNumber: event.blockNumber,
-          gasUsed: Math.floor(Math.random() * 100000 + 50000),
-          gasPrice: Math.floor(Math.random() * 50 + 20)
         });
       });
-      
-      // Add ritual-specific events
-      formattedRituals.forEach(ritual => {
-        // Add multiple events per ritual to simulate comprehensive activity
-        const baseTime = new Date(ritual.updateTime);
-        
-        // Ritual initiation event
+
+      // Add ritual status entries derived from ritual data
+      formattedRituals.forEach((ritual) => {
+        const statusMap = {
+          SUCCESSFUL: { event: "Ritual Completed", status: "Success" },
+          ACTIVE: { event: "Ritual Active", status: "Success" },
+          AWAITING_TRANSCRIPTS: {
+            event: "Awaiting Transcripts",
+            status: "Processing",
+          },
+          AWAITING_AGGREGATION: {
+            event: "Awaiting Aggregation",
+            status: "Processing",
+          },
+          TIMEOUT: { event: "Ritual Timeout", status: "Failed" },
+          EXPIRED: { event: "Ritual Expired", status: "Failed" },
+        };
+        const mapped = statusMap[ritual.status] || {
+          event: ritual.status,
+          status: "Success",
+        };
+
         networkActivities.push({
-          id: `${ritual.id}-init`,
+          id: `ritual-${ritual.id}`,
           ritualId: ritual.id,
-          txHash: `0x${Math.random().toString(16).substr(2, 8)}...${Math.random().toString(16).substr(2, 4)}`,
-          event: 'Ritual Initiated',
-          method: 'initiate()',
-          time: new Date(baseTime.getTime() - Math.random() * 3600000), // Random time within past hour
+          txHash: null,
+          event: mapped.event,
+          contract: "Coordinator",
+          method: "-",
+          time: ritual.updateTime,
           participants: ritual.totalParticipants || 0,
           authority: ritual.authority,
-          status: 'Success',
-          gasUsed: Math.floor(Math.random() * 100000 + 50000),
-          gasPrice: Math.floor(Math.random() * 50 + 20)
+          status: mapped.status,
         });
-
-        // DKG events based on status
-        if (ritual.status === 'SUCCESSFUL' || ritual.status === 'ACTIVE') {
-          networkActivities.push({
-            id: `${ritual.id}-dkg`,
-            ritualId: ritual.id,
-            txHash: `0x${Math.random().toString(16).substr(2, 8)}...${Math.random().toString(16).substr(2, 4)}`,
-            event: 'DKG Round Complete',
-            method: 'processDKG()',
-            time: new Date(baseTime.getTime() - Math.random() * 1800000), // Random time within past 30 mins
-            participants: ritual.totalParticipants || 0,
-            authority: ritual.authority,
-            status: 'Success',
-            gasUsed: Math.floor(Math.random() * 150000 + 80000),
-            gasPrice: Math.floor(Math.random() * 50 + 20)
-          });
-        }
-
-        // Transcript events
-        if (ritual.status === 'AWAITING_TRANSCRIPTS' || ritual.status === 'SUCCESSFUL') {
-          networkActivities.push({
-            id: `${ritual.id}-transcript`,
-            ritualId: ritual.id,
-            txHash: `0x${Math.random().toString(16).substr(2, 8)}...${Math.random().toString(16).substr(2, 4)}`,
-            event: 'Transcripts Submitted',
-            method: 'submitTranscripts()',
-            time: new Date(baseTime.getTime() - Math.random() * 900000), // Random time within past 15 mins
-            participants: Math.floor((ritual.totalParticipants || 0) * 0.8), // Some participants submit
-            authority: ritual.authority,
-            status: ritual.status === 'AWAITING_TRANSCRIPTS' ? 'Processing' : 'Success',
-            gasUsed: Math.floor(Math.random() * 80000 + 30000),
-            gasPrice: Math.floor(Math.random() * 50 + 20)
-          });
-        }
-
-        // Aggregation events
-        if (ritual.status === 'AWAITING_AGGREGATION' || ritual.status === 'SUCCESSFUL') {
-          networkActivities.push({
-            id: `${ritual.id}-aggregation`,
-            ritualId: ritual.id,
-            txHash: `0x${Math.random().toString(16).substr(2, 8)}...${Math.random().toString(16).substr(2, 4)}`,
-            event: 'Key Aggregation',
-            method: 'aggregateKeys()',
-            time: ritual.updateTime,
-            participants: ritual.totalParticipants || 0,
-            authority: ritual.authority,
-            status: ritual.status === 'AWAITING_AGGREGATION' ? 'Processing' : 'Success',
-            gasUsed: Math.floor(Math.random() * 120000 + 60000),
-            gasPrice: Math.floor(Math.random() * 50 + 20)
-          });
-        }
-
-        // Timeout/Expired events
-        if (ritual.status === 'TIMEOUT' || ritual.status === 'EXPIRED') {
-          networkActivities.push({
-            id: `${ritual.id}-timeout`,
-            ritualId: ritual.id,
-            txHash: `0x${Math.random().toString(16).substr(2, 8)}...${Math.random().toString(16).substr(2, 4)}`,
-            event: ritual.status === 'TIMEOUT' ? 'Ritual Timeout' : 'Ritual Expired',
-            method: 'finalizeRitual()',
-            time: ritual.updateTime,
-            participants: ritual.totalParticipants || 0,
-            authority: ritual.authority,
-            status: 'Failed',
-            gasUsed: Math.floor(Math.random() * 60000 + 20000),
-            gasPrice: Math.floor(Math.random() * 50 + 20)
-          });
-        }
       });
 
       // Sort by time (most recent first)
       networkActivities.sort((a, b) => new Date(b.time) - new Date(a.time));
-      
+
       setActivities(networkActivities);
       setLoading(false);
     } catch (error) {
-      console.error('Failed to fetch network activity:', error);
+      console.error("Failed to fetch network activity:", error);
       setLoading(false);
     }
   };
 
   // Filter and search logic
-  const filteredActivities = activities.filter(activity => {
-    const matchesSearch = searchTerm === '' || 
-      activity.ritualId.toString().includes(searchTerm) ||
-      activity.txHash.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredActivities = activities.filter((activity) => {
+    const matchesSearch =
+      searchTerm === "" ||
+      (activity.ritualId != null &&
+        activity.ritualId.toString().includes(searchTerm)) ||
+      (activity.txHash &&
+        activity.txHash.toLowerCase().includes(searchTerm.toLowerCase())) ||
       activity.event.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      activity.method.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = filterStatus === 'all' || activity.status.toLowerCase() === filterStatus;
-    
+      (activity.method &&
+        activity.method.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesStatus =
+      filterStatus === "all" || activity.status.toLowerCase() === filterStatus;
+
     return matchesSearch && matchesStatus;
   });
 
@@ -186,18 +143,24 @@ const NetworkActivity = () => {
           <div className={styles.headerContent}>
             <h1 className={styles.pageTitle}>Network Activity</h1>
             <p className={styles.pageSubtitle}>
-              Real-time TACo network transactions and ritual events
+              TACo network staking events and ritual activity
             </p>
           </div>
           <div className={styles.headerStats}>
             <div className={styles.statItem}>
               <span className={styles.statLabel}>Total Events</span>
-              <span className={styles.statValue}>{activities.length.toLocaleString()}</span>
+              <span className={styles.statValue}>
+                {activities.length.toLocaleString()}
+              </span>
             </div>
             <div className={styles.statItem}>
               <span className={styles.statLabel}>24h Activity</span>
               <span className={styles.statValue}>
-                {activities.filter(a => new Date() - new Date(a.time) < 24 * 60 * 60 * 1000).length}
+                {
+                  activities.filter(
+                    (a) => new Date() - new Date(a.time) < 24 * 60 * 60 * 1000,
+                  ).length
+                }
               </span>
             </div>
           </div>
@@ -233,11 +196,12 @@ const NetworkActivity = () => {
           <div className={styles.tableHeader}>
             <div className={styles.tableInfo}>
               <span>
-                Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems.toLocaleString()} entries
+                Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of{" "}
+                {totalItems.toLocaleString()} entries
               </span>
             </div>
           </div>
-          
+
           <div className={styles.tableWrapper}>
             <table className={styles.activityTable}>
               <thead>
@@ -257,17 +221,15 @@ const NetworkActivity = () => {
                   <tr key={activity.id}>
                     <td>
                       <span className={styles.txHash}>
-                        {activity.txHash || '-'}
+                        {activity.txHash || "-"}
                       </span>
                     </td>
                     <td>
-                      <span className={styles.eventType}>
-                        {activity.event}
-                      </span>
+                      <span className={styles.eventType}>{activity.event}</span>
                     </td>
                     <td>
                       <span className={styles.contract}>
-                        {activity.contract || activity.method || '-'}
+                        {activity.contract || activity.method || "-"}
                       </span>
                     </td>
                     <td className={styles.timeAgo}>
@@ -275,11 +237,17 @@ const NetworkActivity = () => {
                     </td>
                     <td>
                       {activity.stakingProvider ? (
-                        <Link to={`/node/${activity.stakingProvider}`} className={styles.link}>
+                        <Link
+                          to={`/node/${activity.stakingProvider}`}
+                          className={styles.link}
+                        >
                           {formatString(activity.stakingProvider)}
                         </Link>
                       ) : activity.ritualId ? (
-                        <Link to={`/ritual/${activity.ritualId}`} className={styles.link}>
+                        <Link
+                          to={`/ritual/${activity.ritualId}`}
+                          className={styles.link}
+                        >
                           Ritual #{activity.ritualId}
                         </Link>
                       ) : activity.operator ? (
@@ -290,16 +258,22 @@ const NetworkActivity = () => {
                         <span className={styles.address}>
                           {formatString(activity.authority)}
                         </span>
-                      ) : '-'}
+                      ) : (
+                        "-"
+                      )}
                     </td>
                     <td className={styles.amount}>
-                      {activity.amount ? formatWeiDecimal(activity.amount) + ' T' : '-'}
+                      {activity.amount
+                        ? formatWeiDecimal(activity.amount) + " T"
+                        : "-"}
                     </td>
                     <td className={styles.blockNumber}>
-                      {activity.blockNumber || '-'}
+                      {activity.blockNumber || "-"}
                     </td>
                     <td>
-                      <span className={`${styles.status} ${styles[activity.status?.toLowerCase()]}`}>
+                      <span
+                        className={`${styles.status} ${styles[activity.status?.toLowerCase()]}`}
+                      >
                         {activity.status}
                       </span>
                     </td>
@@ -312,31 +286,34 @@ const NetworkActivity = () => {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className={styles.pagination}>
-              <button 
+              <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
                 className={styles.pageButton}
               >
                 Previous
               </button>
-              
+
               <div className={styles.pageNumbers}>
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                  const pageNum =
+                    Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
                   return (
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`${styles.pageButton} ${pageNum === currentPage ? styles.active : ''}`}
+                      className={`${styles.pageButton} ${pageNum === currentPage ? styles.active : ""}`}
                     >
                       {pageNum}
                     </button>
                   );
                 })}
               </div>
-              
-              <button 
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+
+              <button
+                onClick={() =>
+                  setCurrentPage(Math.min(totalPages, currentPage + 1))
+                }
                 disabled={currentPage === totalPages}
                 className={styles.pageButton}
               >
