@@ -1,6 +1,6 @@
 import Web3 from "web3";
 import mainnetArtifacts from '../artifacts/mainnet.json';
-import lynxArtifacts from '../artifacts/lynx-signing.json';
+import lynxArtifacts from '../artifacts/lynx.json';
 import tapirArtifacts from '../artifacts/tapir.json';
 import { getCurrentNetwork } from './dataSource';
 import { conditions } from '@nucypher/taco';
