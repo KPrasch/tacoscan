@@ -14,7 +14,7 @@ let betaStakers = null;
 // Load beta stakers from file
 export const loadBetaStakers = async () => {
   if (betaStakers !== null) return betaStakers;
-  
+
   try {
     const response = await fetch('/beta_stakers.txt');
     const text = await response.text();
@@ -110,29 +110,6 @@ export const node_columns = [
   },
 ];
 
-const COUNT_FORMATS = [
-  {
-    // 0 - 999
-    letter: "",
-    limit: 1e3,
-  },
-  {
-    // 1,000 - 999,999
-    letter: "K",
-    limit: 1e6,
-  },
-  {
-    // 1,000,000 - 999,999,999
-    letter: "M",
-    limit: 1e9,
-  },
-  {
-    // 1,000,000,000 - 999,999,999,999
-    letter: "B",
-    limit: 1e12,
-  },
-];
-
 export const formatString = (data) => {
   if (data == null) {
     return "Not yet finalized";
@@ -146,33 +123,13 @@ export const formatString = (data) => {
   return fistSymbol + " ... " + endSymbol;
 };
 
-export const formatStringEnd = (data) => {
-  if (data == null) {
-    return "...";
-  }
-  if (data.length < 10) {
-    return data;
-  }
-
-  const fistSymbol = data.slice(0, 10);
-  return fistSymbol + " ... ";
-};
-
-export const formatSatoshi = (data) => {
-  return (data / Const.SATOSHI_BITCOIN).toFixed(7);
-};
-
-export const formatGwei = (value) => {
-  return parseFloat(value / Const.DECIMAL_ETH).toFixed(7);
-};
-
 export const formatGweiFixedZero = (value) => {
   // Handle null/undefined
   if (!value) return "0";
-  
+
   // Convert to string if not already
   const valueStr = value.toString();
-  
+
   // For very large numbers, use BigInt for accurate division
   try {
     const valueBigInt = BigInt(valueStr);
@@ -192,10 +149,10 @@ export const formatWeiDecimal = (value) => {
 export const formatWeiDecimalNoSurplus = (value) => {
   // Handle null/undefined
   if (!value) return "0";
-  
+
   // Convert to string if not already
   const valueStr = value.toString();
-  
+
   // For very large numbers, use BigInt for accurate division
   try {
     const valueBigInt = BigInt(valueStr);
@@ -208,18 +165,6 @@ export const formatWeiDecimalNoSurplus = (value) => {
       parseFloat(value / Const.DECIMAL_ETH).toFixed(0)
     );
   }
-};
-
-export const formatNumberToDecimal = (value) => {
-  return new Intl.NumberFormat().format(value);
-};
-
-export const formatNumber = (value) => {
-  let newValue = value / Const.DECIMAL_ETH;
-  const format = COUNT_FORMATS.find((format) => newValue < format.limit);
-  newValue = (1000 * newValue) / format.limit;
-  newValue = Math.round(newValue * 10) / 10;
-  return newValue + format.letter;
 };
 
 export function formatTimeToText(timestamp) {
@@ -273,7 +218,7 @@ export function formatTimeToText(timestamp) {
   }
 }
 
-export function formatTimestampToText(date) {
+function formatTimestampToText(date) {
   const month = date.months();
   let day = date.days();
   const hours = date.hours();
@@ -292,31 +237,6 @@ export function formatTimestampToText(date) {
   }
 }
 
-export function formatEntryDate(date) {
-  const month = date.months();
-  let day = date.days();
-  const hours = date.hours();
-  const minutes = date.minutes();
-  const seconds = date.seconds();
-  if (month > 0) {
-    day = day + month * 30;
-  }
-  if (day > 0) {
-    return `${day < 10 ? "0" + day : day}d ${
-      hours < 10 ? "0" + hours : hours
-    }h`;
-  } else if (hours > 0) {
-    return `${hours < 10 ? "0" + hours : hours}h ${
-      minutes < 10 ? "0" + minutes : minutes
-    }m`;
-  } else if (minutes > 0) {
-    return `${minutes < 10 ? "0" + minutes : minutes}m`;
-  } else if (seconds > 0) {
-    return `${seconds < 10 ? "0" + seconds : seconds}s`;
-  }
-}
-
-export function formatDate(date) {
   return new Date(date).toLocaleString("en-US", {
     month: "short",
     day: "2-digit",
@@ -350,26 +270,10 @@ function convertFromLittleEndian(hex) {
   }
 }
 
-export function convertToLittleEndian(txHash) {
-  try {
-    if (txHash === undefined) {
-      return "";
-    }
-    txHash = txHash.replace("0x", "");
-    const chunks = txHash.match(/.{2}/g).reverse();
-    const littleEndianHex = chunks.join("");
-    return "0x" + littleEndianHex;
-  } catch (e) {
-    console.log(e);
-  }
-  return "";
-}
-
-// Detect heartbeat groups based on timing and participant patterns
 export const detectHeartbeatGroups = (rituals, timeout) => {
   const heartbeats = rituals.filter(r => r.isHeartbeat);
   if (heartbeats.length === 0) return [];
-  
+
   // March 17, 2025 is the first heartbeat group - don't go farther back
   const cutoffDate = new Date('2025-03-17T00:00:00Z').getTime();
 
@@ -379,27 +283,27 @@ export const detectHeartbeatGroups = (rituals, timeout) => {
   const dkgTimeoutMs = parseFloat(timeout || 0) * 1000; // Convert timeout to milliseconds
   // Use DKG timeout as the window for grouping, or fallback to 4 hours if not available
   const groupingWindow = dkgTimeoutMs || (4 * 60 * 60 * 1000);
-  
+
   // Sort heartbeats by timestamp and filter out those before cutoff
   const sortedHeartbeats = [...heartbeats]
     .filter(hb => hb.initTimeStamp >= cutoffDate)
     .sort((a, b) => a.initTimeStamp - b.initTimeStamp);
-  
+
   sortedHeartbeats.forEach(hb => {
     let addedToGroup = false;
-    
+
     // Find the Monday midnight UTC for this ritual
     const hbDate = new Date(hb.initTimeStamp);
     const dayOfWeek = hbDate.getUTCDay();
     const hoursFromMidnight = hbDate.getUTCHours();
-    
+
     // Check if this is near a Monday (day 1) midnight UTC
     // Consider Sunday late night (day 0, hour 22-24) and Monday early morning (day 1, hour 0-6)
-    const isNearMondayMidnight = 
+    const isNearMondayMidnight =
       (dayOfWeek === 0 && hoursFromMidnight >= 22) || // Sunday 22:00 - 24:00 UTC
       (dayOfWeek === 1 && hoursFromMidnight <= 6) ||  // Monday 00:00 - 06:00 UTC
       (dayOfWeek === 2 && hoursFromMidnight <= 2);    // Tuesday 00:00 - 02:00 UTC (for late runs)
-    
+
     // Find the nearest Monday midnight for grouping
     let mondayMidnight = new Date(hb.initTimeStamp);
     if (dayOfWeek === 0 && hoursFromMidnight >= 22) {
@@ -414,20 +318,20 @@ export const detectHeartbeatGroups = (rituals, timeout) => {
       mondayMidnight.setUTCDate(mondayMidnight.getUTCDate() - daysToSubtract);
     }
     mondayMidnight.setUTCHours(0, 0, 0, 0);
-    
+
     // Look for an existing group near this Monday
     for (let group of groups) {
       // Check if this ritual belongs to an existing Monday batch
       const groupMondayTime = group.mondayMidnight.getTime();
       const timeDiff = Math.abs(mondayMidnight.getTime() - groupMondayTime);
-      
+
       // If it's the same Monday batch (within a day)
       // Also check if rituals are within the DKG timeout window of each other
       if (timeDiff < 24 * 60 * 60 * 1000) {
         // Check if this ritual is within the DKG timeout window of the first ritual in the group
         const firstRitualTime = group.rituals[0].initTimeStamp;
         const ritualTimeDiff = Math.abs(hb.initTimeStamp - firstRitualTime);
-        
+
         // Group rituals that start within the DKG timeout window
         if (ritualTimeDiff <= groupingWindow) {
           group.rituals.push(hb);
@@ -436,7 +340,7 @@ export const detectHeartbeatGroups = (rituals, timeout) => {
         }
       }
     }
-    
+
     if (!addedToGroup) {
       groups.push({
         rituals: [hb],
@@ -446,48 +350,48 @@ export const detectHeartbeatGroups = (rituals, timeout) => {
       });
     }
   });
-  
+
   // Sort groups by Monday date (most recent first)
   groups.sort((a, b) => b.mondayMidnight.getTime() - a.mondayMidnight.getTime());
-  
+
   if (groups.length > 0) {
     const mostRecentMonday = groups[0].mondayMidnight.getTime();
     const oneWeek = 7 * 24 * 60 * 60 * 1000;
-    
+
     groups.forEach(group => {
       // Calculate weeks since most recent batch
       const weeksAgo = Math.round((mostRecentMonday - group.mondayMidnight.getTime()) / oneWeek);
       group.weekNumber = weeksAgo;
-      
+
       // Sort rituals within group by ID
       group.rituals.sort((a, b) => a.id - b.id);
-      
+
       // Calculate group statistics
-      const successful = group.rituals.filter(r => 
+      const successful = group.rituals.filter(r =>
         r.status === 'SUCCESSFUL' || r.status === 'ACTIVE'
       ).length;
-      const failed = group.rituals.filter(r => 
-        r.status === 'TIME OUT' || r.status === 'EXPIRED' || 
+      const failed = group.rituals.filter(r =>
+        r.status === 'TIME OUT' || r.status === 'EXPIRED' ||
         r.status === 'DKG INVALID' || r.status === 'DKG ERROR' ||
         r.status === 'TIMEOUT'
       ).length;
-      const pending = group.rituals.filter(r => 
-        r.status === 'DKG AWAITING TRANSCRIPTS' || 
+      const pending = group.rituals.filter(r =>
+        r.status === 'DKG AWAITING TRANSCRIPTS' ||
         r.status === 'DKG AWAITING AGGREGATIONS'
       ).length;
-      
+
       group.stats = {
         total: group.rituals.length,
         successful,
         failed,
         pending,
-        successRate: group.rituals.length > 0 
-          ? ((successful / group.rituals.length) * 100).toFixed(1) 
+        successRate: group.rituals.length > 0
+          ? ((successful / group.rituals.length) * 100).toFixed(1)
           : '0.0'
       };
-      
+
       // Overall status is no longer needed since partial failures are expected
-      
+
       // Get unique participants across all rituals in the group
       const allParticipants = new Set();
       group.rituals.forEach(r => {
@@ -496,7 +400,7 @@ export const detectHeartbeatGroups = (rituals, timeout) => {
       group.uniqueParticipants = Array.from(allParticipants);
     });
   }
-  
+
   return groups;
 };
 
@@ -513,18 +417,18 @@ export const formatRitualsData = (rawData, timeout) => {
       const currentTimestampMs = Date.now();
       const initTimeStampMs = ritual.initTimestamp * 1000;
       const timeoutStamp = initTimeStampMs + timeoutMs;
-      
+
       let status = ritual.dkgStatus.replaceAll("_", " ");
-      
-      if ((ritual.dkgStatus === "DKG_AWAITING_AGGREGATIONS" || 
-           ritual.dkgStatus === "DKG_AWAITING_TRANSCRIPTS") && 
+
+      if ((ritual.dkgStatus === "DKG_AWAITING_AGGREGATIONS" ||
+           ritual.dkgStatus === "DKG_AWAITING_TRANSCRIPTS") &&
           timeoutStamp < currentTimestampMs) {
         status = "TIME OUT";
       }
 
       // Check if this is a heartbeat ritual (3 or fewer participants)
       const isHeartbeat = ritual.participants?.length <= 3;
-      
+
       return {
         id: ritual.id,
         status: status,
@@ -605,7 +509,7 @@ export const formatNodes = async (rawData) => {
 
 export const formatNodeDetail = (rawData) => {
   console.log("formatNodeDetail input:", rawData);
-  
+
   // Handle null or missing appAuthorization
   if (!rawData || !rawData.appAuthorization) {
     console.log("No appAuthorization found, returning empty data");
@@ -628,7 +532,7 @@ export const formatNodeDetail = (rawData) => {
       events: []
     };
   }
-  
+
   const appAuthorization = rawData.appAuthorization;
 
   const getFirstStakedAt = (stakeHistory) => {
@@ -642,8 +546,8 @@ export const formatNodeDetail = (rawData) => {
     return null;
   };
 
-  const firstStakedAt = appAuthorization.stake?.stakeHistory 
-    ? getFirstStakedAt(appAuthorization.stake?.stakeHistory) * 1000 
+  const firstStakedAt = appAuthorization.stake?.stakeHistory
+    ? getFirstStakedAt(appAuthorization.stake?.stakeHistory) * 1000
     : null;
 
   const mergeAndSortEvents = (stakeHistory, appAuthHistories, tacoOperator) => {
@@ -664,14 +568,14 @@ export const formatNodeDetail = (rawData) => {
         parsedEventAmount: null,
       });
     }
-    
+
     combinedEvents.sort((a, b) => b.timestamp - a.timestamp);
     return combinedEvents;
   };
 
   const events = mergeAndSortEvents(
-    appAuthorization.stake?.stakeHistory || [], 
-    rawData.appAuthHistories || [], 
+    appAuthorization.stake?.stakeHistory || [],
+    rawData.appAuthHistories || [],
     appAuthorization.tacoOperator || {}
   );
 
@@ -692,11 +596,11 @@ export const formatNodeDetail = (rawData) => {
     beneficiary: appAuthorization.stake?.beneficiary,
     events: events,
   };
-  
+
   console.log("formatNodeDetail result:", result);
   console.log("Authorized amount:", appAuthorization.amount, "->", result.weiDecimalAuthorizedAmount);
   console.log("Staked amount:", appAuthorization.stake?.stakedAmount, "->", result.weiDecimalStakedAmount);
-  
+
   return result;
 };
 
@@ -711,12 +615,12 @@ const retryQuery = async (queryFn, maxRetries = 3) => {
             const result = await queryFn();
             if (result.errors) {
                 // Check if it's a network/fetch error vs a GraphQL schema error
-                const hasNetworkError = result.errors.some(error => 
-                    error.message.includes('Failed to fetch') || 
+                const hasNetworkError = result.errors.some(error =>
+                    error.message.includes('Failed to fetch') ||
                     error.message.includes('Network error') ||
                     error.extensions?.code === 'NETWORK_ERROR'
                 );
-                
+
                 if (hasNetworkError && attempt < maxRetries - 1) {
                     console.warn(`Network error detected, retrying... (${attempt + 1}/${maxRetries})`);
                     throw new Error(`Network error: ${result.errors[0].message}`);
@@ -744,36 +648,36 @@ const getAllRitualsWithPagination = async () => {
     let pageCount = 0;
     let consecutiveFailures = 0;
     const maxConsecutiveFailures = 3;
-    
+
     console.log('🌮 Starting paginated ritual fetch...');
-    
+
     while (hasMore && consecutiveFailures < maxConsecutiveFailures) {
         pageCount++;
         console.log(`📄 Fetching page ${pageCount} (skip: ${skip})`);
-        
+
         try {
             const query = () => client.execute(client.GetAllRitualsQueryDocument, { skip });
             const data = await retryQuery(query, 2); // Fewer retries per page
-            
+
             if (data.data) {
                 const rituals = data.data.rituals || [];
                 const pageRitualCounter = data.data.ritualCounter;
-                
+
                 // Store ritual counter from first page for total count
                 if (!ritualCounter && pageRitualCounter) {
                     ritualCounter = pageRitualCounter;
                     const expectedTotal = ritualCounter.total ? parseInt(ritualCounter.total) : 0;
                     console.log(`📊 Expected total rituals: ${expectedTotal}`);
                 }
-                
+
                 if (rituals.length > 0) {
                     // Remove duplicates by ID (just in case)
                     const existingIds = new Set(allRituals.map(r => r.id));
                     const newRituals = rituals.filter(r => !existingIds.has(r.id));
-                    
+
                     allRituals.push(...newRituals);
                     console.log(`✅ Page ${pageCount}: Added ${newRituals.length} new rituals (total: ${allRituals.length})`);
-                    
+
                     // Check if we actually added new rituals
                     if (newRituals.length === 0) {
                         // No new rituals added, we've reached the end
@@ -782,23 +686,23 @@ const getAllRitualsWithPagination = async () => {
                     } else {
                         skip += pageSize;
                         consecutiveFailures = 0; // Reset failure counter on success
-                        
+
                         // If we got less than pageSize, we've reached the end
                         hasMore = rituals.length === pageSize;
-                        
+
                         // Also check against expected total if available
                         if (ritualCounter?.total && allRituals.length >= parseInt(ritualCounter.total)) {
                             console.log(`📊 Reached expected total of ${ritualCounter.total} rituals`);
                             hasMore = false;
                         }
                     }
-                    
+
                     // Progress indicator
                     if (ritualCounter?.total) {
                         const progress = Math.min(100, (allRituals.length / parseInt(ritualCounter.total)) * 100);
                         console.log(`📈 Progress: ${progress.toFixed(1)}% (${allRituals.length}/${ritualCounter.total})`);
                     }
-                    
+
                     // Safety check to prevent infinite loops
                     if (allRituals.length >= 5000) {
                         console.warn('⚠️ Reached safety limit of 5000 rituals');
@@ -812,28 +716,28 @@ const getAllRitualsWithPagination = async () => {
                 console.warn('❌ No data returned, ending pagination');
                 hasMore = false;
             }
-            
+
             // Small delay between successful requests
             if (hasMore) {
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
-            
+
         } catch (error) {
             consecutiveFailures++;
             console.error(`❌ Page ${pageCount} failed (${consecutiveFailures}/${maxConsecutiveFailures}):`, error.message);
-            
+
             if (consecutiveFailures >= maxConsecutiveFailures) {
                 console.error('💥 Too many consecutive failures, stopping pagination');
                 throw new Error(`Pagination failed after ${maxConsecutiveFailures} consecutive failures: ${error.message}`);
             }
-            
+
             // Wait longer before retrying after failure
             await new Promise(resolve => setTimeout(resolve, 2000 * consecutiveFailures));
         }
     }
-    
+
     console.log(`🎉 Pagination complete! Total rituals fetched: ${allRituals.length}`);
-    
+
     // If we got some data but not all, still return what we have
     return {
         rituals: allRituals,
@@ -874,32 +778,6 @@ export const getRituals = async (isSearch, searchInput) => {
     }
 };
 
-export const getRitualsByStakingProvider = async (searchInput) => {
-  // Since the taco-matic subgraph is no longer available,
-  // use contract reads and filter by participant
-  try {
-    const { getCurrentNetwork } = await import('../utils/dataSource');
-    const { getAllRituals } = await import('../utils/contractReader');
-    const currentNetwork = getCurrentNetwork();
-
-    const allRituals = await getAllRituals(currentNetwork);
-
-    // Filter rituals where searchInput is in participants
-    const filteredRituals = allRituals.filter(ritual =>
-      ritual.participants?.some(p =>
-        p.toLowerCase() === searchInput.toLowerCase()
-      )
-    );
-
-    return { rituals: filteredRituals };
-  } catch (e) {
-    console.log("error to fetch ritual data by staking provider: " + e);
-    return { rituals: [] };
-  }
-};
-
-// Fetch all network events from multiple contracts
-export const getAllNetworkEvents = async () => {
   try {
     // Fetch all app authorizations with their events
     const appAuthsQuery = `
@@ -942,10 +820,10 @@ export const getAllNetworkEvents = async () => {
     });
 
     const data = await response.json();
-    
+
     if (data?.data) {
       const events = [];
-      
+
       // Add stake history events
       data.data.appAuthorizations?.forEach(auth => {
         auth.stake?.stakeHistory?.forEach(event => {
@@ -959,7 +837,7 @@ export const getAllNetworkEvents = async () => {
             txHash: event.txHash
           });
         });
-        
+
         // Add OperatorBonded events
         if (auth.tacoOperator?.bondedTimestamp) {
           events.push({
@@ -973,7 +851,7 @@ export const getAllNetworkEvents = async () => {
           });
         }
       });
-      
+
       // Add app authorization history events
       data.data.appAuthHistories?.forEach(event => {
         events.push({
@@ -986,11 +864,11 @@ export const getAllNetworkEvents = async () => {
           txHash: event.txHash
         });
       });
-      
+
       // Sort by timestamp descending
       return events.sort((a, b) => b.timestamp - a.timestamp);
     }
-    
+
     return [];
   } catch (error) {
     console.error('Error fetching network events:', error);
@@ -1065,7 +943,7 @@ export const getNodes = async (isSearch, searchInput) => {
       });
     }
     console.log("data: ", data)
-    
+
     // Check if data is valid before returning
     if (data && data.data && !data.errors) {
       return data.data;
@@ -1084,23 +962,23 @@ export const getNodeDetail = async (node) => {
     const nodeAddress = node.toLowerCase();
     const appAddress = tacoAddr;
     const queryId = `${nodeAddress}-${appAddress}`;
-    
+
     console.log("Fetching node detail for ID:", queryId);
-    
+
     const data = await client.execute(client.StakerDetailDocument, {
       id: queryId
     });
 
     console.log("Node detail response:", data);
-    
+
     if (data?.data?.appAuthorization) {
       return data.data;
     }
-    
+
     // If not found in subgraph, read directly from contract
     console.log("Node not found in subgraph, reading from contract...");
     const contractInfo = await getStakingProviderInfo(node, 'mainnet');
-    
+
     if (contractInfo) {
       // Format contract data to match subgraph structure
       return {
@@ -1132,7 +1010,7 @@ export const getNodeDetail = async (node) => {
   } catch (e) {
     console.log("error to fetch staking provider data " + e);
   }
-  
+
   return { appAuthorization: null, appAuthHistories: [] };
 };
 
@@ -1153,53 +1031,6 @@ export const getUserDetail = async (userAddress) => {
   return emptyData;
 };
 
-export const getCurrentBlockNumber = async () => {
-  try {
-    const response = await fetch(
-      Const.DEFAULT_NETWORK === Const.NETWORK_MAINNET
-        ? Const.RPC_ETH_MAINNET
-        : Const.RPC_ETH_GOERLI,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "eth_blockNumber",
-          params: [],
-          id: 1,
-        }),
-      }
-    );
-    const dataJson = await response.json();
-    return parseInt(dataJson.result, 16);
-  } catch (e) {
-    return "ERROR";
-  }
-};
-
-export const getBalanceOfAddress = async (address) => {
-  try {
-    if (address === Const.ADDRESS_ZERO) {
-      return 0;
-    }
-    let rpc = Const.MAINNET_API_BALANCE;
-    if (Const.DEFAULT_NETWORK === Const.NETWORK_TESTNET) {
-      rpc = Const.GOERLI_API_BALANCE;
-    }
-
-    const response = await fetch(rpc + address);
-    const data = await response.json();
-    return parseFloat(parseFloat(data.result) / 1000000000000000000).toFixed(2);
-  } catch (e) {
-    console.log("fetch balance error : " + e.toString());
-  }
-  return 0;
-};
-
-// Singleton Web3 instance to reuse connection
-let web3Instance = null;
 const getWeb3Instance = () => {
   if (!web3Instance) {
     web3Instance = new Web3(Const.RPC_ETH_POLYGON);
@@ -1263,30 +1094,4 @@ export const getTimeout = async () => {
       .call();
     return timeout;
   }, 300000); // Cache for 5 minutes
-};
-
-export const getTotalMerkleDropReward = async (address) => {
-  try {
-    if (Const.DEFAULT_NETWORK === Const.NETWORK_TESTNET) return 0;
-
-    let tags = await (
-      await fetch(
-        `https://api.github.com/repos/threshold-network/token-dashboard/tags`
-      )
-    ).json();
-    const latestTag = tags[0].name;
-    const rewardsJsonUrl = `https://raw.githubusercontent.com/threshold-network/token-dashboard/${latestTag}/src/merkle-drop/rewards.json`;
-    const data = await (await fetch(rewardsJsonUrl)).json();
-    if (data != undefined && data.claims != undefined) {
-      const key = Object.keys(data.claims).find(
-        (k) => k.toLowerCase() === address.toLowerCase()
-      );
-      const amount = data.claims[key].amount;
-      if (amount === undefined || amount === 0) return 0;
-      return parseFloat(formatGwei(amount)).toFixed(1);
-    }
-  } catch (e) {
-    console.log("get merkle drop reward error " + e.toString());
-  }
-  return 0;
 };
