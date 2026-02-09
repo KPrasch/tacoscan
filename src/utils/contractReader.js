@@ -1,14 +1,15 @@
 import Web3 from "web3";
-import mainnetArtifacts from '../artifacts/mainnet.json';
-import lynxArtifacts from '../artifacts/lynx.json';
-import tapirArtifacts from '../artifacts/tapir.json';
-import { getCurrentNetwork } from './dataSource';
-import { conditions } from '@nucypher/taco';
-import { fromHexString } from '@nucypher/shared';
+import mainnetArtifacts from "../artifacts/mainnet.json";
+import lynxArtifacts from "../artifacts/lynx.json";
+import tapirArtifacts from "../artifacts/tapir.json";
+import { getCurrentNetwork } from "./dataSource";
+import { conditions } from "@nucypher/taco";
+import { fromHexString } from "@nucypher/shared";
+import BatchProcessor from "./batchProcessor";
 
 // Helper function to try decoding bytes data as conditions
 const tryDecodeConditions = (bytesData) => {
-  if (!bytesData || bytesData === '0x' || bytesData === '0x00') {
+  if (!bytesData || bytesData === "0x" || bytesData === "0x00") {
     return null;
   }
 
@@ -18,12 +19,13 @@ const tryDecodeConditions = (bytesData) => {
     const jsonString = new TextDecoder().decode(bytes);
 
     // Parse JSON and create ConditionExpression
-    const conditionExpr = conditions.conditionExpr.ConditionExpression.fromJSON(jsonString);
+    const conditionExpr =
+      conditions.conditionExpr.ConditionExpression.fromJSON(jsonString);
 
     // Return the condition object
     return conditionExpr.toObj();
   } catch (error) {
-    console.log('Could not decode as ConditionExpression:', error.message);
+    console.log("Could not decode as ConditionExpression:", error.message);
 
     // Fallback: try to decode as plain JSON
     try {
@@ -40,7 +42,7 @@ const tryDecodeConditions = (bytesData) => {
         }
       }
     } catch (error) {
-      console.log('Could not decode bytes data:', error.message);
+      console.log("Could not decode bytes data:", error.message);
     }
   }
 
@@ -49,31 +51,34 @@ const tryDecodeConditions = (bytesData) => {
 };
 
 // Get TACoApplication ABI and address
-const getTACoApplication = (network = 'mainnet') => {
+const getTACoApplication = (network = "mainnet") => {
   let artifacts;
 
   switch (network) {
-    case 'lynx':
+    case "lynx":
       // Lynx artifacts are under Sepolia chain ID
-      artifacts = lynxArtifacts['11155111'];
+      artifacts = lynxArtifacts["11155111"];
       break;
-    case 'tapir':
+    case "tapir":
       // Tapir artifacts are under Sepolia chain ID
-      artifacts = tapirArtifacts['11155111'];
+      artifacts = tapirArtifacts["11155111"];
       break;
-    case 'polygon':
+    case "polygon":
       // Polygon artifacts are in mainnet.json under key "137"
-      artifacts = mainnetArtifacts['137'];
+      artifacts = mainnetArtifacts["137"];
       break;
-    case 'mainnet':
+    case "mainnet":
     default:
       // Ethereum mainnet artifacts are under key "1"
-      artifacts = mainnetArtifacts['1'];
+      artifacts = mainnetArtifacts["1"];
       break;
   }
 
   if (!artifacts || !artifacts.TACoApplication) {
-    console.warn(`TACoApplication not found for network ${network}, artifacts:`, artifacts ? Object.keys(artifacts) : 'none');
+    console.warn(
+      `TACoApplication not found for network ${network}, artifacts:`,
+      artifacts ? Object.keys(artifacts) : "none",
+    );
     return null;
   }
 
@@ -81,15 +86,15 @@ const getTACoApplication = (network = 'mainnet') => {
 };
 
 // Get TestnetThresholdStaking contract for testnets
-const getTestnetStaking = (network = 'mainnet') => {
+const getTestnetStaking = (network = "mainnet") => {
   let artifacts;
 
   switch (network) {
-    case 'lynx':
-      artifacts = lynxArtifacts['11155111'];
+    case "lynx":
+      artifacts = lynxArtifacts["11155111"];
       break;
-    case 'tapir':
-      artifacts = tapirArtifacts['11155111'];
+    case "tapir":
+      artifacts = tapirArtifacts["11155111"];
       break;
     default:
       return null; // Only testnets have TestnetThresholdStaking
@@ -104,16 +109,16 @@ const getTestnetStaking = (network = 'mainnet') => {
 };
 
 // Get SigningCoordinator contract for testnets
-const getSigningCoordinator = (network = 'mainnet') => {
+const getSigningCoordinator = (network = "mainnet") => {
   let artifacts;
 
   switch (network) {
-    case 'lynx':
+    case "lynx":
       // SigningCoordinator is on Sepolia (11155111) for lynx
-      artifacts = lynxArtifacts['11155111'];
+      artifacts = lynxArtifacts["11155111"];
       break;
-    case 'tapir':
-      artifacts = tapirArtifacts['11155111'];
+    case "tapir":
+      artifacts = tapirArtifacts["11155111"];
       break;
     default:
       return null; // Only testnets have SigningCoordinator for now
@@ -143,7 +148,7 @@ const getSigningCoordinatorChild = (chainId) => {
 const getSupportedChainIds = (network = "mainnet") => {
   if (network === "lynx" || network === "tapir") {
     // Return all chain IDs from lynx artifacts
-    return Object.keys(lynxArtifacts).map(id => parseInt(id));
+    return Object.keys(lynxArtifacts).map((id) => parseInt(id));
   }
   return [1]; // Mainnet only supports Ethereum mainnet
 };
@@ -151,27 +156,35 @@ const getSupportedChainIds = (network = "mainnet") => {
 // Get RPC URL for network
 const getRpcUrl = (network) => {
   switch (network) {
-    case 'lynx':
-    case 'tapir':
+    case "lynx":
+    case "tapir":
       // Both Lynx and Tapir use Sepolia (chain ID 11155111)
-      return import.meta.env.VITE_RPC_ETH_MAINNET || 'https://eth-sepolia.g.alchemy.com/v2/demo';
-    case 'polygon':
-      return import.meta.env.VITE_RPC_ETH_POLYGON || 'https://polygon-rpc.com';
-    case 'mainnet':
+      return (
+        import.meta.env.VITE_RPC_ETH_MAINNET ||
+        "https://eth-sepolia.g.alchemy.com/v2/demo"
+      );
+    case "polygon":
+      return import.meta.env.VITE_RPC_ETH_POLYGON || "https://polygon-rpc.com";
+    case "mainnet":
     default:
-      return import.meta.env.VITE_RPC_ETH_MAINNET || 'https://cloudflare-eth.com';
+      return (
+        import.meta.env.VITE_RPC_ETH_MAINNET || "https://cloudflare-eth.com"
+      );
   }
 };
 
 // Read staking provider info directly from contract
-export const getStakingProviderInfo = async (stakingProvider, network = 'mainnet') => {
+export const getStakingProviderInfo = async (
+  stakingProvider,
+  network = "mainnet",
+) => {
   try {
     const rpcUrl = getRpcUrl(network);
     const web3 = new Web3(rpcUrl);
     const tacoApp = getTACoApplication(network);
 
     if (!tacoApp) {
-      console.error('TACoApplication not found');
+      console.error("TACoApplication not found");
       return null;
     }
 
@@ -183,34 +196,44 @@ export const getStakingProviderInfo = async (stakingProvider, network = 'mainnet
     let stakingInfo = {};
 
     if (testnetStaking) {
-      stakingContract = new web3.eth.Contract(testnetStaking.abi, testnetStaking.address);
+      stakingContract = new web3.eth.Contract(
+        testnetStaking.abi,
+        testnetStaking.address,
+      );
 
       // On testnets, get stake info from TestnetThresholdStaking
       try {
         // Get authorized stake from TestnetThresholdStaking
-        const authorizedStake = await stakingContract.methods.authorizedStake(stakingProvider, tacoApp.address).call();
+        const authorizedStake = await stakingContract.methods
+          .authorizedStake(stakingProvider, tacoApp.address)
+          .call();
 
         // Get staking provider info from TestnetThresholdStaking if available
         try {
-          const providerInfo = await stakingContract.methods.stakingProviderInfo(stakingProvider).call();
+          const providerInfo = await stakingContract.methods
+            .stakingProviderInfo(stakingProvider)
+            .call();
           stakingInfo = {
-            authorized: authorizedStake || '0',
-            stakedAmount: providerInfo?.tStake || '0',
-            ...providerInfo
+            authorized: authorizedStake || "0",
+            stakedAmount: providerInfo?.tStake || "0",
+            ...providerInfo,
           };
         } catch {
           // If stakingProviderInfo doesn't exist, just use authorizedStake
           stakingInfo = {
-            authorized: authorizedStake || '0'
+            authorized: authorizedStake || "0",
           };
         }
 
         // Get roles (owner, operator, etc.) from TestnetThresholdStaking
         try {
-          const roles = await stakingContract.methods.rolesOf(stakingProvider).call();
+          const roles = await stakingContract.methods
+            .rolesOf(stakingProvider)
+            .call();
           if (roles) {
             stakingInfo.owner = roles.owner || stakingProvider;
-            stakingInfo.operator = roles.operator || roles.owner || stakingProvider;
+            stakingInfo.operator =
+              roles.operator || roles.owner || stakingProvider;
           }
         } catch {
           // If rolesOf fails, default to stakingProvider
@@ -218,14 +241,16 @@ export const getStakingProviderInfo = async (stakingProvider, network = 'mainnet
           stakingInfo.operator = stakingProvider;
         }
       } catch (error) {
-        console.error('Error reading from TestnetThresholdStaking:', error);
+        console.error("Error reading from TestnetThresholdStaking:", error);
       }
     }
 
     // Get operator info from TACoApplication
     let tacoInfo;
     try {
-      tacoInfo = await contract.methods.stakingProviderInfo(stakingProvider).call();
+      tacoInfo = await contract.methods
+        .stakingProviderInfo(stakingProvider)
+        .call();
     } catch {
       // If TACoApplication doesn't have the info, return what we have from TestnetThresholdStaking
       if (testnetStaking && stakingInfo.authorized) {
@@ -234,11 +259,11 @@ export const getStakingProviderInfo = async (stakingProvider, network = 'mainnet
           operatorConfirmed: false,
           operatorStartTimestamp: 0,
           authorized: stakingInfo.authorized,
-          deauthorizing: '0',
+          deauthorizing: "0",
           endDeauthorization: 0,
-          tReward: '0',
+          tReward: "0",
           endCommitment: 0,
-          ...stakingInfo
+          ...stakingInfo,
         };
       }
       return null;
@@ -250,12 +275,12 @@ export const getStakingProviderInfo = async (stakingProvider, network = 'mainnet
         operator: tacoInfo.operator || stakingInfo.operator || stakingProvider,
         operatorConfirmed: tacoInfo.operatorConfirmed || false,
         operatorStartTimestamp: parseInt(tacoInfo.operatorStartTimestamp || 0),
-        authorized: stakingInfo.authorized || tacoInfo.authorized || '0',
-        deauthorizing: tacoInfo.deauthorizing || '0',
+        authorized: stakingInfo.authorized || tacoInfo.authorized || "0",
+        deauthorizing: tacoInfo.deauthorizing || "0",
         endDeauthorization: parseInt(tacoInfo.endDeauthorization || 0),
-        tReward: tacoInfo.tReward || '0',
+        tReward: tacoInfo.tReward || "0",
         endCommitment: parseInt(tacoInfo.endCommitment || 0),
-        stakedAmount: stakingInfo.stakedAmount || '0'
+        stakedAmount: stakingInfo.stakedAmount || "0",
       };
     }
 
@@ -268,47 +293,52 @@ export const getStakingProviderInfo = async (stakingProvider, network = 'mainnet
       deauthorizing: tacoInfo.deauthorizing,
       endDeauthorization: parseInt(tacoInfo.endDeauthorization),
       tReward: tacoInfo.tReward,
-      endCommitment: parseInt(tacoInfo.endCommitment)
+      endCommitment: parseInt(tacoInfo.endCommitment),
     };
   } catch (error) {
-    console.error('Error reading staking provider info:', error);
+    console.error("Error reading staking provider info:", error);
     return null;
   }
 };
 
 // Get authorized stake amount
-export const getAuthorizedStake = async (stakingProvider, network = 'mainnet') => {
+export const getAuthorizedStake = async (
+  stakingProvider,
+  network = "mainnet",
+) => {
   try {
     const rpcUrl = getRpcUrl(network);
     const web3 = new Web3(rpcUrl);
     const tacoApp = getTACoApplication(network);
 
     if (!tacoApp) {
-      console.error('TACoApplication not found');
-      return '0';
+      console.error("TACoApplication not found");
+      return "0";
     }
 
     const contract = new web3.eth.Contract(tacoApp.abi, tacoApp.address);
 
     // Call authorizedStake
-    const stake = await contract.methods.authorizedStake(stakingProvider).call();
+    const stake = await contract.methods
+      .authorizedStake(stakingProvider)
+      .call();
 
     return stake; // Return in wei for consistency
   } catch (error) {
-    console.error('Error reading authorized stake:', error);
-    return '0';
+    console.error("Error reading authorized stake:", error);
+    return "0";
   }
 };
 
 // Get all staking providers from contract events
-export const getAllStakingProviders = async (network = 'mainnet') => {
+export const getAllStakingProviders = async (network = "mainnet") => {
   try {
     const rpcUrl = getRpcUrl(network);
     const web3 = new Web3(rpcUrl);
     const tacoApp = getTACoApplication(network);
 
     if (!tacoApp) {
-      console.error('TACoApplication not found');
+      console.error("TACoApplication not found");
       return [];
     }
 
@@ -318,20 +348,25 @@ export const getAllStakingProviders = async (network = 'mainnet') => {
     const testnetStaking = getTestnetStaking(network);
     let stakingContract = null;
     if (testnetStaking) {
-      stakingContract = new web3.eth.Contract(testnetStaking.abi, testnetStaking.address);
+      stakingContract = new web3.eth.Contract(
+        testnetStaking.abi,
+        testnetStaking.address,
+      );
     }
 
     // Get events for all operator confirmations (these represent active nodes)
-    const events = await contract.getPastEvents('OperatorConfirmed', {
+    const events = await contract.getPastEvents("OperatorConfirmed", {
       fromBlock: 0,
-      toBlock: 'latest'
+      toBlock: "latest",
     });
 
-    console.log(`Found ${events.length} OperatorConfirmed events on ${network}`);
+    console.log(
+      `Found ${events.length} OperatorConfirmed events on ${network}`,
+    );
 
     // Get unique staking providers
     const stakingProviders = new Set();
-    events.forEach(event => {
+    events.forEach((event) => {
       if (event.returnValues && event.returnValues.stakingProvider) {
         stakingProviders.add(event.returnValues.stakingProvider);
       }
@@ -339,70 +374,79 @@ export const getAllStakingProviders = async (network = 'mainnet') => {
 
     // If on testnet and no operators found, try getting stakes directly from TestnetThresholdStaking
     if (stakingProviders.size === 0 && stakingContract) {
-      console.log('No operators found, checking TestnetThresholdStaking for staked providers...');
+      console.log(
+        "No operators found, checking TestnetThresholdStaking for staked providers...",
+      );
 
       // Try to get all staking providers who have authorized to TACoApplication
-      const authEvents = await stakingContract.getPastEvents('AuthorizationIncreased', {
-        fromBlock: 0,
-        toBlock: 'latest',
-        filter: { application: tacoApp.address }
-      });
+      const authEvents = await stakingContract.getPastEvents(
+        "AuthorizationIncreased",
+        {
+          fromBlock: 0,
+          toBlock: "latest",
+          filter: { application: tacoApp.address },
+        },
+      );
 
-      authEvents.forEach(event => {
+      authEvents.forEach((event) => {
         if (event.returnValues && event.returnValues.stakingProvider) {
           stakingProviders.add(event.returnValues.stakingProvider);
         }
       });
 
-      console.log(`Found ${stakingProviders.size} providers from AuthorizationIncreased events`);
+      console.log(
+        `Found ${stakingProviders.size} providers from AuthorizationIncreased events`,
+      );
     }
 
-    // Fetch data for each provider
-    const providers = [];
-    for (const provider of stakingProviders) {
-      const info = await getStakingProviderInfo(provider, network);
-      if (info) {
-        providers.push({
-          stakingProvider: provider,
-          ...info
-        });
-      }
-    }
+    // Fetch data for each provider in parallel batches
+    const batchProcessor = new BatchProcessor(5, 200);
+    const results = await batchProcessor.processBatch(
+      [...stakingProviders],
+      async (provider) => {
+        const info = await getStakingProviderInfo(provider, network);
+        return info ? { stakingProvider: provider, ...info } : null;
+      },
+    );
 
-    return providers;
+    return results.filter(Boolean);
   } catch (error) {
-    console.error('Error fetching all staking providers:', error);
+    console.error("Error fetching all staking providers:", error);
     return [];
   }
 };
 
 // Get Coordinator contract for rituals
-const getCoordinator = (network = 'mainnet') => {
+const getCoordinator = (network = "mainnet") => {
   let artifacts;
 
   switch (network) {
-    case 'lynx':
+    case "lynx":
       // Coordinator is on Polygon Amoy (80002) for lynx
-      artifacts = lynxArtifacts['80002'];
+      artifacts = lynxArtifacts["80002"];
       break;
-    case 'tapir':
+    case "tapir":
       // Coordinator is on Polygon Amoy (80002) for tapir
-      artifacts = tapirArtifacts['80002'];
+      artifacts = tapirArtifacts["80002"];
       break;
-    case 'polygon':
-      artifacts = mainnetArtifacts['137'];
+    case "polygon":
+      artifacts = mainnetArtifacts["137"];
       break;
-    case 'mainnet':
+    case "mainnet":
     default:
       // Coordinator is on Polygon (137) for mainnet
-      artifacts = mainnetArtifacts['137'];
+      artifacts = mainnetArtifacts["137"];
       break;
   }
 
   // Look for Coordinator contract
   if (artifacts) {
     // Try different possible names
-    const coordinatorNames = ['Coordinator', 'CoordinatorAgent', 'DKGCoordinator'];
+    const coordinatorNames = [
+      "Coordinator",
+      "CoordinatorAgent",
+      "DKGCoordinator",
+    ];
     for (const name of coordinatorNames) {
       if (artifacts[name]) {
         return artifacts[name];
@@ -414,19 +458,23 @@ const getCoordinator = (network = 'mainnet') => {
 };
 
 // Get all rituals from contract
-export const getAllRituals = async (network = 'mainnet') => {
+export const getAllRituals = async (network = "mainnet") => {
   try {
     const coordinator = getCoordinator(network);
 
     if (!coordinator) {
-      console.log('Coordinator contract not found for network:', network);
+      console.log("Coordinator contract not found for network:", network);
       return [];
     }
 
     // Rituals are always on Polygon/Polygon Amoy, use Polygon RPC
-    const rpcUrl = import.meta.env.VITE_RPC_ETH_POLYGON || 'https://polygon-rpc.com';
+    const rpcUrl =
+      import.meta.env.VITE_RPC_ETH_POLYGON || "https://polygon-rpc.com";
     const web3 = new Web3(rpcUrl);
-    const contract = new web3.eth.Contract(coordinator.abi, coordinator.address);
+    const contract = new web3.eth.Contract(
+      coordinator.abi,
+      coordinator.address,
+    );
 
     // Get the total number of rituals
     let numRituals;
@@ -437,7 +485,7 @@ export const getAllRituals = async (network = 'mainnet') => {
       try {
         numRituals = await contract.methods.ritualsCount().call();
       } catch {
-        console.log('Could not determine number of rituals');
+        console.log("Could not determine number of rituals");
         return [];
       }
     }
@@ -449,7 +497,7 @@ export const getAllRituals = async (network = 'mainnet') => {
         const ritual = await contract.methods.rituals(i).call();
         rituals.push({
           id: i,
-          ...ritual
+          ...ritual,
         });
       } catch (error) {
         console.error(`Error fetching ritual ${i}:`, error);
@@ -458,7 +506,7 @@ export const getAllRituals = async (network = 'mainnet') => {
 
     return rituals;
   } catch (error) {
-    console.error('Error fetching all rituals:', error);
+    console.error("Error fetching all rituals:", error);
     return [];
   }
 };
@@ -475,7 +523,10 @@ export const getAllSigningCohorts = async (network = "mainnet") => {
 
     const rpcUrl = getRpcUrl(network);
     const web3 = new Web3(rpcUrl);
-    const contract = new web3.eth.Contract(signingCoordinator.abi, signingCoordinator.address);
+    const contract = new web3.eth.Contract(
+      signingCoordinator.abi,
+      signingCoordinator.address,
+    );
 
     // Get total number of cohorts
     const numCohorts = await contract.methods.numberOfSigningCohorts().call();
@@ -491,11 +542,11 @@ export const getAllSigningCohorts = async (network = "mainnet") => {
 
         // Get signers for this cohort
         const signerParticipants = await contract.methods.getSigners(i).call();
-        const signers = signerParticipants.map(p => ({
+        const signers = signerParticipants.map((p) => ({
           provider: p.provider || p[0],
           operator: p.operator || p[1],
           signature: p.signature || p[2],
-          address: p.provider || p[0]
+          address: p.provider || p[0],
         }));
 
         // Get threshold
@@ -507,21 +558,36 @@ export const getAllSigningCohorts = async (network = "mainnet") => {
 
         for (const chainId of supportedChainIds) {
           try {
-            const chainConditions = await contract.methods.getSigningCohortConditions(i, chainId).call();
-            console.log(`Cohort ${i} chain ${chainId} conditions:`, chainConditions);
+            const chainConditions = await contract.methods
+              .getSigningCohortConditions(i, chainId)
+              .call();
+            console.log(
+              `Cohort ${i} chain ${chainId} conditions:`,
+              chainConditions,
+            );
             // getSigningCohortConditions returns bytes data
-            if (chainConditions && chainConditions !== '0x' && chainConditions !== '0x00') {
+            if (
+              chainConditions &&
+              chainConditions !== "0x" &&
+              chainConditions !== "0x00"
+            ) {
               // Store the raw bytes data - we'll decode it in the UI if needed
               conditions[chainId] = {
                 raw: chainConditions,
                 // Try to decode as ConditionExpression
-                decoded: tryDecodeConditions(chainConditions)
+                decoded: tryDecodeConditions(chainConditions),
               };
-              console.log(`Decoded conditions for cohort ${i} chain ${chainId}:`, conditions[chainId].decoded);
+              console.log(
+                `Decoded conditions for cohort ${i} chain ${chainId}:`,
+                conditions[chainId].decoded,
+              );
             }
           } catch (error) {
             // Conditions might not be set for this chain
-            console.log(`No conditions for cohort ${i} on chain ${chainId}:`, error.message);
+            console.log(
+              `No conditions for cohort ${i} on chain ${chainId}:`,
+              error.message,
+            );
           }
         }
 
@@ -532,7 +598,7 @@ export const getAllSigningCohorts = async (network = "mainnet") => {
           signers,
           threshold: parseInt(threshold),
           conditions,
-          signersCount: signerParticipants.length
+          signersCount: signerParticipants.length,
         });
       } catch (error) {
         console.error(`Error fetching cohort ${i}:`, error);
@@ -547,7 +613,10 @@ export const getAllSigningCohorts = async (network = "mainnet") => {
 };
 
 // Get signing cohort details
-export const getSigningCohortDetails = async (cohortId, network = "mainnet") => {
+export const getSigningCohortDetails = async (
+  cohortId,
+  network = "mainnet",
+) => {
   try {
     const signingCoordinator = getSigningCoordinator(network);
 
@@ -558,14 +627,19 @@ export const getSigningCohortDetails = async (cohortId, network = "mainnet") => 
 
     const rpcUrl = getRpcUrl(network);
     const web3 = new Web3(rpcUrl);
-    const contract = new web3.eth.Contract(signingCoordinator.abi, signingCoordinator.address);
+    const contract = new web3.eth.Contract(
+      signingCoordinator.abi,
+      signingCoordinator.address,
+    );
 
     // Get cohort state
     const state = await contract.methods.getSigningCohortState(cohortId).call();
     const isActive = await contract.methods.isCohortActive(cohortId).call();
 
     // Get signers and their details
-    const signerParticipants = await contract.methods.getSigners(cohortId).call();
+    const signerParticipants = await contract.methods
+      .getSigners(cohortId)
+      .call();
     const signers = [];
 
     // getSigners returns array of {provider, operator, signature}
@@ -575,7 +649,7 @@ export const getSigningCohortDetails = async (cohortId, network = "mainnet") => 
         operator: participant.operator || participant[1],
         signature: participant.signature || participant[2],
         // For display, we'll use the provider address as the main address
-        address: participant.provider || participant[0]
+        address: participant.provider || participant[0],
       });
     }
 
@@ -596,19 +670,28 @@ export const getSigningCohortDetails = async (cohortId, network = "mainnet") => 
 
     for (const chainId of supportedChainIds) {
       try {
-        const chainConditions = await contract.methods.getSigningCohortConditions(cohortId, chainId).call();
+        const chainConditions = await contract.methods
+          .getSigningCohortConditions(cohortId, chainId)
+          .call();
         // getSigningCohortConditions returns bytes data
-        if (chainConditions && chainConditions !== '0x' && chainConditions !== '0x00') {
+        if (
+          chainConditions &&
+          chainConditions !== "0x" &&
+          chainConditions !== "0x00"
+        ) {
           // Store the raw bytes data - we'll decode it in the UI if needed
           conditions[chainId] = {
             raw: chainConditions,
             // Try to decode as ConditionExpression
-            decoded: tryDecodeConditions(chainConditions)
+            decoded: tryDecodeConditions(chainConditions),
           };
         }
       } catch (error) {
         // Conditions might not be set for this chain
-        console.log(`No conditions for cohort ${cohortId} on chain ${chainId}:`, error.message);
+        console.log(
+          `No conditions for cohort ${cohortId} on chain ${chainId}:`,
+          error.message,
+        );
       }
     }
 
@@ -620,7 +703,7 @@ export const getSigningCohortDetails = async (cohortId, network = "mainnet") => 
       signersCount: signers.length,
       threshold: parseInt(threshold),
       chains,
-      conditions
+      conditions,
     };
   } catch (error) {
     console.error("Error fetching cohort details:", error);
