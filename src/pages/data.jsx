@@ -17,6 +17,7 @@ export const loadBetaStakers = async () => {
 
   try {
     const response = await fetch('/beta_stakers.txt');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const text = await response.text();
     betaStakers = new Set(
       text.split('\n')
@@ -818,6 +819,7 @@ export const getRituals = async (isSearch, searchInput) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: appAuthsQuery })
     });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const data = await response.json();
 
