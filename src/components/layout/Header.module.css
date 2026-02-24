@@ -13,7 +13,7 @@
 }
 
 .mainHeader {
-  padding: 20px 0;
+  padding: 10px 0;
   border-bottom: 1px solid #1A1A1A;
 }
 
@@ -42,26 +42,26 @@
 
 .logoText {
   font-family: var(--font-mono);
-  font-size: 32px;
+  font-size: 20px;
   font-weight: 400;
   color: #FFFFFF;
   letter-spacing: 0.15em;
-  margin-left: 16px;
+  margin-left: 10px;
   line-height: 1;
 }
 
 .mainNav {
   display: flex;
-  gap: 32px;
+  gap: 16px;
   align-items: center;
 }
 
 .navLink {
   color: #E5E7EB;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 8px 12px;
+  padding: 5px 8px;
   border-radius: 4px;
   transition: all 0.2s ease;
   background: none;
@@ -124,10 +124,10 @@
 
 .dropdownContent a {
   color: #E5E7EB;
-  padding: 12px 20px;
+  padding: 8px 14px;
   text-decoration: none;
   display: block;
-  font-size: 14px;
+  font-size: 12px;
   transition: all 0.2s ease;
   white-space: nowrap;
 }
@@ -157,10 +157,10 @@
   background: #96FF5E;
   color: #0A0A0A;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  padding: 6px 14px;
+  border-radius: 5px;
   font-family: var(--font-mono, 'Space Mono', monospace);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -174,7 +174,7 @@
 
 .searchSection {
   background: #0F0F0F;
-  padding: 24px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #1A1A1A;
 }
 
@@ -200,9 +200,9 @@
 
 .searchInput {
   flex: 1;
-  padding: 14px 16px;
+  padding: 8px 12px;
   border: none;
-  font-size: 14px;
+  font-size: 13px;
   font-family: var(--font-mono, 'Space Mono', monospace);
   background: transparent;
   color: #FFFFFF;
@@ -217,7 +217,7 @@
 }
 
 .searchButton {
-  padding: 14px 20px;
+  padding: 8px 14px;
   background: transparent;
   border: none;
   border-left: 1px solid #2A2A2A;

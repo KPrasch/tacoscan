@@ -1,23 +1,26 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { getAllRewardEvents, formatString, formatTimeToText, formatWeiDecimal } from "./data";
+import { getRewardDistributions, formatString, formatWeiDecimal } from "./data";
 import styles from "./Rewards.module.css";
 
-const EVENT_COLORS = {
-  REWARD_ADDED: "#10B981",
-  REWARD_PAID: "#3B82F6",
-  REWARDS_WITHDRAWN: "#F59E0B",
-  REWARD_RESET: "#EF4444",
-  REWARD_CONTRACT_SET: "#6366F1",
-  REWARD_DISTRIBUTOR_SET: "#8B5CF6",
-  COMMITMENT_MADE: "#06B6D4",
-  PENALIZED: "#DC2626",
+const REWARDS_CONTRACT = "0xA08AadA7c59E4A1D4A858fcfA299673d2f6De0c3";
+
+const formatTokenAmount = (weiStr) => {
+  try {
+    const bi = BigInt(weiStr);
+    const whole = bi / BigInt(10 ** 18);
+    const frac = bi % BigInt(10 ** 18);
+    const fracStr = frac.toString().padStart(18, "0").slice(0, 2);
+    return `${Number(whole).toLocaleString()}.${fracStr}`;
+  } catch {
+    return "0";
+  }
 };
 
 const Rewards = () => {
-  const [events, setEvents] = useState([]);
+  const [distributions, setDistributions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterType, setFilterType] = useState("all");
+  const [selectedDist, setSelectedDist] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
@@ -25,10 +28,11 @@ const Rewards = () => {
   useEffect(() => {
     (async () => {
       try {
-        const data = await getAllRewardEvents();
-        setEvents(data);
+        const data = await getRewardDistributions();
+        setDistributions(data);
+        if (data.length > 0) setSelectedDist(data[data.length - 1].date);
       } catch (err) {
-        console.error("Failed to fetch rewards:", err);
+        console.error("Failed to fetch distributions:", err);
       } finally {
         setLoading(false);
       }
@@ -36,46 +40,40 @@ const Rewards = () => {
   }, []);
 
   const stats = useMemo(() => {
-    const totalDistributed = events
-      .filter(e => e.eventType === "REWARD_PAID" || e.eventType === "REWARD_ADDED")
-      .reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
-    const totalWithdrawn = events
-      .filter(e => e.eventType === "REWARDS_WITHDRAWN")
-      .reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
-    const penalized = events.filter(e => e.eventType === "PENALIZED").length;
+    if (!distributions.length) return { totalDistributed: "0", totalStakers: 0, distributions: 0 };
+    const latest = distributions[distributions.length - 1];
+    const totalStakers = Object.keys(latest.claims).length;
+    return {
+      totalDistributed: latest.accumulatedAmount,
+      latestDistribution: latest.thisDistributionAmount,
+      totalStakers,
+      distributions: distributions.length,
+    };
+  }, [distributions]);
 
-    // Top earners
-    const earnerMap = {};
-    events.filter(e => e.eventType === "REWARD_PAID" || e.eventType === "REWARD_ADDED").forEach(e => {
-      if (e.stakingProvider) {
-        earnerMap[e.stakingProvider] = (earnerMap[e.stakingProvider] || 0) + parseFloat(e.amount || 0);
-      }
-    });
-    const topEarners = Object.entries(earnerMap)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
+  const currentDist = useMemo(() => distributions.find(d => d.date === selectedDist), [distributions, selectedDist]);
 
-    return { totalDistributed, totalWithdrawn, penalized, topEarners, totalEvents: events.length };
-  }, [events]);
-
-  const eventTypes = useMemo(() => [...new Set(events.map(e => e.eventType))].sort(), [events]);
+  const claimsList = useMemo(() => {
+    if (!currentDist) return [];
+    return Object.entries(currentDist.claims)
+      .map(([addr, claim]) => ({ address: addr, ...claim }))
+      .sort((a, b) => {
+        try { return BigInt(b.earnedThisDistribution) > BigInt(a.earnedThisDistribution) ? 1 : -1; } catch { return 0; }
+      });
+  }, [currentDist]);
 
   const filtered = useMemo(() => {
-    return events.filter(ev => {
-      if (filterType !== "all" && ev.eventType !== filterType) return false;
-      if (searchTerm) {
-        const s = searchTerm.toLowerCase();
-        return [ev.stakingProvider, ev.transactionHash, ev.beneficiary, ev.sender]
-          .filter(Boolean).some(v => v.toLowerCase().includes(s));
-      }
-      return true;
-    });
-  }, [events, filterType, searchTerm]);
+    if (!searchTerm) return claimsList;
+    const s = searchTerm.toLowerCase();
+    return claimsList.filter(c =>
+      c.address.toLowerCase().includes(s) || c.beneficiary?.toLowerCase().includes(s)
+    );
+  }, [claimsList, searchTerm]);
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paged = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  if (loading) return <div className={styles.networkActivity}><div className={styles.loading}>Loading reward events...</div></div>;
+  if (loading) return <div className={styles.networkActivity}><div className={styles.loading}>Loading reward distributions...</div></div>;
 
   return (
     <div className={styles.networkActivity}>
@@ -83,111 +81,146 @@ const Rewards = () => {
         <div className={styles.pageHeader}>
           <div className={styles.headerContent}>
             <h1 className={styles.pageTitle}>💰 Rewards</h1>
-            <p className={styles.pageSubtitle}>Network reward events — payouts, commitments, and penalties</p>
+            <p className={styles.pageSubtitle}>
+              Monthly TACo reward distributions — Merkle tree based payouts to stakers.
+              Contract: <a href={`https://etherscan.io/address/${REWARDS_CONTRACT}`} target="_blank" rel="noopener noreferrer" style={{ color: "#3B82F6" }}>{formatString(REWARDS_CONTRACT)}</a>
+            </p>
           </div>
           <div className={styles.headerStats}>
             <div className={styles.statItem}>
-              <span className={styles.statLabel}>Total Events</span>
-              <span className={styles.statValue}>{stats.totalEvents.toLocaleString()}</span>
+              <span className={styles.statLabel}>Total Distributed</span>
+              <span className={styles.statValue}>{formatTokenAmount(stats.totalDistributed)} T</span>
             </div>
             <div className={styles.statItem}>
-              <span className={styles.statLabel}>Distributed (wei)</span>
-              <span className={styles.statValue}>{formatWeiDecimal(stats.totalDistributed.toString())}</span>
+              <span className={styles.statLabel}>Latest Month</span>
+              <span className={styles.statValue}>{formatTokenAmount(stats.latestDistribution || "0")} T</span>
             </div>
             <div className={styles.statItem}>
-              <span className={styles.statLabel}>Withdrawn (wei)</span>
-              <span className={styles.statValue}>{formatWeiDecimal(stats.totalWithdrawn.toString())}</span>
+              <span className={styles.statLabel}>Stakers</span>
+              <span className={styles.statValue}>{stats.totalStakers}</span>
             </div>
             <div className={styles.statItem}>
-              <span className={styles.statLabel}>Penalties</span>
-              <span className={styles.statValue}>{stats.penalized}</span>
+              <span className={styles.statLabel}>Distributions</span>
+              <span className={styles.statValue}>{stats.distributions}</span>
             </div>
           </div>
         </div>
 
-        {stats.topEarners.length > 0 && (
+        {/* Distribution selector */}
+        <div className={styles.filtersSection}>
+          <div className={styles.filterControls}>
+            <select
+              value={selectedDist || ""}
+              onChange={e => { setSelectedDist(e.target.value); setCurrentPage(1); }}
+              className={styles.filterSelect}
+            >
+              {distributions.map(d => (
+                <option key={d.date} value={d.date}>
+                  {new Date(d.date).toLocaleDateString("en-US", { month: "long", year: "numeric" })} — {formatTokenAmount(d.thisDistributionAmount)} T
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.searchBar}>
+            <input
+              type="text"
+              placeholder="Search by staker or beneficiary address..."
+              value={searchTerm}
+              onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+              className={styles.searchInput}
+            />
+          </div>
+        </div>
+
+        {/* Distribution overview cards */}
+        {distributions.length > 1 && (
           <div className={styles.topEarners}>
-            <h3 className={styles.sectionTitle}>Top Earners</h3>
+            <h3 className={styles.sectionTitle}>Monthly Distribution History</h3>
             <div className={styles.earnersList}>
-              {stats.topEarners.map(([addr, amount], i) => (
-                <div key={addr} className={styles.earnerItem}>
-                  <span className={styles.earnerRank}>#{i + 1}</span>
-                  <Link to={`/node/${addr}`} className={styles.addressLink}>{formatString(addr)}</Link>
-                  <span className={styles.earnerAmount}>{formatWeiDecimal(amount.toString())}</span>
+              {distributions.map((d, i) => (
+                <div
+                  key={d.date}
+                  className={styles.earnerItem}
+                  style={{ cursor: "pointer", background: d.date === selectedDist ? "#1E293B" : undefined }}
+                  onClick={() => { setSelectedDist(d.date); setCurrentPage(1); }}
+                >
+                  <span className={styles.earnerRank}>
+                    {new Date(d.date).toLocaleDateString("en-US", { month: "short", year: "2-digit" })}
+                  </span>
+                  <span className={styles.earnerAmount}>{formatTokenAmount(d.thisDistributionAmount)} T</span>
+                  <span style={{ color: "#6B7280", fontSize: "0.8em" }}>{Object.keys(d.claims).length} stakers</span>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        <div className={styles.filtersSection}>
-          <div className={styles.searchBar}>
-            <input
-              type="text"
-              placeholder="Search by address or tx hash..."
-              value={searchTerm}
-              onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-              className={styles.searchInput}
-            />
-          </div>
-          <div className={styles.filterControls}>
-            <select
-              value={filterType}
-              onChange={e => { setFilterType(e.target.value); setCurrentPage(1); }}
-              className={styles.filterSelect}
-            >
-              <option value="all">All Types</option>
-              {eventTypes.map(t => <option key={t} value={t}>{t.replace(/_/g, " ")}</option>)}
-            </select>
-          </div>
-        </div>
-
         <div className={styles.tableSection}>
           <div className={styles.tableHeader}>
-            <span className={styles.tableInfo}>{filtered.length} reward events</span>
+            <span className={styles.tableInfo}>
+              {filtered.length} stakers in {selectedDist ? new Date(selectedDist).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "—"}
+            </span>
           </div>
           <div className={styles.tableWrapper}>
             <table className={styles.activityTable}>
               <thead>
                 <tr>
-                  <th>Type</th>
+                  <th>#</th>
                   <th>Staking Provider</th>
-                  <th>Amount</th>
                   <th>Beneficiary</th>
-                  <th>Tx Hash</th>
-                  <th>Time</th>
+                  <th>Earned This Month</th>
+                  <th>Accumulated Total</th>
+                  <th>Penalty</th>
+                  <th>Failed Heartbeats</th>
                 </tr>
               </thead>
               <tbody>
-                {paged.map((ev, idx) => (
-                  <tr key={ev.id || idx}>
+                {paged.map((claim, idx) => (
+                  <tr key={claim.address}>
+                    <td style={{ color: "#6B7280" }}>{(currentPage - 1) * itemsPerPage + idx + 1}</td>
                     <td>
-                      <span className={styles.eventType} style={{ background: `${EVENT_COLORS[ev.eventType] || "#6B7280"}20`, color: EVENT_COLORS[ev.eventType] || "#6B7280" }}>
-                        {ev.eventType?.replace(/_/g, " ")}
-                      </span>
+                      <Link to={`/node/${claim.address}`} className={styles.addressLink}>
+                        {formatString(claim.address)}
+                      </Link>
                     </td>
                     <td>
-                      {ev.stakingProvider ? (
-                        <Link to={`/node/${ev.stakingProvider}`} className={styles.addressLink}>
-                          {formatString(ev.stakingProvider)}
+                      {claim.beneficiary && claim.beneficiary !== claim.address ? (
+                        <Link to={`/node/${claim.beneficiary}`} className={styles.addressLink}>
+                          {formatString(claim.beneficiary)}
                         </Link>
-                      ) : "—"}
+                      ) : (
+                        <span style={{ color: "#6B7280" }}>same</span>
+                      )}
                     </td>
-                    <td>{ev.amount && ev.amount !== "0" ? formatWeiDecimal(ev.amount) : "—"}</td>
-                    <td>{ev.beneficiary ? formatString(ev.beneficiary) : "—"}</td>
+                    <td style={{ fontWeight: 600, color: "#10B981" }}>
+                      {formatTokenAmount(claim.earnedThisDistribution)} T
+                    </td>
+                    <td style={{ fontWeight: 600 }}>
+                      {formatTokenAmount(claim.accumulatedAmount)} T
+                    </td>
                     <td>
-                      <a
-                        href={`https://etherscan.io/tx/${ev.transactionHash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.txHash}
-                      >
-                        {formatString(ev.transactionHash)}
-                      </a>
+                      {claim.penaltyThisDistribution && claim.penaltyThisDistribution !== "0" ? (
+                        <span style={{ color: "#EF4444", fontWeight: 600 }}>
+                          {formatTokenAmount(claim.penaltyThisDistribution)} T
+                        </span>
+                      ) : (
+                        <span style={{ color: "#6B7280" }}>—</span>
+                      )}
                     </td>
-                    <td className={styles.timeAgo}>{formatTimeToText(ev.timestamp / 1000)}</td>
+                    <td>
+                      {claim.failedHeartbeats && claim.failedHeartbeats.length > 0 ? (
+                        <span style={{ color: "#F59E0B", fontWeight: 600 }}>
+                          {claim.failedHeartbeats.length}
+                        </span>
+                      ) : (
+                        <span style={{ color: "#10B981" }}>0</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
+                {paged.length === 0 && (
+                  <tr><td colSpan={7} style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>No stakers found</td></tr>
+                )}
               </tbody>
             </table>
           </div>

@@ -12,7 +12,8 @@ const Heartbeats = () => {
   useEffect(() => {
     (async () => {
       try {
-        const [rituals, timeout] = await Promise.all([getRituals(), getTimeout()]);
+        const [ritualsData, timeout] = await Promise.all([getRituals(), getTimeout()]);
+        const rituals = ritualsData?.rituals || [];
         const heartbeatRituals = rituals.filter(r => r.isHeartbeat);
         setAllHeartbeats(heartbeatRituals);
         const detected = detectHeartbeatGroups(rituals, timeout);

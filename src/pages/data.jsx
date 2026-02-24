@@ -1737,6 +1737,27 @@ export const getAllRewardEvents = async () => {
   }
 };
 
+// ─── Reward Distributions (from taco-rewards GitHub) ───────────────────────
+const DISTRIBUTION_DATES = ['2025-10-01', '2025-11-01', '2025-12-01', '2026-01-01', '2026-02-01'];
+const DISTRIBUTIONS_BASE_URL = 'https://raw.githubusercontent.com/nucypher/taco-rewards/main/distributions';
+
+export const getRewardDistributions = async () => {
+  try {
+    const results = await Promise.all(
+      DISTRIBUTION_DATES.map(async (date) => {
+        const resp = await fetch(`${DISTRIBUTIONS_BASE_URL}/${date}.json`);
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        return { date, ...data };
+      })
+    );
+    return results.filter(Boolean);
+  } catch (e) {
+    console.warn('Error fetching reward distributions:', e);
+    return [];
+  }
+};
+
 // ─── All Infractions (network-wide) ────────────────────────────────────────
 export const getAllInfractions = async () => {
   try {
