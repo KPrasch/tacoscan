@@ -238,11 +238,7 @@ const RitualDetail = () => {
                   <span className={styles.value}>{ritual.threshold}</span>
                 </div>
                 <div className={styles.infoRow}>
-                  <span className={styles.label}>DKG Size:</span>
-                  <span className={styles.value}>{ritual.dkgSize}</span>
-                </div>
-                <div className={styles.infoRow}>
-                  <span className={styles.label}>Total Participants:</span>
+                  <span className={styles.label}>Participants:</span>
                   <span className={styles.value}>{ritual.totalParticipants}</span>
                 </div>
                 <div className={styles.infoRow}>

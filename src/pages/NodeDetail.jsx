@@ -316,7 +316,7 @@ const NodeDetail = () => {
           <div className={styles.statValue}>
             {nodeData.operator && nodeData.operator !== "-" ? (
               <a
-                href={`https://polygonscan.com/address/${nodeData.operator}`}
+                href={`https://etherscan.io/address/${nodeData.operator}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.operatorLink}

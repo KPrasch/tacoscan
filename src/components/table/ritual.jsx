@@ -368,9 +368,9 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                             letterSpacing: '0.025em',
                             fontFamily: 'var(--font-display)'
                           }}>
-                            DKG Size
+                            Participants
                           </div>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: '#111827', fontWeight: 500 }}>{row.dkgSize}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: '#111827', fontWeight: 500 }}>{row.totalParticipants}</div>
                         </div>
                         <div>
                           <div style={{ 
