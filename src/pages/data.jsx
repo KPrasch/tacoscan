@@ -26,14 +26,18 @@ const gqlFetch = async (endpoint, query, variables = {}) => {
 // GraphQL query fragments (matching query.graphql)
 const RITUAL_FIELDS = `
   id
+  domain
   authority
   participants
   status
+  successful
   startedAt
   endedAt
   transcriptCount
   aggregationCount
   publicKey { word0 word1 }
+  createdAt
+  updatedAt
   transactions(orderBy: timestamp, orderDirection: desc) {
     eventType
     participant
@@ -476,9 +480,9 @@ export const formatRitualsData = (rawData, timeout) => {
   return rawData
     .map((ritual) => {
       const currentTimestampMs = Date.now();
-      const initTimestamp = parseInt(ritual.startedAt || ritual.initTimestamp || 0);
-      const endTimestamp = parseInt(ritual.endedAt || ritual.endTimestamp || 0);
-      const rawStatus = ritual.status || ritual.dkgStatus || "PENDING";
+      const initTimestamp = parseInt(ritual.startedAt || 0);
+      const endTimestamp = parseInt(ritual.endedAt || 0);
+      const rawStatus = ritual.status || "PENDING";
       const normalizedStatus = rawStatus.toString().toUpperCase();
 
       let status = normalizedStatus.replaceAll("_", " ");
@@ -517,7 +521,7 @@ export const formatRitualsData = (rawData, timeout) => {
         : ritual.publicKey || null;
 
       const participants = ritual.participants || [];
-      const dkgSize = ritual.dkgSize ?? participants.length;
+      const dkgSize = participants.length;
       const threshold = ritual.threshold ?? null;
       const latestTransaction = transactions[0];
 
@@ -527,7 +531,6 @@ export const formatRitualsData = (rawData, timeout) => {
       return {
         id: ritual.id,
         status: status,
-        initiator: ritual.initiator || ritual.authority,
         authority: ritual.authority,
         aggregations: postedAggregations,
         transcripts: postedTranscripts,
@@ -1028,10 +1031,10 @@ const BASE_EVENTS_QUERY = `
 `;
 
 // Safely fetch from a chain — returns empty object on failure
-const safeFetch = async (endpoint, query, chainLabel) => {
+const safeFetch = async (endpoint, query, chainLabel, variables = {}) => {
   if (!endpoint) return {};
   try {
-    return await gqlFetch(endpoint, query);
+    return await gqlFetch(endpoint, query, variables);
   } catch (err) {
     console.warn(`⚠️ ${chainLabel} event fetch failed:`, err.message);
     return {};
@@ -1391,6 +1394,34 @@ const getWeb3Instance = () => {
   return web3Instance;
 };
 
+// Fetch ritual on-chain data (threshold, accessController, feeModel) from Coordinator contract
+export const getRitualOnChainData = async (ritualId) => {
+  if (!ritualId || isNaN(ritualId)) return null;
+  try {
+    return await web3Cache.get(
+      `ritual-onchain-${ritualId}`,
+      async () => {
+        const web3 = getWeb3Instance();
+        const coordinatorContract = new web3.eth.Contract(
+          CoordinatorABI,
+          CoordinatorAddress
+        );
+        const ritualData = await coordinatorContract.methods.rituals(ritualId).call();
+        return {
+          threshold: ritualData.threshold ? parseInt(ritualData.threshold) : null,
+          accessController: ritualData.accessController || null,
+          feeModel: ritualData.feeModel || null,
+          authority: ritualData.authority || null,
+        };
+      },
+      3600000
+    );
+  } catch (error) {
+    console.error(`Failed to fetch on-chain data for ritual ${ritualId}:`, error);
+    return null;
+  }
+};
+
 export const getRitualFeeModel = async (ritualId) => {
   if (!ritualId || isNaN(ritualId)) {
     console.error(`Invalid ritual ID: ${ritualId}`);
@@ -1484,6 +1515,7 @@ export const getRitualHandovers = async (ritualId) => {
 // ─── Infractions for a specific staking provider ───────────────────────────
 export const getProviderInfractions = async (providerId) => {
   try {
+    const variables = { provider: providerId.toLowerCase() };
     const [ethData, polyData] = await Promise.all([
       safeFetch(SUBGRAPH_ETHEREUM, `
         query GetInfractions($provider: String!) {
@@ -1491,14 +1523,14 @@ export const getProviderInfractions = async (providerId) => {
             id infractionType infractionTypeName ritual { id } timestamp
           }
         }
-      `, 'Ethereum'),
+      `, 'Ethereum', variables),
       safeFetch(SUBGRAPH_POLYGON, `
         query GetInfractions($provider: String!) {
           infractions(where: { stakingProvider: $provider }, first: 50, orderBy: timestamp, orderDirection: desc) {
             id infractionType infractionTypeName ritual { id } timestamp
           }
         }
-      `, 'Polygon'),
+      `, 'Polygon', variables),
     ]);
     return [
       ...(ethData.infractions || []).map(i => ({ ...i, chain: 'ethereum' })),

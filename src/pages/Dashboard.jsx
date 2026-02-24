@@ -160,42 +160,9 @@ const Dashboard = () => {
       
       const totalConfirmedNodes = confirmedNodeParticipations.size;
       
-      // Get top participants for debugging
-      const topParticipants = Array.from(confirmedNodeParticipations.entries())
-        .sort((a, b) => b[1].recentParticipationCount - a[1].recentParticipationCount)
-        .slice(0, 5)
-        .map(([id, data]) => ({
-          id: id.slice(0, 10) + '...',
-          recentCount: data.recentParticipationCount,
-          allTimeCount: data.participationCount
-        }));
+      // Top participants removed - was debug logging only
       
-      console.log(`Active nodes calculation (Map-based approach):
-        === Ritual Counts ===
-        - Recent rituals (2 weeks): ${twoWeekRituals.length}
-        - Recent rituals (8 weeks): ${recentActiveOrSuccessfulRituals.length}
-        - ALL successful+active rituals: ${allSuccessfulOrActiveRituals.length}
-        
-        === Node Participation ===
-        - Total confirmed nodes: ${totalConfirmedNodes}
-        - Active nodes (8 weeks, ≥1 participation): ${activeNodes}
-        - Active nodes (all time, ≥1 participation): ${allTimeActiveNodes}
-        - Inactive nodes (8 weeks): ${participationDistribution.zero}
-        
-        === Participation Distribution (8 weeks) ===
-        - No participation: ${participationDistribution.zero} nodes
-        - Low (1-10 rituals): ${participationDistribution.low} nodes
-        - Medium (11-50 rituals): ${participationDistribution.medium} nodes
-        - High (>50 rituals): ${participationDistribution.high} nodes
-        
-        === Activity Rates ===
-        - Activity rate (8 weeks): ${totalConfirmedNodes > 0 ? ((activeNodes / totalConfirmedNodes) * 100).toFixed(1) : 0}%
-        - Activity rate (all time): ${totalConfirmedNodes > 0 ? ((allTimeActiveNodes / totalConfirmedNodes) * 100).toFixed(1) : 0}%
-        - Expected ~95% would be: ${Math.round(totalConfirmedNodes * 0.95)} nodes
-        
-        === Top Participants (8 weeks) ===`);
-      console.log('Top 5 most active nodes:', topParticipants);
-        
+      console.log(`Dashboard: ${totalConfirmedNodes} confirmed nodes, ${allTimeActiveNodes} active (all-time), ${activeNodes} active (8w)`);
       
       
       // Calculate success rate (successful rituals / total rituals)

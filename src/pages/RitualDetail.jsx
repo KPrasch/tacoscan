@@ -24,11 +24,21 @@ const RitualDetail = () => {
           const timeout = await Data.getTimeout();
           const formattedRitual = Data.formatRitualsData(data.rituals, timeout)[0];
           
-          // Fetch feeModel for the specific ritual detail view
-          const feeModel = await Data.getRitualFeeModel(id);
-          formattedRitual.feeModel = feeModel;
+          // Fetch on-chain data (threshold, accessController, feeModel)
+          const onChainData = await Data.getRitualOnChainData(id);
+          if (onChainData) {
+            formattedRitual.feeModel = onChainData.feeModel;
+            formattedRitual.accessController = onChainData.accessController || formattedRitual.accessController;
+            if (onChainData.threshold) formattedRitual.threshold = onChainData.threshold;
+          }
           
-          // Don't add duplicate initiation transaction - the real one with txHash is already in the data
+          // Fetch access controls for this ritual
+          try {
+            const accessControls = await Data.getRitualAccessControls(id);
+            formattedRitual.accessControls = accessControls;
+          } catch (e) {
+            formattedRitual.accessControls = [];
+          }
           
           setRitual(formattedRitual);
         } else {
@@ -394,6 +404,48 @@ const RitualDetail = () => {
           {activeTab === 'authorizations' && (
             <div className={styles.timelineSection}>
               <RitualManagement ritual={ritual} defaultTab="encryptors" />
+              {/* Access Controls from v2 subgraph */}
+              {ritual.accessControls && ritual.accessControls.length > 0 && (
+                <div style={{ marginTop: '24px' }}>
+                  <h3 className={styles.sectionTitle}>Access Control Records</h3>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Address</th>
+                        <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Authorized</th>
+                        <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Transaction</th>
+                        <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ritual.accessControls.map((ac, idx) => (
+                        <tr key={idx}>
+                          <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
+                            <a href={`https://polygonscan.com/address/${ac.address}`} target="_blank" rel="noopener noreferrer" style={{ color: '#3B82F6' }}>
+                              {formatAddress(ac.address)}
+                            </a>
+                          </td>
+                          <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6' }}>
+                            <span style={{ color: ac.isAuthorized ? '#10B981' : '#EF4444', fontWeight: 500 }}>
+                              {ac.isAuthorized ? '✓ Yes' : '✗ No'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
+                            {ac.transactionHash ? (
+                              <a href={`https://polygonscan.com/tx/${ac.transactionHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#3B82F6' }}>
+                                {ac.transactionHash.slice(0, 10)}...
+                              </a>
+                            ) : '-'}
+                          </td>
+                          <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6', fontSize: '13px' }}>
+                            {ac.timestamp ? new Date(parseInt(ac.timestamp) * 1000).toLocaleString() : '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 

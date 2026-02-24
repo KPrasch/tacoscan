@@ -239,7 +239,7 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
   };
 
   const canManage = connectedAddress && 
-    connectedAddress.toLowerCase() === ritual?.initiator?.toLowerCase();
+    connectedAddress.toLowerCase() === (ritual?.authority || ritual?.initiator)?.toLowerCase();
 
   const handlePayment = async (isNextPeriod) => {
     try {
@@ -407,7 +407,7 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
           <h2 className={styles.title}>Ritual Management</h2>
           <div className={styles.ritualInfo}>
             <span className={styles.label}>Ritual #{ritual?.id}</span>
-            <span className={styles.authority}>Authority: {ritual?.initiator?.slice(0, 6)}...{ritual?.initiator?.slice(-4)}</span>
+            <span className={styles.authority}>Authority: {(ritual?.authority || ritual?.initiator)?.slice(0, 6)}...{(ritual?.authority || ritual?.initiator)?.slice(-4)}</span>
           </div>
         </div>
       )}

@@ -275,12 +275,12 @@ const NodeDetail = () => {
             📋
           </button>
           <a
-            href={`https://polygonscan.com/address/${address}`}
+            href={`https://etherscan.io/address/${address}`}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.etherscanLink}
           >
-            View on Polygonscan ↗
+            View on Etherscan ↗
           </a>
         </div>
       </div>
