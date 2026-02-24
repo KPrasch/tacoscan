@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { getNodeDetail, getTimeout, isBetaStaker } from "./data";
 import { formatString, formatWeiDecimal, formatTimeToText } from "./data";
 import styles from "./NodeDetail.module.css";
+import { getRewardStatus, getRewardExplanation, RewardStatusLabels, RewardStatusColors, RewardStatusIcons, RewardStatus, BETA_STAKERS, NODES_REQUESTED_EXIT } from "../utils/rewardEligibility";
 
 const NodeDetail = () => {
   const { address } = useParams();
@@ -104,6 +105,9 @@ const NodeDetail = () => {
 
     // Check if this is a beta staker
     const isBeta = await isBetaStaker(stakingProvider);
+    
+    // Determine reward eligibility
+    const rewardStatus = getRewardStatus(auth);
 
     // Use BigInt for accurate wei to token conversion
     const formatAmount = (weiAmount) => {
@@ -166,6 +170,10 @@ const NodeDetail = () => {
         ? new Date(auth.tacoOperator.bondedTimestamp * 1000)
         : null,
       isBetaStaker: isBeta,
+      rewardStatus: rewardStatus,
+      rewardStatusLabel: RewardStatusLabels[rewardStatus],
+      rewardExplanation: getRewardExplanation(rewardStatus),
+      isRequestedExit: NODES_REQUESTED_EXIT.has(stakingProvider.toLowerCase()),
       // V2 extended fields
       isReleased: data.isReleased || false,
       isSlashed: data.isSlashed || false,
@@ -260,6 +268,37 @@ const NodeDetail = () => {
               ) : (
                 <span className={styles.unconfirmedBadge}>Unconfirmed</span>
               )}
+              {nodeData.isRequestedExit && (
+                <span style={{
+                  background: "#F59E0B",
+                  color: "#FFFFFF",
+                  padding: "4px 12px",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  fontFamily: "var(--font-mono)",
+                  marginLeft: "8px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}>🚪 Requested Exit</span>
+              )}
+              <span style={{
+                background: RewardStatusColors[nodeData.rewardStatus] + '20',
+                color: RewardStatusColors[nodeData.rewardStatus],
+                border: `1px solid ${RewardStatusColors[nodeData.rewardStatus]}`,
+                padding: "4px 12px",
+                borderRadius: "6px",
+                fontSize: "13px",
+                fontWeight: 500,
+                fontFamily: "var(--font-mono)",
+                marginLeft: "8px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+              }}>
+                {RewardStatusIcons[nodeData.rewardStatus]} {nodeData.rewardStatusLabel}
+              </span>
             </div>
           </div>
         </div>
@@ -441,6 +480,30 @@ const NodeDetail = () => {
                     </span>
                   </div>
                 </div>
+              </div>
+
+              <div className={styles.infoSection}>
+                <h3 className={styles.sectionTitle}>Reward Eligibility</h3>
+                <div style={{
+                  background: RewardStatusColors[nodeData.rewardStatus] + '10',
+                  border: `1px solid ${RewardStatusColors[nodeData.rewardStatus]}40`,
+                  borderRadius: '8px',
+                  padding: '16px',
+                  marginBottom: '16px'
+                }}>
+                  <div style={{ fontWeight: 600, marginBottom: '8px', color: RewardStatusColors[nodeData.rewardStatus] }}>
+                    {RewardStatusIcons[nodeData.rewardStatus]} {nodeData.rewardStatusLabel}
+                  </div>
+                  <div style={{ color: '#4B5563', fontSize: '0.875rem', lineHeight: 1.5 }}>
+                    {nodeData.rewardExplanation}
+                  </div>
+                </div>
+                {nodeData.rewardStatus === 'reward_eligible' && (
+                  <div style={{ fontSize: '0.8rem', color: '#6B7280', fontStyle: 'italic' }}>
+                    💡 Rewards are calculated based on authorized stake × time × 3.75% APR (capped at 15M T). 
+                    Nodes failing heartbeat rituals receive penalties: 2 failures = 33% penalty, 3 = 67%, 4+ = 100%.
+                  </div>
+                )}
               </div>
 
               <div className={styles.infoSection}>

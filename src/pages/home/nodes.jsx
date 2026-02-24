@@ -11,6 +11,13 @@ import {
   NodeStatusColors,
   filterNodesByStatus 
 } from "../../utils/nodeCategories";
+import {
+  categorizeRewardEligibility,
+  RewardStatus,
+  RewardStatusLabels,
+  RewardStatusColors,
+  RewardStatusIcons,
+} from "../../utils/rewardEligibility";
 
 const NodesPage = ({ network = 'polygon', isSearch = false, searchInput = '' } = {}) => {
   const [pageData, setPageData] = useState({
@@ -26,6 +33,7 @@ const NodesPage = ({ network = 'polygon', isSearch = false, searchInput = '' } =
   });
   
   const [nodeCategories, setNodeCategories] = useState(null);
+  const [rewardCounts, setRewardCounts] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [rawData, setRawData] = useState([]);
 
@@ -47,6 +55,7 @@ const NodesPage = ({ network = 'polygon', isSearch = false, searchInput = '' } =
       if (!isSearch && info?.appAuthorizations) {
         const categories = categorizeAllNodes(info.appAuthorizations);
         setNodeCategories(categories);
+        setRewardCounts(categorizeRewardEligibility(info.appAuthorizations));
       }
 
       setPageData({
@@ -320,6 +329,70 @@ const NodesPage = ({ network = 'polygon', isSearch = false, searchInput = '' } =
               </div>
               );
             })}
+          </div>
+        </div>
+      )}
+      
+      {/* Reward Eligibility Breakdown */}
+      {!isSearch && rewardCounts && (
+        <div style={{ marginTop: "32px", marginBottom: "24px" }}>
+          <h2 style={{
+            fontSize: "1.5rem",
+            fontWeight: 600,
+            color: "#0A0A0A",
+            marginBottom: "8px"
+          }}>
+            Reward Eligibility
+          </h2>
+          <p style={{ color: "#6B7280", fontSize: "0.875rem", marginBottom: "16px", marginTop: 0 }}>
+            Why some authorized nodes don't receive rewards. Eligible nodes may still receive reduced rewards due to heartbeat penalties.
+          </p>
+          
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gap: "12px"
+          }}>
+            {Object.values(RewardStatus).map(status => (
+              <div
+                key={status}
+                title={RewardStatusLabels[status]}
+                style={{
+                  background: "#FFFFFF",
+                  border: "1px solid #E5E7EB",
+                  borderRadius: "8px",
+                  padding: "16px 20px",
+                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.08)",
+                  position: "relative",
+                  overflow: "hidden"
+                }}
+              >
+                <div style={{
+                  position: "absolute",
+                  top: 0, left: 0, right: 0,
+                  height: "3px",
+                  background: RewardStatusColors[status]
+                }} />
+                <div style={{
+                  fontSize: "0.7rem",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  color: "#6B7280",
+                  marginBottom: "6px"
+                }}>
+                  {RewardStatusIcons[status]} {RewardStatusLabels[status]}
+                </div>
+                <div style={{
+                  fontSize: "1.75rem",
+                  fontWeight: 700,
+                  color: "#0A0A0A",
+                  fontFamily: "var(--font-mono, 'Space Mono', monospace)"
+                }}>
+                  {rewardCounts[status] || 0}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
