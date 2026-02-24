@@ -237,15 +237,6 @@ function formatTimestampToText(date) {
   }
 }
 
-  return new Date(date).toLocaleString("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 export const calculateTimeMoment = (timestamp) => {
   return formatTimestampToText(
     moment.duration(moment(new Date().getTime()).diff(moment(timestamp)))
@@ -892,6 +883,100 @@ const buildAppAuthorization = (provider) => {
       bondedTimestampFirstOperator: provider.startTimestamp
     } : null
   };
+};
+
+export const getAllNetworkEvents = async () => {
+  try {
+    const appAuthsQuery = `
+      query GetAllEvents {
+        appAuthorizations(first: 100, orderBy: id) {
+          id
+          amount
+          tacoOperator {
+            operator
+            bondedTimestamp
+            confirmed
+          }
+          stake {
+            stakeHistory(first: 100, orderBy: timestamp, orderDirection: desc) {
+              eventType
+              eventAmount
+              timestamp
+              blockNumber
+              txHash
+            }
+          }
+        }
+        appAuthHistories(first: 500, orderBy: timestamp, orderDirection: desc) {
+          eventType
+          eventAmount
+          timestamp
+          blockNumber
+          txHash
+          appAuthorization {
+            id
+          }
+        }
+      }
+    `;
+
+    const response = await fetch('https://gateway-arbitrum.network.thegraph.com/api/f49026e5653284c96b9798f93567eaa1/subgraphs/id/6VFbgC6JWwPQkqCxdVDNSieW8bwLdoVBtimVm3F2WV86', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: appAuthsQuery })
+    });
+
+    const data = await response.json();
+
+    if (data?.data) {
+      const events = [];
+
+      data.data.appAuthorizations?.forEach(auth => {
+        auth.stake?.stakeHistory?.forEach(event => {
+          events.push({
+            type: event.eventType,
+            contract: 'TokenStaking',
+            stakingProvider: auth.id.split('-')[0],
+            amount: event.eventAmount,
+            timestamp: parseInt(event.timestamp) * 1000,
+            blockNumber: event.blockNumber,
+            txHash: event.txHash
+          });
+        });
+
+        if (auth.tacoOperator?.bondedTimestamp) {
+          events.push({
+            type: 'OperatorBonded',
+            contract: 'TACoApplication',
+            stakingProvider: auth.id.split('-')[0],
+            operator: auth.tacoOperator.operator,
+            timestamp: parseInt(auth.tacoOperator.bondedTimestamp) * 1000,
+            blockNumber: null,
+            txHash: null
+          });
+        }
+      });
+
+      data.data.appAuthHistories?.forEach(event => {
+        events.push({
+          type: event.eventType,
+          contract: 'TACoApplication',
+          stakingProvider: event.appAuthorization?.id?.split('-')[0],
+          amount: event.eventAmount,
+          timestamp: parseInt(event.timestamp) * 1000,
+          blockNumber: event.blockNumber,
+          txHash: event.txHash
+        });
+      });
+
+      return events.sort((a, b) => b.timestamp - a.timestamp);
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Error fetching network events:', error);
+    return [];
+  }
 };
 
 export const getNodes = async (isSearch, searchInput) => {
