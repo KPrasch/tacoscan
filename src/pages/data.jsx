@@ -39,6 +39,22 @@ const RITUAL_FIELDS = `
     participant
     timestamp
     transactionHash
+    gasUsed
+    transcriptDigest
+    aggregatedTranscriptDigest
+    previousAuthority
+    newAuthority
+  }
+  handovers {
+    id
+    departingParticipant
+    incomingParticipant
+    status
+    requestedAt
+    transcriptPostedAt
+    blindedSharePostedAt
+    canceledAt
+    finalizedAt
   }
 `;
 
@@ -563,7 +579,14 @@ export const formatNodes = async (rawData) => {
       authorizedAmount: parseFloat(item.amount) || 0,
       stakedAmount: parseFloat(item.stake?.stakedAmount) || 0,
       bondedAt: item.tacoOperator?.bondedTimestamp * 1000,
-      isBetaStaker: betaStakersList.has(item.id.split('-')[0].toLowerCase())
+      isBetaStaker: betaStakersList.has(item.id.split('-')[0].toLowerCase()),
+      isReleased: item.isReleased || false,
+      isSlashed: item.isSlashed || false,
+      isPenalized: item.isPenalized || false,
+      totalRewards: item.totalRewards || '0',
+      totalRewardsWithdrawn: item.totalRewardsWithdrawn || '0',
+      isChildSynced: item.isChildSynced,
+      endDeauthorization: item.endDeauthorization,
     }))
 
   const statsRecord = {
@@ -846,8 +869,15 @@ const buildAppAuthorization = (provider) => {
     id: providerId + '-' + tacoAddr,
     amount: provider.authorized,
     amountDeauthorizing: provider.deauthorizing,
+    endDeauthorization: provider.endDeauthorization,
     appAddress: tacoAddr,
     appName: "TACo",
+    isReleased: provider.isReleased,
+    isSlashed: provider.isSlashed,
+    isPenalized: provider.isPenalized,
+    totalRewards: provider.totalRewards,
+    totalRewardsWithdrawn: provider.totalRewardsWithdrawn,
+    isChildSynced: provider.isChildSynced,
     stake: {
       id: providerId,
       stakedAmount: provider.authorized,
@@ -1219,7 +1249,9 @@ export const getNodes = async (isSearch, searchInput) => {
     if (!isSearch) {
       const data = await gqlFetch(SUBGRAPH_ETHEREUM, `
         query { stakingProviders(first: 1000, orderBy: authorized, orderDirection: desc) {
-          id operator authorized deauthorizing startTimestamp
+          id operator authorized deauthorizing endDeauthorization startTimestamp
+          isReleased isSlashed isPenalized totalRewards totalRewardsWithdrawn
+          isChildSynced
         } }
       `);
       stakingProviders = data.stakingProviders;
@@ -1251,9 +1283,26 @@ export const getNodeDetail = async (node) => {
     const data = await gqlFetch(SUBGRAPH_ETHEREUM, `
       query StakerDetail($id: ID!) {
         stakingProvider(id: $id) {
-          id operator authorized deauthorizing startTimestamp
-          authorizationEvents(first: 10, orderBy: timestamp, orderDirection: desc) {
-            id eventType fromAmount toAmount timestamp blockNumber transactionHash
+          id operator previousOperator authorized deauthorizing endDeauthorization startTimestamp
+          isReleased isSlashed isPenalized totalPenalty lastSlashInvestigator lastSlashReward
+          isChildSynced lastChildSyncAt
+          totalRewards totalRewardsWithdrawn
+          commitmentEndTimestamp penaltyPercent penaltyEndTimestamp
+          createdAt updatedAt
+          authorizationEvents(first: 50, orderBy: timestamp, orderDirection: desc) {
+            id eventType fromAmount toAmount penalty investigator reward
+            deauthorizing endDeauthorization operator
+            timestamp blockNumber transactionHash
+          }
+          rewards(first: 50, orderBy: timestamp, orderDirection: desc) {
+            id eventType amount sender beneficiary
+            endCommitment penaltyPercent endPenalty
+            transactionHash blockNumber timestamp
+          }
+          infractions(first: 20, orderBy: timestamp, orderDirection: desc) {
+            id infractionType infractionTypeName
+            ritual { id }
+            timestamp
           }
         }
       }
@@ -1267,13 +1316,36 @@ export const getNodeDetail = async (node) => {
         amount: event.toAmount,
         eventAmount: event.toAmount,
         eventType: event.eventType,
+        fromAmount: event.fromAmount,
+        penalty: event.penalty,
+        investigator: event.investigator,
+        reward: event.reward,
+        operator: event.operator,
         stakingProvider: provider.id,
         timestamp: event.timestamp,
         blockNumber: event.blockNumber,
         txHash: event.transactionHash
       }));
 
-      return { appAuthorization, appAuthHistories };
+      return {
+        appAuthorization,
+        appAuthHistories,
+        // V2 extended fields
+        rewardEvents: provider.rewards || [],
+        infractions: provider.infractions || [],
+        totalRewards: provider.totalRewards,
+        totalRewardsWithdrawn: provider.totalRewardsWithdrawn,
+        commitmentEndTimestamp: provider.commitmentEndTimestamp,
+        penaltyPercent: provider.penaltyPercent,
+        penaltyEndTimestamp: provider.penaltyEndTimestamp,
+        isReleased: provider.isReleased,
+        isSlashed: provider.isSlashed,
+        isPenalized: provider.isPenalized,
+        totalPenalty: provider.totalPenalty,
+        endDeauthorization: provider.endDeauthorization,
+        previousOperator: provider.previousOperator,
+        isChildSynced: provider.isChildSynced,
+      };
     }
   } catch (e) {
     console.log("error to fetch staking provider data " + e);
@@ -1335,6 +1407,227 @@ export const getRitualFeeModel = async (ritualId) => {
     );
   } catch (error) {
     console.error(`Failed to fetch feeModel for ritual ${ritualId}:`, error);
+    return null;
+  }
+};
+
+// ─── Domain Stats ──────────────────────────────────────────────────────────
+export const getDomainStats = async () => {
+  const results = {};
+  const query = `query { domainStatss(first: 10) {
+    id totalRituals successfulRituals failedRituals activeRituals
+    totalStakingProviders activeStakingProviders totalAuthorized totalSlashed
+    totalRewardEvents totalRewardsDistributed totalRewardsWithdrawn
+    totalSigningCohorts deployedCohorts totalMultisigs totalExecutions
+    totalBridgeMessages totalOpExecutions totalInfractions
+    totalRitualAccessControls totalPolicies totalSubscriptionPayments totalSubscriptionRevenue
+    totalContractAuthorizations totalReimbursements totalReimbursementFailures
+    totalGovernanceEvents createdAt updatedAt
+  } }`;
+
+  const [ethStats, polyStats, baseStats] = await Promise.all([
+    safeFetch(SUBGRAPH_ETHEREUM, query, 'Ethereum'),
+    safeFetch(SUBGRAPH_POLYGON, query, 'Polygon'),
+    safeFetch(SUBGRAPH_BASE, query, 'Base'),
+  ]);
+
+  (ethStats.domainStatss || []).forEach(s => { results[`eth-${s.id}`] = { ...s, chain: 'ethereum' }; });
+  (polyStats.domainStatss || []).forEach(s => { results[`poly-${s.id}`] = { ...s, chain: 'polygon' }; });
+  (baseStats.domainStatss || []).forEach(s => { results[`base-${s.id}`] = { ...s, chain: 'base' }; });
+
+  return results;
+};
+
+// ─── Ritual Access Controls for a specific ritual ──────────────────────────
+export const getRitualAccessControls = async (ritualId) => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_POLYGON, `
+      query GetRitualAccessControls($ritualId: Int!) {
+        ritualAccessControls(where: { ritualId: $ritualId }, first: 100) {
+          id address isAuthorized transactionHash timestamp
+        }
+      }
+    `, { ritualId: parseInt(ritualId) });
+    return data?.ritualAccessControls || [];
+  } catch (e) {
+    console.warn('Error fetching ritual access controls:', e);
+    return [];
+  }
+};
+
+// ─── Handovers for a specific ritual ───────────────────────────────────────
+export const getRitualHandovers = async (ritualId) => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_POLYGON, `
+      query GetHandovers($prefix: String!) {
+        handovers(where: { id_starts_with: $prefix }, first: 100, orderBy: createdAt, orderDirection: desc) {
+          id departingParticipant incomingParticipant status
+          requestedAt transcriptPostedAt blindedSharePostedAt canceledAt finalizedAt
+          ritual { id }
+        }
+      }
+    `, { prefix: ritualId.toString() });
+    return data?.handovers || [];
+  } catch (e) {
+    console.warn('Error fetching handovers:', e);
+    return [];
+  }
+};
+
+// ─── Infractions for a specific staking provider ───────────────────────────
+export const getProviderInfractions = async (providerId) => {
+  try {
+    const [ethData, polyData] = await Promise.all([
+      safeFetch(SUBGRAPH_ETHEREUM, `
+        query GetInfractions($provider: String!) {
+          infractions(where: { stakingProvider: $provider }, first: 50, orderBy: timestamp, orderDirection: desc) {
+            id infractionType infractionTypeName ritual { id } timestamp
+          }
+        }
+      `, 'Ethereum'),
+      safeFetch(SUBGRAPH_POLYGON, `
+        query GetInfractions($provider: String!) {
+          infractions(where: { stakingProvider: $provider }, first: 50, orderBy: timestamp, orderDirection: desc) {
+            id infractionType infractionTypeName ritual { id } timestamp
+          }
+        }
+      `, 'Polygon'),
+    ]);
+    return [
+      ...(ethData.infractions || []).map(i => ({ ...i, chain: 'ethereum' })),
+      ...(polyData.infractions || []).map(i => ({ ...i, chain: 'polygon' })),
+    ].sort((a, b) => parseInt(b.timestamp) - parseInt(a.timestamp));
+  } catch (e) {
+    console.warn('Error fetching infractions:', e);
+    return [];
+  }
+};
+
+// ─── Governance Events ─────────────────────────────────────────────────────
+export const getGovernanceEvents = async () => {
+  try {
+    const query = `query { governanceEvents(first: 200, orderBy: timestamp, orderDirection: desc) {
+      id eventType contract oldValue newValue oldValueInt newValueInt
+      oldValueAddress newValueAddress domain transactionHash blockNumber timestamp
+    } }`;
+
+    const [ethData, polyData, baseData] = await Promise.all([
+      safeFetch(SUBGRAPH_ETHEREUM, query, 'Ethereum'),
+      safeFetch(SUBGRAPH_POLYGON, query, 'Polygon'),
+      safeFetch(SUBGRAPH_BASE, query, 'Base'),
+    ]);
+
+    return [
+      ...(ethData.governanceEvents || []).map(e => ({ ...e, chain: 'ethereum' })),
+      ...(polyData.governanceEvents || []).map(e => ({ ...e, chain: 'polygon' })),
+      ...(baseData.governanceEvents || []).map(e => ({ ...e, chain: 'base' })),
+    ].sort((a, b) => parseInt(b.timestamp) - parseInt(a.timestamp));
+  } catch (e) {
+    console.warn('Error fetching governance events:', e);
+    return [];
+  }
+};
+
+// ─── Signing Cohorts from Subgraph (v2 native) ────────────────────────────
+export const getSigningCohortsFromSubgraph = async () => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_BASE, `
+      query {
+        signingCohorts(first: 200, orderBy: createdAt, orderDirection: desc) {
+          id domain chainId authority participants status
+          isDeployed deployedAt conditions conditionsSetAt
+          multisigAddress signers threshold
+          createdAt updatedAt
+          signatures(first: 100) {
+            id provider signer signature transactionHash timestamp
+          }
+        }
+      }
+    `);
+    return data?.signingCohorts || [];
+  } catch (e) {
+    console.warn('Error fetching signing cohorts from subgraph:', e);
+    return [];
+  }
+};
+
+// ─── Signing Cohort Detail from Subgraph ───────────────────────────────────
+export const getSigningCohortDetail = async (cohortId) => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_BASE, `
+      query GetCohort($id: ID!) {
+        signingCohort(id: $id) {
+          id domain chainId authority participants status
+          isDeployed deployedAt conditions conditionsSetAt
+          multisigAddress signers threshold
+          createdAt updatedAt
+          signatures(first: 200, orderBy: timestamp, orderDirection: desc) {
+            id provider signer signature transactionHash blockNumber timestamp
+          }
+          multisig {
+            id factory signers threshold isCleared
+            executionCount totalValue lastExecutedAt
+            createdAt updatedAt
+            executions(first: 100, orderBy: timestamp, orderDirection: desc) {
+              id sender nonce destination value transactionHash blockNumber timestamp gasUsed
+            }
+            signerEvents(first: 50, orderBy: timestamp, orderDirection: desc) {
+              id eventType signer newSigner transactionHash timestamp
+            }
+          }
+        }
+      }
+    `, { id: cohortId });
+    return data?.signingCohort || null;
+  } catch (e) {
+    console.warn('Error fetching signing cohort detail:', e);
+    return null;
+  }
+};
+
+// ─── Policies from Subgraph ────────────────────────────────────────────────
+export const getPolicies = async () => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_POLYGON, `
+      query {
+        policies(first: 200, orderBy: timestamp, orderDirection: desc) {
+          id domain sponsor owner size startTimestamp endTimestamp cost
+          transactionHash blockNumber timestamp
+          payments(first: 50, orderBy: timestamp, orderDirection: desc) {
+            id subscriber amount period slots paymentType timestamp
+          }
+        }
+      }
+    `);
+    return data?.policies || [];
+  } catch (e) {
+    console.warn('Error fetching policies:', e);
+    return [];
+  }
+};
+
+// ─── Reward Events for a staking provider ──────────────────────────────────
+export const getProviderRewards = async (providerId) => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_ETHEREUM, `
+      query GetRewards($id: ID!) {
+        stakingProvider(id: $id) {
+          totalRewards
+          totalRewardsWithdrawn
+          commitmentEndTimestamp
+          penaltyPercent
+          penaltyEndTimestamp
+          rewards(first: 100, orderBy: timestamp, orderDirection: desc) {
+            id eventType amount sender beneficiary
+            endCommitment penaltyPercent endPenalty
+            transactionHash blockNumber timestamp
+          }
+        }
+      }
+    `, { id: providerId.toLowerCase() });
+    return data?.stakingProvider || null;
+  } catch (e) {
+    console.warn('Error fetching provider rewards:', e);
     return null;
   }
 };
