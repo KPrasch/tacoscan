@@ -116,7 +116,7 @@ const HeartbeatGroupDetail = () => {
       {/* Header */}
       <div className={styles.header}>
         <button 
-          onClick={() => navigate('/rituals')}
+          onClick={() => navigate('/heartbeats')}
           className={styles.backButton}
         >
           ← Back to Rituals

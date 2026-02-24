@@ -18,6 +18,8 @@ const Heartbeats = () => {
         const heartbeatRituals = rituals.filter(r => r.isHeartbeat);
         setAllHeartbeats(heartbeatRituals);
         const detected = detectHeartbeatGroups(rituals, timeout);
+        // Sort by recency (most recent first)
+        detected.sort((a, b) => new Date(b.mondayMidnight) - new Date(a.mondayMidnight));
         setGroups(detected);
       } catch (err) {
         console.error("Failed to fetch heartbeats:", err);
@@ -100,7 +102,7 @@ const Heartbeats = () => {
               </thead>
               <tbody>
                 {groups.map((group, idx) => (
-                  <tr key={idx} style={{ cursor: "pointer" }} onClick={() => navigate(`/heartbeat-group/${group.weekNumber}`)}>
+                  <tr key={idx} style={{ cursor: "pointer" }} onClick={() => navigate(`/heartbeat-group/${new Date(group.mondayMidnight).toISOString().split('T')[0]}`)}>
                     <td>
                       <span className={styles.eventType} style={{ background: "#10B98120", color: "#10B981" }}>
                         Week {group.weekNumber}
@@ -127,7 +129,7 @@ const Heartbeats = () => {
                     </td>
                     <td>{group.uniqueParticipants?.length || 0}</td>
                     <td>
-                      <Link to={`/heartbeat-group/${group.weekNumber}`} className={styles.ritualLink}>
+                      <Link to={`/heartbeat-group/${new Date(group.mondayMidnight).toISOString().split('T')[0]}`} className={styles.ritualLink}>
                         View →
                       </Link>
                     </td>
