@@ -6,7 +6,6 @@ import { CoordinatorABI } from "../utils/abi";
 import { CoordinatorAddress } from "../utils/addresses";
 import web3Cache from "../utils/web3Cache";
 import BatchProcessor from "../utils/batchProcessor";
-import { getStakingProviderInfo } from "../utils/contractReader";
 
 // Beta stakers list - cached in memory
 let betaStakers = null;
@@ -372,13 +371,12 @@ export const detectHeartbeatGroups = (rituals, timeout) => {
         r.status === 'SUCCESSFUL' || r.status === 'ACTIVE'
       ).length;
       const failed = group.rituals.filter(r =>
-        r.status === 'TIME OUT' || r.status === 'EXPIRED' ||
-        r.status === 'DKG INVALID' || r.status === 'DKG ERROR' ||
-        r.status === 'TIMEOUT'
+        r.status === 'TIME OUT' || r.status === 'FAILED'
       ).length;
       const pending = group.rituals.filter(r =>
-        r.status === 'DKG AWAITING TRANSCRIPTS' ||
-        r.status === 'DKG AWAITING AGGREGATIONS'
+        r.status === 'PENDING' ||
+        r.status === 'AWAITING TRANSCRIPTS' ||
+        r.status === 'AWAITING AGGREGATIONS'
       ).length;
 
       group.stats = {
@@ -414,49 +412,84 @@ export const formatRitualsData = (rawData, timeout) => {
 
   return rawData
     .map((ritual) => {
-      // Calculate status
       const currentTimestampMs = Date.now();
-      const initTimeStampMs = ritual.initTimestamp * 1000;
+      const initTimestamp = parseInt(ritual.startedAt || ritual.initTimestamp || 0);
+      const endTimestamp = parseInt(ritual.endedAt || ritual.endTimestamp || 0);
+      const rawStatus = ritual.status || ritual.dkgStatus || "PENDING";
+      const normalizedStatus = rawStatus.toString().toUpperCase();
+
+      let status = normalizedStatus.replaceAll("_", " ");
+      if (normalizedStatus === "AWAITING_TRANSCRIPTS") status = "AWAITING TRANSCRIPTS";
+      if (normalizedStatus === "AWAITING_AGGREGATIONS") status = "AWAITING AGGREGATIONS";
+
+      const initTimeStampMs = initTimestamp * 1000;
       const timeoutStamp = initTimeStampMs + timeoutMs;
 
-      let status = ritual.dkgStatus.replaceAll("_", " ");
-
-      if ((ritual.dkgStatus === "DKG_AWAITING_AGGREGATIONS" ||
-           ritual.dkgStatus === "DKG_AWAITING_TRANSCRIPTS") &&
-          timeoutStamp < currentTimestampMs) {
+      if (
+        (normalizedStatus === "AWAITING_AGGREGATIONS" ||
+          normalizedStatus === "AWAITING_TRANSCRIPTS") &&
+        timeoutStamp < currentTimestampMs
+      ) {
         status = "TIME OUT";
       }
 
+      const transactions = (ritual.transactions || []).map((tx) => ({
+        description: tx.description || tx.eventType,
+        from: tx.from || tx.participant,
+        timestamp: parseInt(tx.timestamp),
+        txHash: tx.txHash || tx.transactionHash,
+        eventType: tx.eventType,
+        participant: tx.participant,
+      }));
+
+      const postedTranscripts = transactions
+        .filter((tx) => tx.eventType === "TRANSCRIPT_POSTED" && tx.participant)
+        .map((tx) => tx.participant);
+      const postedAggregations = transactions
+        .filter((tx) => tx.eventType === "AGGREGATION_POSTED" && tx.participant)
+        .map((tx) => tx.participant);
+
+      const publicKey = ritual.publicKey?.word0 && ritual.publicKey?.word1
+        ? `${ritual.publicKey.word0}${ritual.publicKey.word1.slice(2)}`
+        : ritual.publicKey || null;
+
+      const participants = ritual.participants || [];
+      const dkgSize = ritual.dkgSize ?? participants.length;
+      const threshold = ritual.threshold ?? null;
+      const latestTransaction = transactions[0];
+
       // Check if this is a heartbeat ritual (3 or fewer participants)
-      const isHeartbeat = ritual.participants?.length <= 3;
+      const isHeartbeat = participants.length <= 3;
 
       return {
         id: ritual.id,
         status: status,
-        initiator: ritual.initiator,
+        initiator: ritual.initiator || ritual.authority,
         authority: ritual.authority,
-        aggregations: ritual.postedAggregations,
-        transcripts: ritual.postedTranscripts,
-        participants: ritual.participants,
-        publicKey: ritual.publicKey,
-        initTimeStamp: ritual.initTimestamp * 1000,
-        endTimeStamp: ritual.endTimestamp * 1000,
-        threshold: ritual.threshold,
-        dkgSize: ritual.dkgSize,
-        accessController: ritual.accessController,
+        aggregations: postedAggregations,
+        transcripts: postedTranscripts,
+        participants: participants,
+        publicKey: publicKey,
+        initTimeStamp: initTimestamp * 1000,
+        endTimeStamp: endTimestamp * 1000,
+        threshold: threshold,
+        dkgSize: dkgSize,
+        accessController: ritual.accessController || null,
         feeModel: ritual.feeModel,
-        transactions: ritual.transactions,
-        updateTime: ritual.transactions[ritual.transactions.length - 1].timestamp * 1000,
-        totalParticipants: ritual.participants.length,
-        totalPostedAggregations: ritual.postedAggregations.length,
-        totalPostedTranscripts: ritual.postedTranscripts.length,
-        pendingTranscripts: ritual.participants.filter(
-          (participant) => !ritual.postedTranscripts.includes(participant)
+        transactions: transactions,
+        updateTime: latestTransaction
+          ? latestTransaction.timestamp * 1000
+          : (endTimestamp || initTimestamp) * 1000,
+        totalParticipants: participants.length,
+        totalPostedAggregations: postedAggregations.length,
+        totalPostedTranscripts: postedTranscripts.length,
+        pendingTranscripts: participants.filter(
+          (participant) => !postedTranscripts.includes(participant)
         ),
-        pendingAggregations: ritual.participants.filter(
-          (participant) => !ritual.postedAggregations.includes(participant)
+        pendingAggregations: participants.filter(
+          (participant) => !postedAggregations.includes(participant)
         ),
-        operatorAddresses: ritual.operatorAddresses || {}, // Preserve operator addresses
+        operatorAddresses: ritual.operatorAddresses || {},
         isHeartbeat: isHeartbeat
       };
     })
@@ -749,75 +782,48 @@ const getAllRitualsWithPagination = async () => {
 export const getRituals = async (isSearch, searchInput) => {
     const emptyData = { rituals: [] };
 
-    // Since the taco-matic subgraph is no longer available,
-    // always use contract reads for ritual data
-    const { getCurrentNetwork } = await import('../utils/dataSource');
-    const { getAllRituals } = await import('../utils/contractReader');
-    const currentNetwork = getCurrentNetwork();
-
-    console.log(`Fetching rituals from ${currentNetwork} contracts...`);
     try {
-        const rituals = await getAllRituals(currentNetwork);
-        console.log(`Found ${rituals.length} rituals on ${currentNetwork}`);
-
-        // If searching, filter by ID or authority
         if (isSearch && searchInput) {
-            const filtered = rituals.filter(r =>
-                r.id?.toString() === searchInput ||
-                r.authority?.toLowerCase() === searchInput.toLowerCase()
-            );
-            return { rituals: filtered };
-        }
+            const isAddress = searchInput.startsWith('0x') && searchInput.length === 42;
+            const isTxHash = searchInput.startsWith('0x') && searchInput.length === 66;
 
-        return { rituals };
+            const data = await client.execute(client.GetRitualsQueryByUserDocument, {
+                authority: isAddress ? searchInput.toLowerCase() : null,
+                id: !isAddress ? searchInput : null,
+                txHash: isTxHash ? searchInput.toLowerCase() : null,
+                skip: 0,
+            });
+
+            if (data?.data && !data.errors) {
+                return data.data;
+            }
+        } else {
+            const data = await getAllRitualsWithPagination();
+            if (data?.rituals) {
+                return data;
+            }
+        }
     } catch (error) {
-        console.error('Error fetching rituals from contract:', error);
+        console.error('Error fetching rituals from subgraph:', error);
         return {
             rituals: [],
-            _errorMessage: `Error fetching ritual data from ${currentNetwork} contracts: ${error.message}`
+            _errorMessage: `Error fetching ritual data from subgraph: ${error.message}`
         };
     }
+
+    return emptyData;
 };
 
-  try {
-    // Fetch all app authorizations with their events
-    const appAuthsQuery = `
-      query GetAllEvents {
-        appAuthorizations(first: 100, orderBy: id) {
-          id
-          amount
-          tacoOperator {
-            operator
-            bondedTimestamp
-            confirmed
-          }
-          stake {
-            stakeHistory(first: 100, orderBy: timestamp, orderDirection: desc) {
-              eventType
-              eventAmount
-              timestamp
-              blockNumber
-              txHash
-            }
-          }
-        }
-        appAuthHistories(first: 500, orderBy: timestamp, orderDirection: desc) {
-          eventType
-          eventAmount
-          timestamp
-          blockNumber
-          txHash
-          appAuthorization {
-            id
-          }
-        }
-      }
-    `;
 
-    const response = await fetch('https://gateway-arbitrum.network.thegraph.com/api/f49026e5653284c96b9798f93567eaa1/subgraphs/id/6VFbgC6JWwPQkqCxdVDNSieW8bwLdoVBtimVm3F2WV86', {
+export const getNetworkEvents = async () => {
+  try {
+    const endpoint = import.meta.env.VITE_SUBGRAPH_ETHEREUM;
+    const query = `\n      query GetAllEvents {\n        stakingProviders(first: 100, orderBy: authorized, orderDirection: desc) {\n          id\n          operator\n          authorized\n          deauthorizing\n          startTimestamp\n          authorizationEvents(first: 50, orderBy: timestamp, orderDirection: desc) {\n            eventType\n            toAmount\n            timestamp\n            blockNumber\n            transactionHash\n          }\n        }\n      }\n    `;
+
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: appAuthsQuery })
+      body: JSON.stringify({ query })
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -826,48 +832,32 @@ export const getRituals = async (isSearch, searchInput) => {
     if (data?.data) {
       const events = [];
 
-      // Add stake history events
-      data.data.appAuthorizations?.forEach(auth => {
-        auth.stake?.stakeHistory?.forEach(event => {
+      data.data.stakingProviders?.forEach(provider => {
+        provider.authorizationEvents?.forEach(event => {
           events.push({
             type: event.eventType,
-            contract: 'TokenStaking',
-            stakingProvider: auth.id.split('-')[0],
-            amount: event.eventAmount,
+            contract: 'TACoApplication',
+            stakingProvider: provider.id,
+            amount: event.toAmount,
             timestamp: parseInt(event.timestamp) * 1000,
             blockNumber: event.blockNumber,
-            txHash: event.txHash
+            txHash: event.transactionHash
           });
         });
 
-        // Add OperatorBonded events
-        if (auth.tacoOperator?.bondedTimestamp) {
+        if (provider.operator && provider.startTimestamp) {
           events.push({
             type: 'OperatorBonded',
             contract: 'TACoApplication',
-            stakingProvider: auth.id.split('-')[0],
-            operator: auth.tacoOperator.operator,
-            timestamp: parseInt(auth.tacoOperator.bondedTimestamp) * 1000,
+            stakingProvider: provider.id,
+            operator: provider.operator,
+            timestamp: parseInt(provider.startTimestamp) * 1000,
             blockNumber: null,
             txHash: null
           });
         }
       });
 
-      // Add app authorization history events
-      data.data.appAuthHistories?.forEach(event => {
-        events.push({
-          type: event.eventType,
-          contract: 'TACoApplication',
-          stakingProvider: event.appAuthorization?.id?.split('-')[0],
-          amount: event.eventAmount,
-          timestamp: parseInt(event.timestamp) * 1000,
-          blockNumber: event.blockNumber,
-          txHash: event.txHash
-        });
-      });
-
-      // Sort by timestamp descending
       return events.sort((a, b) => b.timestamp - a.timestamp);
     }
 
@@ -878,78 +868,50 @@ export const getRituals = async (isSearch, searchInput) => {
   }
 };
 
+const buildAppAuthorization = (provider) => {
+  const providerId = provider.id.toLowerCase();
+  return {
+    id: providerId + '-' + tacoAddr,
+    amount: provider.authorized,
+    amountDeauthorizing: provider.deauthorizing,
+    appAddress: tacoAddr,
+    appName: "TACo",
+    stake: {
+      id: providerId,
+      stakedAmount: provider.authorized,
+      owner: { id: providerId },
+      authorizer: providerId,
+      beneficiary: providerId,
+      stakeHistory: []
+    },
+    tacoOperator: provider.operator ? {
+      id: provider.operator,
+      operator: provider.operator,
+      confirmed: true,
+      bondedTimestamp: provider.startTimestamp,
+      bondedTimestampFirstOperator: provider.startTimestamp
+    } : null
+  };
+};
+
 export const getNodes = async (isSearch, searchInput) => {
   const emptyData = { appAuthorizations: [] };
-
-  // Check if we're on a testnet without subgraph
-  const { shouldUseContractReads, getCurrentNetwork } = await import('../utils/dataSource');
-  const { getAllStakingProviders, getStakingProviderInfo } = await import('../utils/contractReader');
-  const currentNetwork = getCurrentNetwork();
-
-  if (shouldUseContractReads(currentNetwork)) {
-    // For testnets, fetch directly from contracts
-    console.log(`Fetching nodes from ${currentNetwork} contracts...`);
-    try {
-      if (isSearch && searchInput) {
-        // If searching for a specific provider
-        const info = await getStakingProviderInfo(searchInput, currentNetwork);
-        if (info && info.authorized !== '0') {
-          return {
-            appAuthorizations: [{
-              id: `${searchInput.toLowerCase()}-0x347cc7ede7e5517bd47d20620b2cf1b406edcf07`,
-              stakingProvider: searchInput,
-              amount: info.authorized,
-              amountDeauthorizing: info.deauthorizing,
-              operator: info.operator,
-              isOperatorConfirmed: info.operatorConfirmed,
-              ...info
-            }]
-          };
-        }
-        return emptyData;
-      } else {
-        // Fetch all staking providers
-        const providers = await getAllStakingProviders(currentNetwork);
-        console.log(`Found ${providers.length} nodes on ${currentNetwork}`);
-
-        // Format to match subgraph structure
-        const appAuthorizations = providers.map(p => ({
-          id: `${p.stakingProvider.toLowerCase()}-0x347cc7ede7e5517bd47d20620b2cf1b406edcf07`,
-          stakingProvider: p.stakingProvider,
-          amount: p.authorized,
-          amountDeauthorizing: p.deauthorizing,
-          operator: p.operator,
-          isOperatorConfirmed: p.operatorConfirmed,
-          ...p
-        }));
-
-        return { appAuthorizations };
-      }
-    } catch (error) {
-      console.error('Error fetching nodes from contract:', error);
-      return {
-        appAuthorizations: [],
-        _testnetMessage: `Error fetching data from ${currentNetwork} contracts: ${error.message}`
-      };
-    }
-  }
 
   try {
     let data;
     if (!isSearch) {
       data = await client.execute(client.GetAllStakersQueryDocument, {});
     } else {
+      const search = searchInput.toLowerCase();
       data = await client.execute(client.SearchStakersDocument, {
-        id: `${searchInput.toLowerCase()}-${tacoAddr}`,
-        address: searchInput.toLowerCase(),
+        id: search,
+        address: search,
       });
     }
-    console.log("data: ", data)
 
-    // Check if data is valid before returning
-    if (data && data.data && !data.errors) {
-      return data.data;
-    } else if (data && data.errors) {
+    if (data?.data?.stakingProviders && !data.errors) {
+      return { appAuthorizations: data.data.stakingProviders.map(buildAppAuthorization) };
+    } else if (data?.errors) {
       console.error("GraphQL errors:", data.errors);
     }
   } catch (e) {
@@ -960,54 +922,27 @@ export const getNodes = async (isSearch, searchInput) => {
 
 export const getNodeDetail = async (node) => {
   try {
-    // First try to get data from subgraph
     const nodeAddress = node.toLowerCase();
-    const appAddress = tacoAddr;
-    const queryId = `${nodeAddress}-${appAddress}`;
-
-    console.log("Fetching node detail for ID:", queryId);
 
     const data = await client.execute(client.StakerDetailDocument, {
-      id: queryId
+      id: nodeAddress
     });
 
-    console.log("Node detail response:", data);
+    if (data?.data?.stakingProvider) {
+      const provider = data.data.stakingProvider;
+      const appAuthorization = buildAppAuthorization(provider);
+      const appAuthHistories = (provider.authorizationEvents || []).map(event => ({
+        id: event.id,
+        amount: event.toAmount,
+        eventAmount: event.toAmount,
+        eventType: event.eventType,
+        stakingProvider: provider.id,
+        timestamp: event.timestamp,
+        blockNumber: event.blockNumber,
+        txHash: event.transactionHash
+      }));
 
-    if (data?.data?.appAuthorization) {
-      return data.data;
-    }
-
-    // If not found in subgraph, read directly from contract
-    console.log("Node not found in subgraph, reading from contract...");
-    const contractInfo = await getStakingProviderInfo(node, 'mainnet');
-
-    if (contractInfo) {
-      // Format contract data to match subgraph structure
-      return {
-        appAuthorization: {
-          id: queryId,
-          amount: contractInfo.authorized,
-          amountDeauthorizing: contractInfo.deauthorizing,
-          appAddress: tacoAddr,
-          appName: "TACo",
-          stake: {
-            id: nodeAddress,
-            stakedAmount: contractInfo.authorized, // Use authorized as proxy for staked
-            owner: { id: nodeAddress },
-            authorizer: nodeAddress,
-            beneficiary: nodeAddress,
-            stakeHistory: []
-          },
-          tacoOperator: contractInfo.operator !== '0x0000000000000000000000000000000000000000' ? {
-            id: contractInfo.operator,
-            operator: contractInfo.operator,
-            confirmed: contractInfo.operatorConfirmed,
-            bondedTimestamp: contractInfo.operatorStartTimestamp,
-            bondedTimestampFirstOperator: contractInfo.operatorStartTimestamp
-          } : null
-        },
-        appAuthHistories: []
-      };
+      return { appAuthorization, appAuthHistories };
     }
   } catch (e) {
     console.log("error to fetch staking provider data " + e);

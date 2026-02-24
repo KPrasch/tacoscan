@@ -9,7 +9,7 @@ const Footer = () => {
           <div className={styles.footerSection}>
             <h4 className={styles.footerTitle}>TACo Scan</h4>
             <p className={styles.footerDescription}>
-              The TACo Threshold Encryption Network Explorer and Analytics Platform
+              The TACo Encryption Network Explorer and Analytics Platform
             </p>
             <div className={styles.socialLinks}>
               <a href="https://github.com/nucypher" className={styles.socialLink}>GitHub</a>

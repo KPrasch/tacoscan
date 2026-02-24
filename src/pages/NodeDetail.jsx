@@ -21,20 +21,19 @@ const NodeDetail = () => {
           try {
             const [ritualsResponse, timeout] = await Promise.all([
               fetch(
-                "https://gateway-arbitrum.network.thegraph.com/api/f49026e5653284c96b9798f93567eaa1/subgraphs/id/6VFbgC6JWwPQkqCxdVDNSieW8bwLdoVBtimVm3F2WV86",
+                import.meta.env.VITE_SUBGRAPH_POLYGON,
                 {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     query: `
-                    query GetRitualsForNode($node: String!) {
+                    query GetRitualsForNode($node: Bytes!) {
                       rituals(where: { participants_contains: [$node] }, first: 100) {
                         id
-                        initTimestamp
-                        endTimestamp
+                        startedAt
+                        endedAt
                         authority
-                        dkgSize
-                        dkgStatus
+                        status
                         participants
                       }
                     }
@@ -54,43 +53,29 @@ const NodeDetail = () => {
               const currentTimestamp = Date.now();
 
               formatted.rituals = ritualsData.data.rituals.map((r) => {
-                const initTimestampMs = parseInt(r.initTimestamp) * 1000;
+                const initTimestampMs = parseInt(r.startedAt) * 1000;
                 const timeoutStamp = initTimestampMs + timeoutMs;
+                const normalizedStatus = r.status?.toUpperCase();
 
-                // Determine status based on dkgStatus and timeout
-                let status;
-                if (r.dkgStatus === "SUCCESSFUL") {
-                  status = "SUCCESSFUL";
-                } else if (r.dkgStatus === "DKG_RITUAL_FINALIZED") {
-                  status = "FINALIZED";
-                } else if (
-                  r.dkgStatus === "DKG_INVALID" ||
-                  r.dkgStatus === "INVALID"
-                ) {
-                  status = "INVALID";
-                } else if (
-                  (r.dkgStatus === "DKG_AWAITING_AGGREGATIONS" ||
-                    r.dkgStatus === "DKG_AWAITING_TRANSCRIPTS") &&
+                let status = normalizedStatus?.replaceAll("_", " ") || "PENDING";
+                if (normalizedStatus === "AWAITING_TRANSCRIPTS") status = "AWAITING TRANSCRIPTS";
+                if (normalizedStatus === "AWAITING_AGGREGATIONS") status = "AWAITING AGGREGATIONS";
+                if (
+                  (normalizedStatus === "AWAITING_AGGREGATIONS" ||
+                    normalizedStatus === "AWAITING_TRANSCRIPTS") &&
                   timeoutStamp < currentTimestamp
                 ) {
                   status = "EXPIRED";
-                } else if (
-                  r.dkgStatus === "DKG_TIMEOUT" ||
-                  r.dkgStatus === "TIMEOUT"
-                ) {
-                  status = "TIMEOUT";
-                } else {
-                  status = "PENDING";
                 }
 
                 return {
                   id: r.id,
                   status: status,
                   authority: r.authority,
-                  participants: r.dkgSize,
+                  participants: r.participants?.length || 0,
                   updateTime:
-                    r.endTimestamp || r.initTimestamp
-                      ? parseInt(r.endTimestamp || r.initTimestamp) * 1000
+                    r.endedAt || r.startedAt
+                      ? parseInt(r.endedAt || r.startedAt) * 1000
                       : Date.now(),
                 };
               });

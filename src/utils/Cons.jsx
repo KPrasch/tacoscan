@@ -1,4 +1,4 @@
-export const MAINNET_API = `https://gateway-arbitrum.network.thegraph.com/api/${import.meta.env.VITE_SUBGRAPH_API_KEY}/subgraphs/id/DETCX5Xm6tJfctRcZAxhQB9q3aK8P4BXLbujHmzEBXYV`;
+export const MAINNET_API = import.meta.env.VITE_SUBGRAPH_POLYGON;
 
 export const RPC_ETH_MAINNET = import.meta.env.VITE_RPC_ETH_MAINNET;
 export const RPC_ETH_POLYGON = import.meta.env.VITE_RPC_ETH_POLYGON;

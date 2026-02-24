@@ -1,15 +1,22 @@
 sources:
-  - name: threshold-staking-mainnet
+  - name: taco-ethereum
     handler:
       graphql:
-        endpoint: https://gateway-arbitrum.network.thegraph.com/api/f49026e5653284c96b9798f93567eaa1/subgraphs/id/5TJAMbsRwm1avUTV4CofaLT4apfQoAiNcysEit9BWr6R
+        endpoint: ${VITE_SUBGRAPH_ETHEREUM}
     transforms:
       - autoPagination:
           limitOfRecords: 2000
-  - name: taco-matic
+  - name: taco-polygon
     handler:
       graphql:
-        endpoint: https://gateway-arbitrum.network.thegraph.com/api/f49026e5653284c96b9798f93567eaa1/subgraphs/id/6VFbgC6JWwPQkqCxdVDNSieW8bwLdoVBtimVm3F2WV86
+        endpoint: ${VITE_SUBGRAPH_POLYGON}
+    transforms:
+      - autoPagination:
+          limitOfRecords: 2000
+  - name: taco-base
+    handler:
+      graphql:
+        endpoint: ${VITE_SUBGRAPH_BASE}
     transforms:
       - autoPagination:
           limitOfRecords: 2000

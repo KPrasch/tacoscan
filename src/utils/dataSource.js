@@ -3,8 +3,8 @@ import { DEFAULT_NETWORK, NETWORK_LYNX, NETWORK_TAPIR } from './Cons';
 
 // Check if the current network has a subgraph
 export const hasSubgraph = (network = DEFAULT_NETWORK) => {
-  // Only mainnet and polygon have subgraphs currently
-  return network !== NETWORK_LYNX && network !== NETWORK_TAPIR;
+  // Subgraphs are available for all supported networks
+  return true;
 };
 
 // Get the current network
