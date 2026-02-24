@@ -525,10 +525,10 @@ export const formatRitualsData = (rawData, timeout) => {
       const threshold = ritual.threshold ?? null;
       const latestTransaction = transactions[0];
 
-      // Heartbeat detection: use timing-based heuristic from detectHeartbeatGroups
-      // Not participant count — mainnet rituals legitimately have 2 participants
-      // This flag is set to false here; detectHeartbeatGroups handles actual detection
-      const isHeartbeat = false;
+      // Heartbeat detection: size 2-3 participants = heartbeat DKG
+      // Live/paid rituals have fee model activity (access controls, subscription payments)
+      // but that's tracked via separate entities, not on the ritual itself
+      const isHeartbeat = participants.length <= 3;
 
       return {
         id: ritual.id,
