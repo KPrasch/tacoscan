@@ -1,4 +1,3 @@
-import * as client from "../../.graphclient";
 import * as Const from "../utils/Cons";
 import moment from "moment";
 import Web3 from "web3";
@@ -7,8 +6,56 @@ import { CoordinatorAddress } from "../utils/addresses";
 import web3Cache from "../utils/web3Cache";
 import BatchProcessor from "../utils/batchProcessor";
 
+// Direct GraphQL fetch to bypass broken GraphQL Mesh stitching runtime
+const SUBGRAPH_POLYGON = import.meta.env.VITE_SUBGRAPH_POLYGON;
+const SUBGRAPH_ETHEREUM = import.meta.env.VITE_SUBGRAPH_ETHEREUM;
+const SUBGRAPH_BASE = import.meta.env.VITE_SUBGRAPH_BASE;
+
+const gqlFetch = async (endpoint, query, variables = {}) => {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables }),
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const json = await response.json();
+  if (json.errors) throw new Error(`GraphQL: ${JSON.stringify(json.errors)}`);
+  return json.data;
+};
+
+// GraphQL query fragments (matching query.graphql)
+const RITUAL_FIELDS = `
+  id
+  authority
+  participants
+  status
+  startedAt
+  endedAt
+  transcriptCount
+  aggregationCount
+  publicKey { word0 word1 }
+  transactions(orderBy: timestamp, orderDirection: desc) {
+    eventType
+    participant
+    timestamp
+    transactionHash
+  }
+`;
+
+const RITUAL_COUNTER_FIELDS = `
+  ritualCounter(id: "global") {
+    total: totalRituals
+    unsuccessful: failedRituals
+    successful: successfulRituals
+    notEnded: pendingRituals
+  }
+`;
+
 // Beta stakers list - cached in memory
 let betaStakers = null;
+
+// Global Web3 instance for reuse
+let web3Instance = null;
 
 // Load beta stakers from file
 export const loadBetaStakers = async () => {
@@ -241,6 +288,10 @@ export const calculateTimeMoment = (timestamp) => {
   return formatTimestampToText(
     moment.duration(moment(new Date().getTime()).diff(moment(timestamp)))
   );
+};
+
+export const formatDate = (timestamp) => {
+  return moment(timestamp).format('MMM DD, YYYY [at] HH:mm:ss [UTC]');
 };
 
 // const calculateTreasuryFee = (treasuryFee) => (1 / treasuryFee) * 100;
@@ -663,7 +714,7 @@ const retryQuery = async (queryFn, maxRetries = 3) => {
     }
 };
 
-// Helper function to get all rituals data with pagination
+// Helper function to get all rituals data with pagination via direct fetch
 const getAllRitualsWithPagination = async () => {
     const allRituals = [];
     let skip = 0;
@@ -671,103 +722,67 @@ const getAllRitualsWithPagination = async () => {
     let hasMore = true;
     let ritualCounter = null;
     let pageCount = 0;
-    let consecutiveFailures = 0;
     const maxConsecutiveFailures = 3;
+    let consecutiveFailures = 0;
 
-    console.log('🌮 Starting paginated ritual fetch...');
+    console.log('🌮 Starting paginated ritual fetch (direct fetch to Polygon)...');
+
+    const query = `
+      query GetAllRituals($skip: Int = 0) {
+        rituals(
+          first: 1000
+          skip: $skip
+          where: { id_not_in: ["1", "2", "3", "4", "5", "6"] }
+          orderBy: id
+          orderDirection: asc
+        ) { ${RITUAL_FIELDS} }
+        ${RITUAL_COUNTER_FIELDS}
+      }
+    `;
 
     while (hasMore && consecutiveFailures < maxConsecutiveFailures) {
         pageCount++;
         console.log(`📄 Fetching page ${pageCount} (skip: ${skip})`);
 
         try {
-            const query = () => client.execute(client.GetAllRitualsQueryDocument, { skip });
-            const data = await retryQuery(query, 2); // Fewer retries per page
+            const data = await gqlFetch(SUBGRAPH_POLYGON, query, { skip });
+            const rituals = data.rituals || [];
+            const pageRitualCounter = data.ritualCounter;
 
-            if (data.data) {
-                const rituals = data.data.rituals || [];
-                const pageRitualCounter = data.data.ritualCounter;
+            if (!ritualCounter && pageRitualCounter) {
+                ritualCounter = pageRitualCounter;
+                console.log(`📊 Expected total rituals: ${ritualCounter.total}`);
+            }
 
-                // Store ritual counter from first page for total count
-                if (!ritualCounter && pageRitualCounter) {
-                    ritualCounter = pageRitualCounter;
-                    const expectedTotal = ritualCounter.total ? parseInt(ritualCounter.total) : 0;
-                    console.log(`📊 Expected total rituals: ${expectedTotal}`);
+            if (rituals.length > 0) {
+                const existingIds = new Set(allRituals.map(r => r.id));
+                const newRituals = rituals.filter(r => !existingIds.has(r.id));
+                allRituals.push(...newRituals);
+                console.log(`✅ Page ${pageCount}: +${newRituals.length} (total: ${allRituals.length})`);
+
+                if (newRituals.length === 0) { hasMore = false; }
+                else {
+                    skip += pageSize;
+                    consecutiveFailures = 0;
+                    hasMore = rituals.length === pageSize;
+                    if (ritualCounter?.total && allRituals.length >= parseInt(ritualCounter.total)) hasMore = false;
                 }
-
-                if (rituals.length > 0) {
-                    // Remove duplicates by ID (just in case)
-                    const existingIds = new Set(allRituals.map(r => r.id));
-                    const newRituals = rituals.filter(r => !existingIds.has(r.id));
-
-                    allRituals.push(...newRituals);
-                    console.log(`✅ Page ${pageCount}: Added ${newRituals.length} new rituals (total: ${allRituals.length})`);
-
-                    // Check if we actually added new rituals
-                    if (newRituals.length === 0) {
-                        // No new rituals added, we've reached the end
-                        console.log('📊 No new unique rituals found, ending pagination');
-                        hasMore = false;
-                    } else {
-                        skip += pageSize;
-                        consecutiveFailures = 0; // Reset failure counter on success
-
-                        // If we got less than pageSize, we've reached the end
-                        hasMore = rituals.length === pageSize;
-
-                        // Also check against expected total if available
-                        if (ritualCounter?.total && allRituals.length >= parseInt(ritualCounter.total)) {
-                            console.log(`📊 Reached expected total of ${ritualCounter.total} rituals`);
-                            hasMore = false;
-                        }
-                    }
-
-                    // Progress indicator
-                    if (ritualCounter?.total) {
-                        const progress = Math.min(100, (allRituals.length / parseInt(ritualCounter.total)) * 100);
-                        console.log(`📈 Progress: ${progress.toFixed(1)}% (${allRituals.length}/${ritualCounter.total})`);
-                    }
-
-                    // Safety check to prevent infinite loops
-                    if (allRituals.length >= 5000) {
-                        console.warn('⚠️ Reached safety limit of 5000 rituals');
-                        hasMore = false;
-                    }
-                } else {
-                    console.log('📋 No more rituals found, ending pagination');
-                    hasMore = false;
-                }
+                if (allRituals.length >= 5000) { hasMore = false; }
             } else {
-                console.warn('❌ No data returned, ending pagination');
                 hasMore = false;
             }
 
-            // Small delay between successful requests
-            if (hasMore) {
-                await new Promise(resolve => setTimeout(resolve, 200));
-            }
-
+            if (hasMore) await new Promise(r => setTimeout(r, 200));
         } catch (error) {
             consecutiveFailures++;
             console.error(`❌ Page ${pageCount} failed (${consecutiveFailures}/${maxConsecutiveFailures}):`, error.message);
-
-            if (consecutiveFailures >= maxConsecutiveFailures) {
-                console.error('💥 Too many consecutive failures, stopping pagination');
-                throw new Error(`Pagination failed after ${maxConsecutiveFailures} consecutive failures: ${error.message}`);
-            }
-
-            // Wait longer before retrying after failure
-            await new Promise(resolve => setTimeout(resolve, 2000 * consecutiveFailures));
+            if (consecutiveFailures >= maxConsecutiveFailures) throw error;
+            await new Promise(r => setTimeout(r, 2000 * consecutiveFailures));
         }
     }
 
-    console.log(`🎉 Pagination complete! Total rituals fetched: ${allRituals.length}`);
-
-    // If we got some data but not all, still return what we have
-    return {
-        rituals: allRituals,
-        ritualCounter: ritualCounter
-    };
+    console.log(`🎉 Pagination complete! Total: ${allRituals.length}`);
+    return { rituals: allRituals, ritualCounter };
 };
 
 export const getRituals = async (isSearch, searchInput) => {
@@ -778,21 +793,35 @@ export const getRituals = async (isSearch, searchInput) => {
             const isAddress = searchInput.startsWith('0x') && searchInput.length === 42;
             const isTxHash = searchInput.startsWith('0x') && searchInput.length === 66;
 
-            const data = await client.execute(client.GetRitualsQueryByUserDocument, {
+            const searchQuery = `
+              query SearchRituals($authority: Bytes, $id: ID, $txHash: Bytes, $skip: Int = 0) {
+                rituals(
+                  first: 1000, skip: $skip,
+                  where: { and: [
+                    { or: [
+                      { authority: $authority }
+                      { id: $id }
+                      { transactions_: { transactionHash: $txHash } }
+                    ] }
+                    { id_not_in: ["1", "2", "3", "4", "5", "6"] }
+                  ] }
+                  orderBy: id, orderDirection: asc
+                ) { ${RITUAL_FIELDS} }
+                ${RITUAL_COUNTER_FIELDS}
+              }
+            `;
+
+            const data = await gqlFetch(SUBGRAPH_POLYGON, searchQuery, {
                 authority: isAddress ? searchInput.toLowerCase() : null,
                 id: !isAddress ? searchInput : null,
                 txHash: isTxHash ? searchInput.toLowerCase() : null,
                 skip: 0,
             });
 
-            if (data?.data && !data.errors) {
-                return data.data;
-            }
+            if (data) return data;
         } else {
             const data = await getAllRitualsWithPagination();
-            if (data?.rituals) {
-                return data;
-            }
+            if (data?.rituals) return data;
         }
     } catch (error) {
         console.error('Error fetching rituals from subgraph:', error);
@@ -983,21 +1012,28 @@ export const getNodes = async (isSearch, searchInput) => {
   const emptyData = { appAuthorizations: [] };
 
   try {
-    let data;
+    let stakingProviders;
     if (!isSearch) {
-      data = await client.execute(client.GetAllStakersQueryDocument, {});
+      const data = await gqlFetch(SUBGRAPH_ETHEREUM, `
+        query { stakingProviders(first: 1000, orderBy: authorized, orderDirection: desc) {
+          id operator authorized deauthorizing startTimestamp
+        } }
+      `);
+      stakingProviders = data.stakingProviders;
     } else {
       const search = searchInput.toLowerCase();
-      data = await client.execute(client.SearchStakersDocument, {
-        id: search,
-        address: search,
-      });
+      const data = await gqlFetch(SUBGRAPH_ETHEREUM, `
+        query SearchStakers($id: ID!, $address: Bytes) {
+          stakingProviders(where: { or: [{ id: $id }, { operator: $address }] }) {
+            id operator authorized deauthorizing startTimestamp
+          }
+        }
+      `, { id: search, address: search });
+      stakingProviders = data.stakingProviders;
     }
 
-    if (data?.data?.stakingProviders && !data.errors) {
-      return { appAuthorizations: data.data.stakingProviders.map(buildAppAuthorization) };
-    } else if (data?.errors) {
-      console.error("GraphQL errors:", data.errors);
+    if (stakingProviders) {
+      return { appAuthorizations: stakingProviders.map(buildAppAuthorization) };
     }
   } catch (e) {
     console.log("error to fetch stakers data " + e);
@@ -1009,12 +1045,19 @@ export const getNodeDetail = async (node) => {
   try {
     const nodeAddress = node.toLowerCase();
 
-    const data = await client.execute(client.StakerDetailDocument, {
-      id: nodeAddress
-    });
+    const data = await gqlFetch(SUBGRAPH_ETHEREUM, `
+      query StakerDetail($id: ID!) {
+        stakingProvider(id: $id) {
+          id operator authorized deauthorizing startTimestamp
+          authorizationEvents(first: 10, orderBy: timestamp, orderDirection: desc) {
+            id eventType fromAmount toAmount timestamp blockNumber transactionHash
+          }
+        }
+      }
+    `, { id: nodeAddress });
 
-    if (data?.data?.stakingProvider) {
-      const provider = data.data.stakingProvider;
+    if (data?.stakingProvider) {
+      const provider = data.stakingProvider;
       const appAuthorization = buildAppAuthorization(provider);
       const appAuthHistories = (provider.authorizationEvents || []).map(event => ({
         id: event.id,
@@ -1037,20 +1080,26 @@ export const getNodeDetail = async (node) => {
 };
 
 export const getUserDetail = async (userAddress) => {
-  const emptyData = JSON.parse(`[]`);
   try {
-    let data;
-    data = await client.execute(client.GetRitualsQueryByUserDocument, {
-      authority: userAddress,
-    });
+    const data = await gqlFetch(SUBGRAPH_POLYGON, `
+      query GetUserRituals($authority: Bytes) {
+        rituals(
+          first: 1000,
+          where: { and: [
+            { authority: $authority }
+            { id_not_in: ["1", "2", "3", "4", "5", "6"] }
+          ] }
+          orderBy: id, orderDirection: asc
+        ) { ${RITUAL_FIELDS} }
+        ${RITUAL_COUNTER_FIELDS}
+      }
+    `, { authority: userAddress });
 
-    if (data.data !== undefined) {
-      return data.data;
-    }
+    if (data) return data;
   } catch (e) {
     console.log("error to fetch user data " + e);
   }
-  return emptyData;
+  return [];
 };
 
 const getWeb3Instance = () => {
