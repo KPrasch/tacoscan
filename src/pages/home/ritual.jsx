@@ -32,8 +32,11 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                     ritualCounter: {},
                 });
             } else {
-                const timeout = await Data.getTimeout();
-                const formattedData = Data.formatRitualsData(info.rituals, timeout);
+                const [timeout, liveRitualIds] = await Promise.all([
+                    Data.getTimeout(),
+                    Data.getLiveRitualIds().catch(() => new Set()),
+                ]);
+                const formattedData = Data.formatRitualsData(info.rituals, timeout, liveRitualIds);
                 
                 // Apply filters
                 let filteredData = formattedData;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getRituals, getNodes, formatRitualsData, formatNodes, getTimeout, formatTimeToText, getDomainStats, getGovernanceEvents, formatWeiDecimal } from './data';
+import { getRituals, getNodes, formatRitualsData, formatNodes, getTimeout, formatTimeToText, getDomainStats, getGovernanceEvents, formatWeiDecimal, getLiveRitualIds } from './data';
 import styles from './Dashboard.module.css';
 
 const Dashboard = () => {
@@ -24,12 +24,13 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const [ritualsData, nodesData, timeout, statsData, govEvents] = await Promise.all([
+      const [ritualsData, nodesData, timeout, statsData, govEvents, liveRitualIds] = await Promise.all([
         getRituals(false, ''),
         getNodes(false, ''),
         getTimeout(),
         getDomainStats().catch(() => null),
         getGovernanceEvents().catch(() => []),
+        getLiveRitualIds().catch(() => new Set()),
       ]);
 
       setDomainStats(statsData);
@@ -42,16 +43,16 @@ const Dashboard = () => {
       const rawNodes = nodesData?.appAuthorizations ? nodesData.appAuthorizations : [];
 
       // Format both rituals and nodes data for display
-      const formattedRituals = formatRitualsData(rituals, timeout);
+      const formattedRituals = formatRitualsData(rituals, timeout, liveRitualIds);
       const { nodes } = await formatNodes(rawNodes);
 
-      // Calculate real statistics (excluding heartbeats)
-      // All rituals for total counts; separate heartbeats vs live (paid/access-controlled)
-      const nonHeartbeatRituals = formattedRituals; // Show all rituals in dashboard stats
-      // Use the actual total from ritualCounter if available, otherwise use formatted length
-      const totalRituals = nonHeartbeatRituals.length;
-      const activeRituals = nonHeartbeatRituals.filter(r => r.status === 'ACTIVE').length;
-      const successfulRituals = nonHeartbeatRituals.filter(r => r.status === 'SUCCESSFUL').length;
+      // Show ALL rituals in dashboard stats, but track live vs heartbeat
+      const liveRituals = formattedRituals.filter(r => !r.isHeartbeat);
+      const heartbeatRituals = formattedRituals.filter(r => r.isHeartbeat);
+      const totalRituals = formattedRituals.length;
+      const activeRituals = formattedRituals.filter(r => r.status === 'ACTIVE' || r.status === 'SUCCESSFUL').length;
+      const successfulRituals = formattedRituals.filter(r => r.status === 'SUCCESSFUL').length;
+      const nonHeartbeatRituals = formattedRituals; // All rituals for downstream calculations
       const totalNodes = nodes.length;
       
       // Calculate active nodes - let's try different approaches
@@ -176,7 +177,7 @@ const Dashboard = () => {
 
       setStats({
         totalRituals,
-        activeRituals: activeRituals + successfulRituals, // Show active + successful as "active"
+        activeRituals: activeRituals, // Active + successful combined
         totalNodes,
         activeNodes: allTimeActiveNodes, // Use all-time active nodes for display (91.5% rate)
         successRate
@@ -234,7 +235,7 @@ const Dashboard = () => {
             participants: ritual.totalParticipants || 0,
             time: ritual.updateTime,
             status: 'success',
-            isHeartbeat: ritual.totalParticipants <= 3
+            isHeartbeat: ritual.isHeartbeat
           });
         } else if (ritual.status === 'DKG AWAITING TRANSCRIPTS') {
           recentEvents.push({
@@ -243,7 +244,7 @@ const Dashboard = () => {
             participants: ritual.totalPostedTranscripts || 0,
             time: ritual.updateTime,
             status: 'pending',
-            isHeartbeat: ritual.totalParticipants <= 3
+            isHeartbeat: ritual.isHeartbeat
           });
         } else if (ritual.status === 'DKG AWAITING AGGREGATIONS') {
           recentEvents.push({
@@ -252,7 +253,7 @@ const Dashboard = () => {
             participants: ritual.totalPostedAggregations || 0,
             time: ritual.updateTime,
             status: 'pending',
-            isHeartbeat: ritual.totalParticipants <= 3
+            isHeartbeat: ritual.isHeartbeat
           });
         } else if (ritual.status === 'EXPIRED' || ritual.status === 'TIME OUT') {
           recentEvents.push({
@@ -261,7 +262,7 @@ const Dashboard = () => {
             participants: ritual.totalParticipants || 0,
             time: ritual.updateTime,
             status: 'failed',
-            isHeartbeat: ritual.totalParticipants <= 3
+            isHeartbeat: ritual.isHeartbeat
           });
         }
       });

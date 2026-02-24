@@ -470,7 +470,7 @@ export const detectHeartbeatGroups = (rituals, timeout) => {
   return groups;
 };
 
-export const formatRitualsData = (rawData, timeout) => {
+export const formatRitualsData = (rawData, timeout, liveRitualIds = new Set()) => {
   if (rawData === undefined) {
     return [];
   }
@@ -525,10 +525,9 @@ export const formatRitualsData = (rawData, timeout) => {
       const threshold = ritual.threshold ?? null;
       const latestTransaction = transactions[0];
 
-      // Heartbeat detection: size 2-3 participants = heartbeat DKG
-      // Live/paid rituals have fee model activity (access controls, subscription payments)
-      // but that's tracked via separate entities, not on the ritual itself
-      const isHeartbeat = participants.length <= 3;
+      // Heartbeat detection: size ≤3 AND no access controls = heartbeat DKG
+      // Live/paid rituals have RitualAccessControl entries (fee model activity)
+      const isHeartbeat = participants.length <= 3 && !liveRitualIds.has(String(ritual.id));
 
       return {
         id: ritual.id,
@@ -1794,5 +1793,20 @@ export const getAllInfractions = async () => {
   } catch (e) {
     console.warn('Error fetching infractions:', e);
     return [];
+  }
+};
+
+// Get all ritual IDs that have access controls set (= live/paid rituals, not heartbeats)
+export const getLiveRitualIds = async () => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_POLYGON, `
+      query { ritualAccessControls(first: 1000) { ritualId } }
+    `);
+    const ids = new Set((data?.ritualAccessControls || []).map(r => String(r.ritualId)));
+    console.log(`🔑 Found ${ids.size} live ritual IDs with access controls`);
+    return ids;
+  } catch (e) {
+    console.warn('Error fetching live ritual IDs:', e);
+    return new Set();
   }
 };
