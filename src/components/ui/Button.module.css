@@ -22,18 +22,18 @@
 }
 
 .small {
-  padding: 4px 10px;
-  font-size: 12px;
+  padding: 2px 8px;
+  font-size: 11px;
 }
 
 .medium {
-  padding: 8px 16px;
-  font-size: 14px;
+  padding: 5px 12px;
+  font-size: 12px;
 }
 
 .large {
-  padding: 10px 22px;
-  font-size: 16px;
+  padding: 7px 16px;
+  font-size: 13px;
 }
 
 /* Primary button style - lime green background */

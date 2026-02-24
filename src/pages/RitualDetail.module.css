@@ -9,7 +9,7 @@
 .container {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 24px 20px;
+  padding: 16px 20px;
 }
 
 .loadingWrapper {
@@ -55,8 +55,8 @@
   background: white;
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 20px 24px;
-  margin-bottom: 24px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
 }
 
 .headerTop {
@@ -73,7 +73,7 @@
 
 .title {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -85,7 +85,7 @@
 }
 
 .statusBadge {
-  padding: 6px 14px;
+  padding: 3px 10px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
@@ -100,16 +100,16 @@
   display: flex;
   gap: 0;
   border-bottom: 2px solid var(--border-color);
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
 
 .tab {
-  padding: 14px 28px;
+  padding: 8px 18px;
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
@@ -142,15 +142,15 @@
 /* Overview Grid */
 .overviewGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  gap: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 16px;
 }
 
 .infoCard {
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 8px;
+  padding: 14px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
   transition: box-shadow 0.2s;
 }
@@ -161,11 +161,11 @@
 
 .cardTitle {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 24px 0;
-  padding-bottom: 16px;
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
   border-bottom: 2px solid var(--border-color);
 }
 
@@ -173,7 +173,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 0;
+  padding: 8px 0;
   border-bottom: 1px solid rgba(229, 231, 235, 0.3);
 }
 
@@ -272,8 +272,8 @@
 .participantsSection {
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 8px;
+  padding: 14px;
   overflow-x: auto;
 }
 
@@ -288,7 +288,7 @@
 }
 
 .participantsTable th {
-  padding: 12px 16px;
+  padding: 6px 10px;
   text-align: left;
   font-family: var(--font-display);
   font-size: 12px;
@@ -313,7 +313,7 @@
 }
 
 .participantsTable td {
-  padding: 14px 16px;
+  padding: 6px 10px;
   font-family: var(--font-mono);
   font-size: 13px;
   color: var(--text-primary);
@@ -344,18 +344,18 @@
 .timelineSection {
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 8px;
+  padding: 14px;
   max-width: 100%;
 }
 
 .sectionTitle {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 28px 0;
-  padding-bottom: 16px;
+  margin: 0 0 14px 0;
+  padding-bottom: 8px;
   border-bottom: 2px solid var(--border-color);
 }
 
@@ -376,7 +376,7 @@
 
 .timelineItem {
   position: relative;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
 }
 
 .timelineMarker {
@@ -395,7 +395,7 @@
   background: white;
   border: 1px solid #E5E7EB;
   border-radius: 8px;
-  padding: 18px;
+  padding: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.2s;
 }
@@ -413,7 +413,7 @@
 
 .timelineEvent {
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   color: #111827;
   letter-spacing: -0.01em;

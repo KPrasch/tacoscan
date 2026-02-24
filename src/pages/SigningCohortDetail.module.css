@@ -7,7 +7,7 @@
 .container {
     max-width: 1600px;
     margin: 0 auto;
-    padding: 24px 20px;
+    padding: 16px 20px;
 }
 
 .loading {
@@ -44,8 +44,8 @@
 .header {
     background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
     border-radius: 12px;
-    padding: 32px;
-    margin-bottom: 24px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
     color: #ffffff;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
@@ -81,16 +81,16 @@
 }
 
 .title {
-    font-size: 32px;
+    font-size: 20px;
     font-weight: 700;
-    margin: 0 0 20px 0;
+    margin: 0 0 10px 0;
     font-family: var(--font-mono, "Space Mono", monospace);
     color: #ffffff;
 }
 
 .headerStats {
     display: flex;
-    gap: 32px;
+    gap: 16px;
     flex-wrap: wrap;
 }
 
@@ -109,7 +109,7 @@
 }
 
 .headerStatValue {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 600;
     color: #10b981;
     font-family: var(--font-mono, "Space Mono", monospace);
@@ -140,7 +140,7 @@
 .tabNavigation {
     display: flex;
     gap: 0;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
@@ -150,7 +150,7 @@
 
 .tab {
     flex: 1;
-    padding: 10px 16px;
+    padding: 6px 12px;
     background: transparent;
     border: none;
     border-radius: 6px;
@@ -205,7 +205,7 @@
 
 /* Fix for cards without header */
 .card > h2.cardTitle {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 600;
     padding: 16px 20px;
     margin: 0;
@@ -219,13 +219,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 20px;
+    padding: 8px 14px;
     border-bottom: 1px solid #e5e7eb;
     background: #f9fafb;
 }
 
 .cardTitle {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 600;
     margin: 0;
     color: #1f2937;
@@ -290,14 +290,14 @@
 }
 
 .cardContent {
-    padding: 20px;
+    padding: 12px;
 }
 
 /* Overview Grid */
 .infoGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    gap: 12px;
 }
 
 .infoItem {
@@ -315,7 +315,7 @@
 }
 
 .infoValue {
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 600;
     color: #1f2937;
     font-family: var(--font-mono, "Space Mono", monospace);
@@ -1381,7 +1381,7 @@
 }
 
 .table th {
-    padding: 12px 16px;
+    padding: 6px 10px;
     text-align: left;
     font-weight: 600;
     color: #374151;
@@ -1404,9 +1404,9 @@
 }
 
 .table td {
-    padding: 12px 16px;
+    padding: 6px 10px;
     color: #1f2937;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .indexCell {

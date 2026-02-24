@@ -1,7 +1,7 @@
 .container {
   min-height: 100vh;
   background: #F9FAFB;
-  padding: 24px 20px 60px;
+  padding: 16px 20px 40px;
 }
 
 .loadingState,
@@ -21,7 +21,7 @@
 
 .header {
   max-width: 1600px;
-  margin: 0 auto 32px;
+  margin: 0 auto 16px;
 }
 
 .backButton {
@@ -35,7 +35,7 @@
   color: #374151;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-bottom: 20px;
+  margin-bottom: 6px;
 }
 
 .backButton:hover {
@@ -44,7 +44,7 @@
 }
 
 .title {
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 600;
   color: #0A0A0A;
   margin: 0 0 8px 0;
@@ -59,17 +59,17 @@
 
 .statsGrid {
   max-width: 1600px;
-  margin: 0 auto 24px;
+  margin: 0 auto 16px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
 }
 
 .statCard {
   background: #FFFFFF;
   border: 1px solid #E5E7EB;
   border-radius: 12px;
-  padding: 20px 24px;
+  padding: 12px 14px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
 }
@@ -84,12 +84,12 @@
   color: #9CA3AF;
   text-transform: uppercase;
   letter-spacing: 0.075em;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
   font-family: var(--font-mono);
 }
 
 .statValue {
-  font-size: 36px;
+  font-size: 22px;
   font-weight: 600;
   color: #0A0A0A;
   line-height: 1;
@@ -105,19 +105,19 @@
 
 .section {
   max-width: 1600px;
-  margin: 0 auto 24px;
+  margin: 0 auto 16px;
   background: #FFFFFF;
   border: 1px solid #E5E7EB;
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 8px;
+  padding: 14px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .sectionTitle {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 600;
   color: #0A0A0A;
-  margin: 0 0 20px 0;
+  margin: 0 0 12px 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
@@ -154,8 +154,8 @@
   display: grid;
   grid-template-columns: 3fr 1fr;
   background: #F8F9FA;
-  padding: 12px 16px;
-  font-size: 12px;
+  padding: 6px 10px;
+  font-size: 10px;
   font-weight: 700;
   color: #0A0A0A;
   text-transform: uppercase;
@@ -167,7 +167,7 @@
 .tableRow {
   display: grid;
   grid-template-columns: 3fr 1fr;
-  padding: 14px 16px;
+  padding: 6px 10px;
   border-bottom: 1px solid #E5E7EB;
   align-items: center;
   transition: background-color 0.2s ease;

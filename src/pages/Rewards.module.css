@@ -7,7 +7,7 @@
 .container {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 24px 20px;
+  padding: 16px 20px;
 }
 
 .loading {
@@ -25,8 +25,8 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 32px;
-  padding: 32px;
+  margin-bottom: 16px;
+  padding: 16px 20px;
   background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
   border-radius: 12px;
   color: #FFFFFF;
@@ -38,7 +38,7 @@
 }
 
 .pageTitle {
-  font-size: 32px;
+  font-size: 20px;
   font-weight: 700;
   margin: 0 0 8px 0;
   font-family: var(--font-mono, 'Space Mono', monospace);
@@ -46,7 +46,7 @@
 }
 
 .pageSubtitle {
-  font-size: 16px;
+  font-size: 12px;
   color: #9CA3AF;
   margin: 0;
   line-height: 1.5;
@@ -54,7 +54,7 @@
 
 .headerStats {
   display: flex;
-  gap: 32px;
+  gap: 20px;
   align-items: center;
 }
 
@@ -75,7 +75,7 @@
 }
 
 .statValue {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
   color: #96FF5E;
   font-family: var(--font-mono, 'Space Mono', monospace);
@@ -88,7 +88,7 @@
   align-items: center;
   gap: 16px;
   margin-bottom: 24px;
-  padding: 20px;
+  padding: 10px 14px;
   background: #FFFFFF;
   border: 1px solid #E5E7EB;
   border-radius: 8px;
@@ -101,7 +101,7 @@
 
 .searchInput {
   width: 100%;
-  padding: 12px 16px;
+  padding: 7px 10px;
   border: 1px solid #D1D5DB;
   border-radius: 6px;
   font-size: 14px;
@@ -124,7 +124,7 @@
 }
 
 .filterSelect {
-  padding: 8px 12px;
+  padding: 5px 10px;
   border: 1px solid #D1D5DB;
   border-radius: 6px;
   font-size: 13px;
@@ -152,13 +152,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 8px 14px;
   border-bottom: 1px solid #E5E7EB;
   background: #F9FAFB;
 }
 
 .tableInfo {
-  font-size: 13px;
+  font-size: 11px;
   color: #6B7280;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
@@ -178,9 +178,9 @@
 }
 
 .activityTable th {
-  padding: 12px 16px;
+  padding: 6px 10px;
   text-align: left;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: #6B7280;
   text-transform: uppercase;
@@ -203,8 +203,8 @@
 }
 
 .activityTable td {
-  padding: 12px 16px;
-  font-size: 13px;
+  padding: 6px 10px;
+  font-size: 12px;
   color: #374151;
   font-family: var(--font-mono, 'Space Mono', monospace);
   vertical-align: middle;
@@ -315,18 +315,18 @@
   justify-content: center;
   align-items: center;
   gap: 8px;
-  padding: 20px;
+  padding: 10px;
   border-top: 1px solid #E5E7EB;
   background: #F9FAFB;
 }
 
 .pageButton {
-  padding: 8px 12px;
+  padding: 4px 8px;
   border: 1px solid #D1D5DB;
-  border-radius: 6px;
+  border-radius: 4px;
   background: #FFFFFF;
   color: #374151;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -416,14 +416,14 @@
   background: #FFFFFF;
   border: 1px solid #E5E7EB;
   border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 24px;
+  padding: 14px;
+  margin-bottom: 16px;
 }
 
 .sectionTitle {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  margin: 0 0 16px 0;
+  margin: 0 0 10px 0;
   color: #374151;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
@@ -438,7 +438,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
+  padding: 5px 10px;
   background: #F9FAFB;
   border-radius: 6px;
 }

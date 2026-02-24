@@ -1,7 +1,7 @@
 .container {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 24px 20px;
+  padding: 16px 20px;
   background: #F9FAFB;
   min-height: 100vh;
 }
@@ -10,8 +10,8 @@
 .header {
   background: #FFFFFF;
   border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
+  padding: 16px;
+  margin-bottom: 16px;
   border: 1px solid #E5E7EB;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -20,7 +20,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .titleSection {
@@ -30,7 +30,7 @@
 }
 
 .title {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
   margin: 0;
   color: #0A0A0A;
@@ -71,7 +71,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 8px 12px;
   background: #F9FAFB;
   border-radius: 8px;
   font-family: var(--font-mono, 'Space Mono', monospace);
@@ -121,16 +121,16 @@
 /* Stats Grid */
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .statCard {
   background: #FFFFFF;
   border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  padding: 20px;
+  border-radius: 6px;
+  padding: 12px 14px;
   transition: all 0.2s;
 }
 
@@ -149,7 +149,7 @@
 }
 
 .statValue {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
   color: #0A0A0A;
   font-family: var(--font-mono, 'Space Mono', monospace);
@@ -191,7 +191,7 @@
 .tab {
   flex: 1;
   max-width: 200px;
-  padding: 16px 24px;
+  padding: 10px 16px;
   background: transparent;
   border: none;
   font-size: 14px;
@@ -223,7 +223,7 @@
 }
 
 .tabContent {
-  padding: 24px;
+  padding: 14px;
 }
 
 /* Overview Content */
@@ -233,15 +233,15 @@
 }
 
 .infoSection {
-  padding: 20px;
+  padding: 12px;
   background: #F9FAFB;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .sectionTitle {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  margin: 0 0 16px 0;
+  margin: 0 0 10px 0;
   color: #0A0A0A;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
@@ -312,7 +312,7 @@
 }
 
 .dataTable th {
-  padding: 12px 16px;
+  padding: 6px 10px;
   text-align: left;
   font-size: 11px;
   font-weight: 600;
@@ -336,8 +336,8 @@
 }
 
 .dataTable td {
-  padding: 12px 16px;
-  font-size: 13px;
+  padding: 6px 10px;
+  font-size: 12px;
   color: #374151;
 }
 
