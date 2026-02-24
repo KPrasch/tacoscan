@@ -836,56 +836,8 @@ export const getRituals = async (isSearch, searchInput) => {
 
 
 export const getNetworkEvents = async () => {
-  try {
-    const endpoint = import.meta.env.VITE_SUBGRAPH_ETHEREUM;
-    const query = `\n      query GetAllEvents {\n        stakingProviders(first: 100, orderBy: authorized, orderDirection: desc) {\n          id\n          operator\n          authorized\n          deauthorizing\n          startTimestamp\n          authorizationEvents(first: 50, orderBy: timestamp, orderDirection: desc) {\n            eventType\n            toAmount\n            timestamp\n            blockNumber\n            transactionHash\n          }\n        }\n      }\n    `;
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const data = await response.json();
-
-    if (data?.data) {
-      const events = [];
-
-      data.data.stakingProviders?.forEach(provider => {
-        provider.authorizationEvents?.forEach(event => {
-          events.push({
-            type: event.eventType,
-            contract: 'TACoApplication',
-            stakingProvider: provider.id,
-            amount: event.toAmount,
-            timestamp: parseInt(event.timestamp) * 1000,
-            blockNumber: event.blockNumber,
-            txHash: event.transactionHash
-          });
-        });
-
-        if (provider.operator && provider.startTimestamp) {
-          events.push({
-            type: 'OperatorBonded',
-            contract: 'TACoApplication',
-            stakingProvider: provider.id,
-            operator: provider.operator,
-            timestamp: parseInt(provider.startTimestamp) * 1000,
-            blockNumber: null,
-            txHash: null
-          });
-        }
-      });
-
-      return events.sort((a, b) => b.timestamp - a.timestamp);
-    }
-
-    return [];
-  } catch (error) {
-    console.error('Error fetching network events:', error);
-    return [];
-  }
+  // Deprecated — use getAllNetworkEvents instead
+  return getAllNetworkEvents();
 };
 
 const buildAppAuthorization = (provider) => {
@@ -914,94 +866,345 @@ const buildAppAuthorization = (provider) => {
   };
 };
 
+// ─── V2 Native Event Queries ───────────────────────────────────────────────
+// Fetches ALL event entity types from all three chain subgraphs.
+
+const ETHEREUM_EVENTS_QUERY = `
+  query EthereumEvents {
+    authorizationEvents(first: 500, orderBy: timestamp, orderDirection: desc) {
+      id eventType fromAmount toAmount penalty investigator reward
+      deauthorizing endDeauthorization operator
+      stakingProvider { id }
+      transactionHash blockNumber timestamp
+    }
+    rewardEvents(first: 200, orderBy: timestamp, orderDirection: desc) {
+      id eventType amount sender beneficiary
+      endCommitment penaltyPercent endPenalty contract distributor
+      stakingProvider { id }
+      transactionHash blockNumber timestamp
+    }
+    governanceEvents(first: 100, orderBy: timestamp, orderDirection: desc) {
+      id eventType contract oldValue newValue
+      oldValueInt newValueInt oldValueAddress newValueAddress
+      domain transactionHash blockNumber timestamp
+    }
+    bridgeMessages(first: 100, orderBy: timestamp, orderDirection: desc) {
+      id domain messageType stakingProvider
+      transactionHash blockNumber timestamp
+    }
+    infractions(first: 100, orderBy: timestamp, orderDirection: desc) {
+      id domain infractionType infractionTypeName
+      stakingProvider { id }
+      ritual { id }
+      timestamp
+    }
+  }
+`;
+
+const POLYGON_EVENTS_QUERY = `
+  query PolygonEvents {
+    ritualTransactions(first: 500, orderBy: timestamp, orderDirection: desc) {
+      id eventType participant transcriptDigest aggregatedTranscriptDigest
+      previousAuthority newAuthority
+      ritual { id }
+      transactionHash blockNumber timestamp gasUsed
+    }
+    handovers(first: 100, orderBy: createdAt, orderDirection: desc) {
+      id departingParticipant incomingParticipant status
+      ritual { id }
+      requestedAt transcriptPostedAt blindedSharePostedAt canceledAt finalizedAt
+      createdAt updatedAt
+    }
+    subscriptionPayments(first: 200, orderBy: timestamp, orderDirection: desc) {
+      id domain policyId subscriber amount period slots paymentType
+      policy { id sponsor owner }
+      transactionHash blockNumber timestamp
+    }
+    policies(first: 100, orderBy: timestamp, orderDirection: desc) {
+      id domain sponsor owner size startTimestamp endTimestamp cost
+      transactionHash blockNumber timestamp
+    }
+    ritualAccessControls(first: 100, orderBy: timestamp, orderDirection: desc) {
+      id domain ritualId address isAuthorized
+      transactionHash blockNumber timestamp
+    }
+    reimbursementWithdrawals(first: 100, orderBy: timestamp, orderDirection: desc) {
+      id domain recipient amount transactionHash blockNumber timestamp
+    }
+    reimbursementFailures(first: 100, orderBy: timestamp, orderDirection: desc) {
+      id domain recipient amount transactionHash blockNumber timestamp
+    }
+    governanceEvents(first: 100, orderBy: timestamp, orderDirection: desc) {
+      id eventType contract oldValue newValue
+      oldValueInt newValueInt oldValueAddress newValueAddress
+      domain transactionHash blockNumber timestamp
+    }
+    infractions(first: 100, orderBy: timestamp, orderDirection: desc) {
+      id domain infractionType infractionTypeName
+      stakingProvider { id }
+      ritual { id }
+      timestamp
+    }
+  }
+`;
+
+const BASE_EVENTS_QUERY = `
+  query BaseEvents {
+    signingCohorts(first: 100, orderBy: createdAt, orderDirection: desc) {
+      id domain chainId authority participants status
+      isDeployed deployedAt multisigAddress signers threshold
+      createdAt updatedAt
+    }
+    signingCohortSignatures(first: 200, orderBy: timestamp, orderDirection: desc) {
+      id provider signer
+      cohort { id }
+      transactionHash blockNumber timestamp
+    }
+    multisigClones(first: 100, orderBy: createdAt, orderDirection: desc) {
+      id domain cohortId factory signers threshold
+      isCleared executionCount totalValue lastExecutedAt
+      createdAt updatedAt
+    }
+    multisigExecutions(first: 200, orderBy: timestamp, orderDirection: desc) {
+      id sender nonce destination value
+      multisig { id }
+      transactionHash blockNumber timestamp gasUsed
+    }
+    multisigSignerEvents(first: 100, orderBy: timestamp, orderDirection: desc) {
+      id eventType signer newSigner
+      multisig { id }
+      transactionHash blockNumber timestamp
+    }
+    opExecutions(first: 100, orderBy: timestamp, orderDirection: desc) {
+      id domain target result
+      transactionHash blockNumber timestamp gasUsed
+    }
+    contractAuthorizations(first: 50, orderBy: createdAt, orderDirection: desc) {
+      id domain contract isAuthorized createdAt updatedAt
+    }
+    governanceEvents(first: 100, orderBy: timestamp, orderDirection: desc) {
+      id eventType contract oldValue newValue
+      oldValueInt newValueInt oldValueAddress newValueAddress
+      domain transactionHash blockNumber timestamp
+    }
+  }
+`;
+
+// Safely fetch from a chain — returns empty object on failure
+const safeFetch = async (endpoint, query, chainLabel) => {
+  if (!endpoint) return {};
+  try {
+    return await gqlFetch(endpoint, query);
+  } catch (err) {
+    console.warn(`⚠️ ${chainLabel} event fetch failed:`, err.message);
+    return {};
+  }
+};
+
 export const getAllNetworkEvents = async () => {
   try {
-    const appAuthsQuery = `
-      query GetAllEvents {
-        appAuthorizations(first: 100, orderBy: id) {
-          id
-          amount
-          tacoOperator {
-            operator
-            bondedTimestamp
-            confirmed
-          }
-          stake {
-            stakeHistory(first: 100, orderBy: timestamp, orderDirection: desc) {
-              eventType
-              eventAmount
-              timestamp
-              blockNumber
-              txHash
-            }
-          }
-        }
-        appAuthHistories(first: 500, orderBy: timestamp, orderDirection: desc) {
-          eventType
-          eventAmount
-          timestamp
-          blockNumber
-          txHash
-          appAuthorization {
-            id
-          }
-        }
-      }
-    `;
+    const [ethData, polyData, baseData] = await Promise.all([
+      safeFetch(SUBGRAPH_ETHEREUM, ETHEREUM_EVENTS_QUERY, 'Ethereum'),
+      safeFetch(SUBGRAPH_POLYGON, POLYGON_EVENTS_QUERY, 'Polygon'),
+      safeFetch(SUBGRAPH_BASE, BASE_EVENTS_QUERY, 'Base'),
+    ]);
 
-    const response = await fetch('https://gateway-arbitrum.network.thegraph.com/api/f49026e5653284c96b9798f93567eaa1/subgraphs/id/6VFbgC6JWwPQkqCxdVDNSieW8bwLdoVBtimVm3F2WV86', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: appAuthsQuery })
+    const events = [];
+    const ts = (v) => parseInt(v) * 1000;
+
+    // ── Ethereum Events ──
+    (ethData.authorizationEvents || []).forEach(e => {
+      events.push({
+        chain: 'ethereum', category: 'authorization', type: e.eventType,
+        stakingProvider: e.stakingProvider?.id, amount: e.toAmount,
+        fromAmount: e.fromAmount, penalty: e.penalty, investigator: e.investigator,
+        reward: e.reward, operator: e.operator,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (ethData.rewardEvents || []).forEach(e => {
+      events.push({
+        chain: 'ethereum', category: 'reward', type: e.eventType,
+        stakingProvider: e.stakingProvider?.id, amount: e.amount,
+        sender: e.sender, beneficiary: e.beneficiary, contract: e.contract,
+        distributor: e.distributor,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (ethData.governanceEvents || []).forEach(e => {
+      events.push({
+        chain: 'ethereum', category: 'governance', type: e.eventType,
+        contract: e.contract, domain: e.domain,
+        oldValue: e.oldValue, newValue: e.newValue,
+        oldValueInt: e.oldValueInt, newValueInt: e.newValueInt,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (ethData.bridgeMessages || []).forEach(e => {
+      events.push({
+        chain: 'ethereum', category: 'bridge', type: 'BRIDGE_MESSAGE',
+        messageType: e.messageType, stakingProvider: e.stakingProvider,
+        domain: e.domain,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (ethData.infractions || []).forEach(e => {
+      events.push({
+        chain: 'ethereum', category: 'infraction', type: e.infractionTypeName,
+        stakingProvider: e.stakingProvider?.id, ritualId: e.ritual?.id,
+        domain: e.domain, timestamp: ts(e.timestamp),
+      });
     });
 
-    const data = await response.json();
-
-    if (data?.data) {
-      const events = [];
-
-      data.data.appAuthorizations?.forEach(auth => {
-        auth.stake?.stakeHistory?.forEach(event => {
-          events.push({
-            type: event.eventType,
-            contract: 'TokenStaking',
-            stakingProvider: auth.id.split('-')[0],
-            amount: event.eventAmount,
-            timestamp: parseInt(event.timestamp) * 1000,
-            blockNumber: event.blockNumber,
-            txHash: event.txHash
-          });
-        });
-
-        if (auth.tacoOperator?.bondedTimestamp) {
-          events.push({
-            type: 'OperatorBonded',
-            contract: 'TACoApplication',
-            stakingProvider: auth.id.split('-')[0],
-            operator: auth.tacoOperator.operator,
-            timestamp: parseInt(auth.tacoOperator.bondedTimestamp) * 1000,
-            blockNumber: null,
-            txHash: null
-          });
-        }
+    // ── Polygon Events ──
+    (polyData.ritualTransactions || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'ritual', type: e.eventType,
+        ritualId: e.ritual?.id, participant: e.participant,
+        previousAuthority: e.previousAuthority, newAuthority: e.newAuthority,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp), gasUsed: e.gasUsed,
       });
-
-      data.data.appAuthHistories?.forEach(event => {
-        events.push({
-          type: event.eventType,
-          contract: 'TACoApplication',
-          stakingProvider: event.appAuthorization?.id?.split('-')[0],
-          amount: event.eventAmount,
-          timestamp: parseInt(event.timestamp) * 1000,
-          blockNumber: event.blockNumber,
-          txHash: event.txHash
-        });
+    });
+    (polyData.handovers || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'handover', type: `HANDOVER_${e.status}`,
+        ritualId: e.ritual?.id,
+        departingParticipant: e.departingParticipant,
+        incomingParticipant: e.incomingParticipant,
+        timestamp: ts(e.updatedAt),
       });
+    });
+    (polyData.subscriptionPayments || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'subscription', type: e.paymentType,
+        subscriber: e.subscriber, amount: e.amount,
+        policyId: e.policyId, period: e.period, slots: e.slots,
+        sponsor: e.policy?.sponsor,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.policies || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'policy', type: 'POLICY_CREATED',
+        sponsor: e.sponsor, owner: e.owner, size: e.size, cost: e.cost,
+        startTimestamp: e.startTimestamp, endTimestamp: e.endTimestamp,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.ritualAccessControls || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'access_control',
+        type: e.isAuthorized ? 'ACCESS_GRANTED' : 'ACCESS_REVOKED',
+        ritualId: e.ritualId?.toString(), address: e.address,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.reimbursementWithdrawals || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'reimbursement', type: 'REIMBURSEMENT_WITHDRAWAL',
+        recipient: e.recipient, amount: e.amount,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.reimbursementFailures || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'reimbursement', type: 'REIMBURSEMENT_FAILURE',
+        recipient: e.recipient, amount: e.amount,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.governanceEvents || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'governance', type: e.eventType,
+        contract: e.contract, domain: e.domain,
+        oldValue: e.oldValue, newValue: e.newValue,
+        oldValueInt: e.oldValueInt, newValueInt: e.newValueInt,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.infractions || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'infraction', type: e.infractionTypeName,
+        stakingProvider: e.stakingProvider?.id, ritualId: e.ritual?.id,
+        domain: e.domain, timestamp: ts(e.timestamp),
+      });
+    });
 
-      return events.sort((a, b) => b.timestamp - a.timestamp);
-    }
+    // ── Base Events ──
+    (baseData.signingCohorts || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'signing', type: `COHORT_${e.status}`,
+        cohortId: e.id, authority: e.authority,
+        participantCount: e.participants?.length,
+        isDeployed: e.isDeployed, multisigAddress: e.multisigAddress,
+        threshold: e.threshold,
+        timestamp: ts(e.createdAt),
+      });
+    });
+    (baseData.signingCohortSignatures || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'signing', type: 'COHORT_SIGNATURE',
+        cohortId: e.cohort?.id, provider: e.provider, signer: e.signer,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (baseData.multisigExecutions || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'multisig', type: 'MULTISIG_EXECUTION',
+        multisigAddress: e.multisig?.id, sender: e.sender,
+        destination: e.destination, amount: e.value, nonce: e.nonce,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp), gasUsed: e.gasUsed,
+      });
+    });
+    (baseData.multisigSignerEvents || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'multisig', type: e.eventType,
+        multisigAddress: e.multisig?.id, signer: e.signer, newSigner: e.newSigner,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (baseData.opExecutions || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'op_execution', type: 'OP_EXECUTION',
+        target: e.target, result: e.result, domain: e.domain,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp), gasUsed: e.gasUsed,
+      });
+    });
+    (baseData.contractAuthorizations || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'contract_auth',
+        type: e.isAuthorized ? 'CONTRACT_AUTHORIZED' : 'CONTRACT_DEAUTHORIZED',
+        contract: e.contract, domain: e.domain,
+        timestamp: ts(e.createdAt),
+      });
+    });
+    (baseData.governanceEvents || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'governance', type: e.eventType,
+        contract: e.contract, domain: e.domain,
+        oldValue: e.oldValue, newValue: e.newValue,
+        oldValueInt: e.oldValueInt, newValueInt: e.newValueInt,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
 
-    return [];
+    return events.sort((a, b) => b.timestamp - a.timestamp);
   } catch (error) {
     console.error('Error fetching network events:', error);
     return [];
