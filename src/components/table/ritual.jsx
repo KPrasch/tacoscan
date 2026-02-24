@@ -382,21 +382,21 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                             letterSpacing: '0.025em',
                             fontFamily: 'var(--font-display)'
                           }}>
-                            Initiator
+                            Authority
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <Link
                               target="_blank"
                               underline="hover"
-                              href={Utils.getPolygonScanAddressLink() + row.initiator}
+                              href={Utils.getPolygonScanAddressLink() + row.authority}
                               className={styles.link}
                               style={{ fontSize: '0.9375rem', fontWeight: 500 }}
                             >
-                              {Data.formatString(row.initiator)}
+                              {Data.formatString(row.authority)}
                               <ShareLink style={{ marginLeft: '6px', width: '14px', height: '14px', opacity: 0.7 }} />
                             </Link>
                             <CopyButton
-                              onClick={(e) => copyToClipBoard(row.initiator)}
+                              onClick={(e) => copyToClipBoard(row.authority)}
                             />
                           </div>
                         </div>

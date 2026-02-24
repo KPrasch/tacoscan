@@ -218,6 +218,17 @@ export const NodesTable = ({ columns, data, isLoading, network }) => {
           <TableCell align="left">
             {row.bondedAt ? Data.formatTimeToText(row.bondedAt) : "-"}
           </TableCell>
+          <TableCell align="left">
+            <span style={{
+              color: row.nodeStatus === 'Slashed' ? '#EF4444' :
+                     row.nodeStatus === 'Penalized' ? '#F59E0B' :
+                     row.nodeStatus === 'Released' ? '#6B7280' : '#10B981',
+              fontWeight: 500,
+              fontSize: '0.875rem'
+            }}>
+              {row.nodeStatus || 'Active'}
+            </span>
+          </TableCell>
         </TableRow>
       </React.Fragment>
     );
@@ -259,7 +270,7 @@ export const NodesTable = ({ columns, data, isLoading, network }) => {
                           height: 35 * emptyRows,
                         }}
                       >
-                        <TableCell colSpan={6} />
+                        <TableCell colSpan={7} />
                       </TableRow>
                     )}
                   </TableBody>

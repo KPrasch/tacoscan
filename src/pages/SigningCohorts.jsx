@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './SigningCohorts.module.css';
-import { formatString, formatDate, calculateTimeMoment } from './data';
-import { getAllSigningCohorts } from '../utils/contractReader';
-import { getCurrentNetwork } from '../utils/dataSource';
+import { formatString, formatDate, calculateTimeMoment, getSigningCohortsFromSubgraph } from './data';
 
 const SigningCohorts = () => {
   const navigate = useNavigate();
@@ -16,21 +14,26 @@ const SigningCohorts = () => {
   useEffect(() => {
     const fetchCohorts = async () => {
       try {
-        const network = getCurrentNetwork();
-        console.log(`Fetching signing cohorts for ${network}...`);
+        console.log('Fetching signing cohorts from v2 subgraph...');
+        const cohortsData = await getSigningCohortsFromSubgraph();
 
-        const cohortsData = await getAllSigningCohorts(network);
-
-        // Transform the data for display
         const transformedCohorts = cohortsData.map(cohort => ({
           id: cohort.id,
           name: `Cohort #${cohort.id}`,
-          signers: cohort.signers || [],
-          threshold: cohort.threshold,
-          isActive: cohort.isActive,
-          state: cohort.state,
-          signersCount: cohort.signersCount || 0,
-          conditions: cohort.conditions
+          signers: cohort.signers || cohort.participants || [],
+          threshold: cohort.threshold || 0,
+          isActive: cohort.status === 'DEPLOYED' || cohort.status === 'CONDITIONS_SET',
+          state: cohort.status?.replace(/_/g, ' ') || 'Unknown',
+          signersCount: (cohort.signers || cohort.participants || []).length,
+          conditions: cohort.conditions,
+          // V2 fields
+          authority: cohort.authority,
+          chainId: cohort.chainId,
+          isDeployed: cohort.isDeployed,
+          deployedAt: cohort.deployedAt,
+          multisigAddress: cohort.multisigAddress,
+          signatureCount: (cohort.signatures || []).length,
+          createdAt: cohort.createdAt,
         }));
 
         setCohorts(transformedCohorts);
@@ -115,6 +118,18 @@ const SigningCohorts = () => {
             {cohorts.reduce((sum, c) => sum + c.signersCount, 0)}
           </div>
           <div className={styles.statLabel}>Total Signers</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statValue}>
+            {cohorts.filter(c => c.isDeployed).length}
+          </div>
+          <div className={styles.statLabel}>Deployed</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statValue}>
+            {cohorts.reduce((sum, c) => sum + (c.signatureCount || 0), 0)}
+          </div>
+          <div className={styles.statLabel}>Total Signatures</div>
         </div>
       </div>
 

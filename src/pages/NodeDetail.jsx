@@ -166,6 +166,28 @@ const NodeDetail = () => {
         ? new Date(auth.tacoOperator.bondedTimestamp * 1000)
         : null,
       isBetaStaker: isBeta,
+      // V2 extended fields
+      isReleased: data.isReleased || false,
+      isSlashed: data.isSlashed || false,
+      isPenalized: data.isPenalized || false,
+      totalRewards: data.totalRewards || '0',
+      totalRewardsWithdrawn: data.totalRewardsWithdrawn || '0',
+      totalPenalty: data.totalPenalty || '0',
+      endDeauthorization: data.endDeauthorization || '0',
+      isChildSynced: data.isChildSynced,
+      commitmentEndTimestamp: data.commitmentEndTimestamp,
+      rewardEvents: (data.rewardEvents || []).map(e => ({
+        type: e.eventType,
+        amount: e.amount,
+        beneficiary: e.beneficiary,
+        timestamp: parseInt(e.timestamp) * 1000,
+        txHash: e.transactionHash,
+      })),
+      infractions: (data.infractions || []).map(i => ({
+        type: i.infractionTypeName,
+        ritualId: i.ritual?.id,
+        timestamp: parseInt(i.timestamp) * 1000,
+      })),
       events: allEvents
         .map((event) => ({
           type: event.eventType,
@@ -338,6 +360,20 @@ const NodeDetail = () => {
           >
             Events
           </button>
+          <button
+            className={`${styles.tab} ${activeTab === "rewards" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("rewards")}
+          >
+            Rewards
+          </button>
+          {nodeData.infractions?.length > 0 && (
+            <button
+              className={`${styles.tab} ${activeTab === "infractions" ? styles.activeTab : ""}`}
+              onClick={() => setActiveTab("infractions")}
+            >
+              Infractions ({nodeData.infractions.length})
+            </button>
+          )}
         </div>
 
         <div className={styles.tabContent}>
@@ -378,6 +414,30 @@ const NodeDetail = () => {
                         : nodeData.authorizedAmount > 0
                           ? "Authorized"
                           : "Not Authorized"}
+                    </span>
+                  </div>
+                  {nodeData.isSlashed && (
+                    <div className={styles.infoRow}>
+                      <span className={styles.infoLabel}>⚠️ Slashed:</span>
+                      <span className={styles.infoValue} style={{ color: '#EF4444' }}>Yes</span>
+                    </div>
+                  )}
+                  {nodeData.isPenalized && (
+                    <div className={styles.infoRow}>
+                      <span className={styles.infoLabel}>⚠️ Penalized:</span>
+                      <span className={styles.infoValue} style={{ color: '#EF4444' }}>Yes</span>
+                    </div>
+                  )}
+                  {nodeData.isReleased && (
+                    <div className={styles.infoRow}>
+                      <span className={styles.infoLabel}>Released:</span>
+                      <span className={styles.infoValue}>Yes</span>
+                    </div>
+                  )}
+                  <div className={styles.infoRow}>
+                    <span className={styles.infoLabel}>Child Chain Synced:</span>
+                    <span className={styles.infoValue}>
+                      {nodeData.isChildSynced ? '✓ Synced' : '✗ Not synced'}
                     </span>
                   </div>
                 </div>
@@ -492,7 +552,6 @@ const NodeDetail = () => {
                   <tbody>
                     {nodeData.events.length > 0 ? (
                       nodeData.events.map((event, idx) => {
-                        // Format amount using BigInt for accuracy
                         const formatEventAmount = (amount) => {
                           if (!amount) return "0";
                           try {
@@ -519,7 +578,7 @@ const NodeDetail = () => {
                             <td>
                               {event.blockNumber ? (
                                 <a
-                                  href={`https://polygonscan.com/block/${event.blockNumber}`}
+                                  href={`https://etherscan.io/block/${event.blockNumber}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className={styles.txLink}
@@ -540,6 +599,98 @@ const NodeDetail = () => {
                         </td>
                       </tr>
                     )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "rewards" && (
+            <div className={styles.eventsContent}>
+              {/* Rewards Summary */}
+              <div className={styles.statsGrid} style={{ marginBottom: '24px' }}>
+                <div className={styles.statCard}>
+                  <div className={styles.statLabel}>Total Rewards</div>
+                  <div className={styles.statValue}>
+                    {(() => {
+                      try { return new Intl.NumberFormat().format(Number(BigInt(nodeData.totalRewards || '0') / BigInt('1000000000000000000'))); }
+                      catch { return '0'; }
+                    })()} T
+                  </div>
+                </div>
+                <div className={styles.statCard}>
+                  <div className={styles.statLabel}>Withdrawn</div>
+                  <div className={styles.statValue}>
+                    {(() => {
+                      try { return new Intl.NumberFormat().format(Number(BigInt(nodeData.totalRewardsWithdrawn || '0') / BigInt('1000000000000000000'))); }
+                      catch { return '0'; }
+                    })()} T
+                  </div>
+                </div>
+              </div>
+              <div className={styles.tableContainer}>
+                <table className={styles.dataTable}>
+                  <thead>
+                    <tr>
+                      <th>Event</th>
+                      <th>Amount</th>
+                      <th>Beneficiary</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {nodeData.rewardEvents?.length > 0 ? (
+                      nodeData.rewardEvents.map((evt, idx) => (
+                        <tr key={idx}>
+                          <td className={styles.eventType}>{evt.type?.replace(/_/g, ' ')}</td>
+                          <td>
+                            {evt.amount ? (() => {
+                              try { return new Intl.NumberFormat().format(Number(BigInt(evt.amount) / BigInt('1000000000000000000'))) + ' T'; }
+                              catch { return evt.amount; }
+                            })() : '-'}
+                          </td>
+                          <td>
+                            {evt.beneficiary ? (
+                              <a href={`https://etherscan.io/address/${evt.beneficiary}`} target="_blank" rel="noopener noreferrer" className={styles.addressLink}>
+                                {formatString(evt.beneficiary)}
+                              </a>
+                            ) : '-'}
+                          </td>
+                          <td>{formatTimeToText(evt.timestamp)}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr><td colSpan="4" className={styles.noData}>No reward events</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "infractions" && (
+            <div className={styles.eventsContent}>
+              <div className={styles.tableContainer}>
+                <table className={styles.dataTable}>
+                  <thead>
+                    <tr>
+                      <th>Infraction Type</th>
+                      <th>Ritual</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {nodeData.infractions?.map((inf, idx) => (
+                      <tr key={idx}>
+                        <td style={{ color: '#EF4444' }}>{inf.type}</td>
+                        <td>
+                          {inf.ritualId ? (
+                            <Link to={`/ritual/${inf.ritualId}`} className={styles.idLink}>#{inf.ritualId}</Link>
+                          ) : '-'}
+                        </td>
+                        <td>{formatTimeToText(inf.timestamp)}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>

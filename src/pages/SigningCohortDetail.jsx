@@ -1,9 +1,7 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styles from "./SigningCohortDetail.module.css";
-import { formatString, formatDate, calculateTimeMoment } from "./data";
-import { getSigningCohortDetails } from "../utils/contractReader";
-import { getCurrentNetwork } from "../utils/dataSource";
+import { formatString, formatDate, calculateTimeMoment, formatTimeToText, getSigningCohortDetail } from "./data";
 import PolicyComposer from "../components/PolicyComposer";
 import ConditionRenderer from "../components/ConditionRenderer";
 
@@ -20,15 +18,33 @@ const SigningCohortDetail = () => {
   useEffect(() => {
     const fetchCohortDetails = async () => {
       try {
-        const network = getCurrentNetwork();
-        console.log(`Fetching cohort ${id} details for ${network}...`);
-
-        const cohortData = await getSigningCohortDetails(id, network);
+        console.log(`Fetching cohort ${id} details from v2 subgraph...`);
+        const cohortData = await getSigningCohortDetail(id);
 
         if (!cohortData) {
           setError("Cohort not found");
         } else {
-          setCohort(cohortData);
+          // Transform to expected format
+          const transformed = {
+            id: cohortData.id,
+            signers: (cohortData.signers || cohortData.participants || []).map(addr => ({ provider: addr, address: addr })),
+            signersCount: (cohortData.signers || cohortData.participants || []).length,
+            threshold: cohortData.threshold || 0,
+            isActive: cohortData.status === 'DEPLOYED' || cohortData.status === 'CONDITIONS_SET',
+            state: cohortData.status?.replace(/_/g, ' ') || 'Unknown',
+            conditions: cohortData.conditions ? { [cohortData.chainId]: cohortData.conditions } : {},
+            chains: cohortData.chainId ? [cohortData.chainId.toString()] : [],
+            // V2 extended data
+            authority: cohortData.authority,
+            isDeployed: cohortData.isDeployed,
+            deployedAt: cohortData.deployedAt,
+            multisigAddress: cohortData.multisigAddress,
+            signatures: cohortData.signatures || [],
+            multisig: cohortData.multisig,
+            createdAt: cohortData.createdAt,
+            updatedAt: cohortData.updatedAt,
+          };
+          setCohort(transformed);
         }
       } catch (error) {
         console.error("Error fetching cohort details:", error);
@@ -129,6 +145,23 @@ const SigningCohortDetail = () => {
                 </span>
               )}
           </button>
+          <button
+            className={`${styles.tab} ${activeTab === "signatures" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("signatures")}
+          >
+            Signatures
+            {cohort?.signatures?.length > 0 && (
+              <span className={styles.tabBadge}>{cohort.signatures.length}</span>
+            )}
+          </button>
+          {cohort?.multisig && (
+            <button
+              className={`${styles.tab} ${activeTab === "multisig" ? styles.activeTab : ""}`}
+              onClick={() => setActiveTab("multisig")}
+            >
+              Multisig
+            </button>
+          )}
         </div>
 
         {/* Main Content Grid */}
@@ -258,16 +291,40 @@ const SigningCohortDetail = () => {
                       </span>
                     </div>
                     <div className={styles.detailItem}>
-                      <span className={styles.detailLabel}>Is Active</span>
+                      <span className={styles.detailLabel}>Deployed</span>
                       <span className={styles.detailValue}>
-                        {String(cohort?.isActive)}
+                        {cohort?.isDeployed ? 'Yes' : 'No'}
                       </span>
                     </div>
-                    {cohort?.dataHash && (
+                    {cohort?.authority && (
                       <div className={styles.detailItem}>
-                        <span className={styles.detailLabel}>Data Hash</span>
+                        <span className={styles.detailLabel}>Authority</span>
+                        <a href={`/address/${cohort.authority}`} className={styles.addressLink}>
+                          {formatString(cohort.authority)}
+                        </a>
+                      </div>
+                    )}
+                    {cohort?.multisigAddress && (
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Multisig Address</span>
+                        <span className={styles.detailValue} style={{ fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
+                          {cohort.multisigAddress}
+                        </span>
+                      </div>
+                    )}
+                    {cohort?.deployedAt && (
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Deployed At</span>
                         <span className={styles.detailValue}>
-                          {cohort.dataHash}
+                          {new Date(parseInt(cohort.deployedAt) * 1000).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    {cohort?.createdAt && (
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Created</span>
+                        <span className={styles.detailValue}>
+                          {formatTimeToText(parseInt(cohort.createdAt) * 1000)}
                         </span>
                       </div>
                     )}
@@ -531,6 +588,157 @@ const SigningCohortDetail = () => {
                       Use the form above to create transaction limits and access
                       controls for this cohort.
                     </p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Signatures Tab */}
+          {activeTab === "signatures" && (
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>Signatures ({cohort?.signatures?.length || 0})</h2>
+              <div className={styles.cardContent}>
+                {cohort?.signatures?.length > 0 ? (
+                  <div className={styles.tableContainer}>
+                    <table className={styles.table}>
+                      <thead>
+                        <tr>
+                          <th>Provider</th>
+                          <th>Signer</th>
+                          <th>Time</th>
+                          <th>Transaction</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cohort.signatures.map((sig, idx) => (
+                          <tr key={idx}>
+                            <td className={styles.addressCell}>
+                              <a href={`/address/${sig.provider}`} className={styles.addressLink}>
+                                {formatString(sig.provider)}
+                              </a>
+                            </td>
+                            <td className={styles.addressCell}>
+                              {formatString(sig.signer)}
+                            </td>
+                            <td>{sig.timestamp ? formatTimeToText(parseInt(sig.timestamp) * 1000) : '-'}</td>
+                            <td>
+                              {sig.transactionHash ? (
+                                <a
+                                  href={`https://basescan.org/tx/${sig.transactionHash}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={styles.addressLink}
+                                >
+                                  {formatString(sig.transactionHash)}
+                                </a>
+                              ) : '-'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className={styles.noData}>No signatures recorded</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Multisig Tab */}
+          {activeTab === "multisig" && cohort?.multisig && (
+            <>
+              <div className={styles.card}>
+                <h2 className={styles.cardTitle}>Multisig Clone</h2>
+                <div className={styles.cardContent}>
+                  <div className={styles.infoGrid}>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Address</span>
+                      <span className={styles.infoValue} style={{ fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
+                        {cohort.multisig.id}
+                      </span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Threshold</span>
+                      <span className={styles.infoValue}>{cohort.multisig.threshold}</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Executions</span>
+                      <span className={styles.infoValue}>{cohort.multisig.executionCount}</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Total Value</span>
+                      <span className={styles.infoValue}>{cohort.multisig.totalValue || '0'}</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Cleared</span>
+                      <span className={styles.infoValue}>{cohort.multisig.isCleared ? 'Yes' : 'No'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Multisig Executions */}
+              {cohort.multisig.executions?.length > 0 && (
+                <div className={styles.card}>
+                  <h2 className={styles.cardTitle}>Executions ({cohort.multisig.executions.length})</h2>
+                  <div className={styles.cardContent}>
+                    <div className={styles.tableContainer}>
+                      <table className={styles.table}>
+                        <thead>
+                          <tr>
+                            <th>Nonce</th>
+                            <th>Sender</th>
+                            <th>Destination</th>
+                            <th>Value</th>
+                            <th>Time</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {cohort.multisig.executions.map((exec, idx) => (
+                            <tr key={idx}>
+                              <td>{exec.nonce}</td>
+                              <td className={styles.addressCell}>{formatString(exec.sender)}</td>
+                              <td className={styles.addressCell}>{formatString(exec.destination)}</td>
+                              <td>{exec.value || '0'}</td>
+                              <td>{exec.timestamp ? formatTimeToText(parseInt(exec.timestamp) * 1000) : '-'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Signer Events */}
+              {cohort.multisig.signerEvents?.length > 0 && (
+                <div className={styles.card}>
+                  <h2 className={styles.cardTitle}>Signer Events</h2>
+                  <div className={styles.cardContent}>
+                    <div className={styles.tableContainer}>
+                      <table className={styles.table}>
+                        <thead>
+                          <tr>
+                            <th>Event</th>
+                            <th>Signer</th>
+                            <th>New Signer</th>
+                            <th>Time</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {cohort.multisig.signerEvents.map((evt, idx) => (
+                            <tr key={idx}>
+                              <td>{evt.eventType?.replace(/_/g, ' ')}</td>
+                              <td className={styles.addressCell}>{formatString(evt.signer)}</td>
+                              <td className={styles.addressCell}>{evt.newSigner ? formatString(evt.newSigner) : '-'}</td>
+                              <td>{evt.timestamp ? formatTimeToText(parseInt(evt.timestamp) * 1000) : '-'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               )}

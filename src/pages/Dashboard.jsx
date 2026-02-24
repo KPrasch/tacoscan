@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getRituals, getNodes, formatRitualsData, formatNodes, getTimeout, formatTimeToText } from './data';
+import { getRituals, getNodes, formatRitualsData, formatNodes, getTimeout, formatTimeToText, getDomainStats, getGovernanceEvents, formatWeiDecimal } from './data';
 import styles from './Dashboard.module.css';
 
 const Dashboard = () => {
@@ -14,6 +14,8 @@ const Dashboard = () => {
 
   const [recentRituals, setRecentRituals] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [domainStats, setDomainStats] = useState(null);
+  const [governanceEvents, setGovernanceEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,11 +24,16 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const [ritualsData, nodesData, timeout] = await Promise.all([
-        getRituals(false, ''),  // Not searching, empty search input
-        getNodes(false, ''),     // Not searching, empty search input
-        getTimeout()
+      const [ritualsData, nodesData, timeout, statsData, govEvents] = await Promise.all([
+        getRituals(false, ''),
+        getNodes(false, ''),
+        getTimeout(),
+        getDomainStats().catch(() => null),
+        getGovernanceEvents().catch(() => []),
       ]);
+
+      setDomainStats(statsData);
+      setGovernanceEvents(govEvents.slice(0, 10));
 
       // getRituals returns an object with rituals property
       const rituals = ritualsData?.rituals ? ritualsData.rituals : [];
@@ -349,6 +356,75 @@ const Dashboard = () => {
           </div>
         </section>
 
+
+        {/* Domain Stats Section */}
+        {domainStats && Object.keys(domainStats).length > 0 && (
+          <section className={styles.networkOverview} style={{ marginTop: '24px' }}>
+            <div className={styles.overviewCard}>
+              <div className={styles.overviewHeader}>
+                <h2 className={styles.overviewTitle}>Protocol Statistics</h2>
+              </div>
+              <div className={styles.overviewStats} style={{ flexWrap: 'wrap', gap: '16px' }}>
+                {Object.values(domainStats).map((s, i) => (
+                  <div key={i} className={styles.overviewStat} style={{ minWidth: '140px' }}>
+                    <span className={styles.overviewLabel}>{s.id?.toUpperCase()} ({s.chain})</span>
+                    <span className={styles.overviewValue} style={{ fontSize: '1.2rem' }}>
+                      {s.totalRituals || 0} rituals
+                    </span>
+                    <span className={styles.overviewChange}>
+                      {s.totalStakingProviders || 0} providers · {s.totalSigningCohorts || 0} cohorts
+                    </span>
+                    {s.totalInfractions > 0 && (
+                      <span className={styles.overviewChange} style={{ color: '#EF4444' }}>
+                        {s.totalInfractions} infractions
+                      </span>
+                    )}
+                    {s.totalPolicies > 0 && (
+                      <span className={styles.overviewChange}>
+                        {s.totalPolicies} policies
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Governance Events */}
+        {governanceEvents.length > 0 && (
+          <section className={styles.networkOverview} style={{ marginTop: '24px' }}>
+            <div className={styles.overviewCard}>
+              <div className={styles.overviewHeader}>
+                <h2 className={styles.overviewTitle}>Recent Governance Events</h2>
+              </div>
+              <div style={{ padding: '0 24px 24px' }}>
+                <table className={styles.dataTable} style={{ width: '100%' }}>
+                  <thead>
+                    <tr>
+                      <th>Type</th>
+                      <th>Chain</th>
+                      <th>Change</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {governanceEvents.map((evt, idx) => (
+                      <tr key={idx}>
+                        <td><span className={styles.method}>{evt.eventType?.replace(/_/g, ' ')}</span></td>
+                        <td>{evt.chain}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)', fontSize: '12px' }}>
+                          {evt.newValueInt != null ? evt.newValueInt : (evt.newValue?.slice(0, 14) || '-')}
+                        </td>
+                        <td className={styles.age}>{formatTimeToText(parseInt(evt.timestamp) * 1000)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Recent Activity Tables */}
         <section className={styles.recentActivity}>

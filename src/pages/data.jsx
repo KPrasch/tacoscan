@@ -171,6 +171,11 @@ export const node_columns = [
     accessor: "bondedAt",
     numeric: true,
   },
+  {
+    header: "Status",
+    accessor: "nodeStatus",
+    numeric: false,
+  },
 ];
 
 export const formatString = (data) => {
@@ -548,7 +553,8 @@ export const formatRitualsData = (rawData, timeout) => {
           (participant) => !postedAggregations.includes(participant)
         ),
         operatorAddresses: ritual.operatorAddresses || {},
-        isHeartbeat: isHeartbeat
+        isHeartbeat: isHeartbeat,
+        handovers: ritual.handovers || []
       };
     })
     .sort((a, b) => b.id - a.id);
@@ -587,6 +593,7 @@ export const formatNodes = async (rawData) => {
       totalRewardsWithdrawn: item.totalRewardsWithdrawn || '0',
       isChildSynced: item.isChildSynced,
       endDeauthorization: item.endDeauthorization,
+      nodeStatus: item.isSlashed ? 'Slashed' : item.isPenalized ? 'Penalized' : item.isReleased ? 'Released' : 'Active',
     }))
 
   const statsRecord = {

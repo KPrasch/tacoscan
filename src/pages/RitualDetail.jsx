@@ -157,6 +157,12 @@ const RitualDetail = () => {
           >
             Authorizations
           </button>
+          <button 
+            className={`${styles.tab} ${activeTab === 'handovers' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('handovers')}
+          >
+            Handovers
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -190,26 +196,7 @@ const RitualDetail = () => {
                     </button>
                   </div>
                 </div>
-                <div className={styles.infoRow}>
-                  <span className={styles.label}>Initiator:</span>
-                  <div className={styles.addressValue}>
-                    <a 
-                      href={`https://polygonscan.com/address/${ritual.initiator}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.addressLink}
-                    >
-                      {ritual.initiator}
-                    </a>
-                    <button 
-                      onClick={() => copyToClipboard(ritual.initiator)}
-                      className={styles.copyBtn}
-                      title="Copy address"
-                    >
-                      📋
-                    </button>
-                  </div>
-                </div>
+                {/* Authority is the v2 native field (replaces legacy initiator) */}
                 <div className={styles.infoRow}>
                   <span className={styles.label}>Status:</span>
                   <span className={styles.value}>
@@ -407,6 +394,57 @@ const RitualDetail = () => {
           {activeTab === 'authorizations' && (
             <div className={styles.timelineSection}>
               <RitualManagement ritual={ritual} defaultTab="encryptors" />
+            </div>
+          )}
+
+          {activeTab === 'handovers' && (
+            <div className={styles.timelineSection}>
+              <h3 className={styles.sectionTitle}>Participant Handovers</h3>
+              {ritual.handovers && ritual.handovers.length > 0 ? (
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Departing</th>
+                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Incoming</th>
+                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Status</th>
+                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Requested</th>
+                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Finalized</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ritual.handovers.map((h, idx) => (
+                      <tr key={idx}>
+                        <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6' }}>
+                          <Link to={`/address/${h.departingParticipant}`} className={styles.addressLink}>
+                            {formatAddress(h.departingParticipant)}
+                          </Link>
+                        </td>
+                        <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6' }}>
+                          <Link to={`/address/${h.incomingParticipant}`} className={styles.addressLink}>
+                            {formatAddress(h.incomingParticipant)}
+                          </Link>
+                        </td>
+                        <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6' }}>
+                          <span style={{
+                            color: h.status === 'FINALIZED' ? '#10B981' : h.status === 'CANCELED' ? '#EF4444' : '#F59E0B',
+                            fontWeight: 500
+                          }}>
+                            {h.status?.replace(/_/g, ' ')}
+                          </span>
+                        </td>
+                        <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6', fontSize: '13px' }}>
+                          {h.requestedAt ? new Date(parseInt(h.requestedAt) * 1000).toLocaleString() : '-'}
+                        </td>
+                        <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6', fontSize: '13px' }}>
+                          {h.finalizedAt ? new Date(parseInt(h.finalizedAt) * 1000).toLocaleString() : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p style={{ color: '#6B7280', padding: '24px 0' }}>No handovers for this ritual.</p>
+              )}
             </div>
           )}
         </div>
