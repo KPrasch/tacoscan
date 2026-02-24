@@ -1701,3 +1701,73 @@ export const getTimeout = async () => {
     return timeout;
   }, 300000); // Cache for 5 minutes
 };
+
+// ─── All Reward Events (network-wide) ──────────────────────────────────────
+export const getAllRewardEvents = async () => {
+  try {
+    const query = `query {
+      rewardEvents(first: 1000, orderBy: timestamp, orderDirection: desc) {
+        id
+        stakingProvider { id }
+        eventType
+        amount
+        sender
+        beneficiary
+        endCommitment
+        penaltyPercent
+        endPenalty
+        contract
+        distributor
+        transactionHash
+        blockNumber
+        timestamp
+      }
+    }`;
+    const data = await gqlFetch(SUBGRAPH_ETHEREUM, query);
+    return (data?.rewardEvents || []).map(e => ({
+      ...e,
+      stakingProvider: e.stakingProvider?.id || null,
+      timestamp: parseInt(e.timestamp) * 1000,
+      blockNumber: parseInt(e.blockNumber),
+      amount: e.amount || '0',
+    }));
+  } catch (e) {
+    console.warn('Error fetching reward events:', e);
+    return [];
+  }
+};
+
+// ─── All Infractions (network-wide) ────────────────────────────────────────
+export const getAllInfractions = async () => {
+  try {
+    const query = `query {
+      infractions(first: 1000, orderBy: timestamp, orderDirection: desc) {
+        id
+        domain
+        ritual { id }
+        stakingProvider { id }
+        infractionType
+        infractionTypeName
+        timestamp
+      }
+    }`;
+    const [ethData, polyData] = await Promise.all([
+      safeFetch(SUBGRAPH_ETHEREUM, query, 'Ethereum'),
+      safeFetch(SUBGRAPH_POLYGON, query, 'Polygon'),
+    ]);
+    const format = (items, chain) => (items || []).map(i => ({
+      ...i,
+      chain,
+      stakingProvider: i.stakingProvider?.id || null,
+      ritualId: i.ritual?.id || null,
+      timestamp: parseInt(i.timestamp) * 1000,
+    }));
+    return [
+      ...format(ethData.infractions, 'ethereum'),
+      ...format(polyData.infractions, 'polygon'),
+    ].sort((a, b) => b.timestamp - a.timestamp);
+  } catch (e) {
+    console.warn('Error fetching infractions:', e);
+    return [];
+  }
+};
