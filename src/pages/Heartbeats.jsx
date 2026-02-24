@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getRituals, detectHeartbeatGroups, formatString, formatTimeToText, getTimeout } from "./data";
+import { getRituals, detectHeartbeatGroups, formatRitualsData, formatString, formatTimeToText, getTimeout } from "./data";
 import styles from "./Heartbeats.module.css";
 
 const Heartbeats = () => {
@@ -13,7 +13,8 @@ const Heartbeats = () => {
     (async () => {
       try {
         const [ritualsData, timeout] = await Promise.all([getRituals(), getTimeout()]);
-        const rituals = ritualsData?.rituals || [];
+        const rawRituals = ritualsData?.rituals || [];
+        const rituals = formatRitualsData(rawRituals, timeout);
         const heartbeatRituals = rituals.filter(r => r.isHeartbeat);
         setAllHeartbeats(heartbeatRituals);
         const detected = detectHeartbeatGroups(rituals, timeout);
