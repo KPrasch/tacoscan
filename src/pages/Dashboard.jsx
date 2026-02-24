@@ -46,7 +46,7 @@ const Dashboard = () => {
       const { nodes } = await formatNodes(rawNodes);
 
       // Calculate real statistics (excluding heartbeats)
-      const nonHeartbeatRituals = formattedRituals.filter(r => r.totalParticipants > 3);
+      const nonHeartbeatRituals = formattedRituals.filter(r => !r.isHeartbeat);
       // Use the actual total from ritualCounter if available, otherwise use formatted length
       const totalRituals = nonHeartbeatRituals.length;
       const activeRituals = nonHeartbeatRituals.filter(r => r.status === 'ACTIVE').length;

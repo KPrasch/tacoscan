@@ -1,411 +1,249 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import * as Data from "../data";
-import NodesTable from "../../components/table/nodes";
-import { StatsCard } from "../../components/ui";
-import styles from "./styles.module.css";
-import { 
-  categorizeAllNodes, 
-  NodeStatus, 
-  NodeStatusLabels, 
-  NodeStatusIcons,
-  NodeStatusColors,
-  filterNodesByStatus 
-} from "../../utils/nodeCategories";
-import {
-  categorizeRewardEligibility,
-  RewardStatus,
-  RewardStatusLabels,
-  RewardStatusColors,
-  RewardStatusIcons,
-} from "../../utils/rewardEligibility";
+import styles from "./nodes.module.css";
+import CopyButton from "../../components/CopyButton";
+import Loader from "../../components/loader";
+import { Tooltip } from "../../components/ui";
 
-const NodesPage = ({ network = 'polygon', isSearch = false, searchInput = '' } = {}) => {
-  const [pageData, setPageData] = useState({
-    rowData: [],
-    isLoading: false,
-    pageNumber: 1
-  });
+const STATUS_COLORS = {
+  Active: "#22c55e",
+  Released: "#6b7280",
+  Slashed: "#ef4444",
+  Penalized: "#f59e0b",
+  Beta: "#3b82f6",
+};
 
-  const [stats, setStats] = useState({
-    numBondedOperators: "loading...",
-    totalAuthorizedAmount: 0,
-    totalStaked: 0,
-  });
-  
-  const [nodeCategories, setNodeCategories] = useState(null);
-  const [rewardCounts, setRewardCounts] = useState(null);
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  const [rawData, setRawData] = useState([]);
+const SortIcon = ({ active, direction }) => (
+  <span style={{ marginLeft: 4, opacity: active ? 1 : 0.3, fontSize: "0.65rem" }}>
+    {active && direction === "asc" ? "▲" : "▼"}
+  </span>
+);
+
+const NodesPage = ({ network = "polygon", isSearch = false, searchInput = "" } = {}) => {
+  const [allNodes, setAllNodes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState(null);
+  const [sortKey, setSortKey] = useState("authorizedAmount");
+  const [sortDir, setSortDir] = useState("desc");
+  const [showDataStakers, setShowDataStakers] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(100);
 
   useEffect(() => {
-    setPageData((prevState) => ({
-      ...prevState,
-      rowData: [],
-      isLoading: true,
-    }));
-
+    setIsLoading(true);
     Data.getNodes(isSearch, searchInput).then(async (info) => {
-      const {nodes, statsRecord} = await Data.formatNodes(info?.appAuthorizations || []);
-      const totalNodes = nodes.length;
-      
-      // Store raw data for filtering
-      setRawData(info?.appAuthorizations || []);
-      
-      // Categorize nodes
-      if (!isSearch && info?.appAuthorizations) {
-        const categories = categorizeAllNodes(info.appAuthorizations);
-        setNodeCategories(categories);
-        setRewardCounts(categorizeRewardEligibility(info.appAuthorizations));
-      }
-
-      setPageData({
-        isLoading: false,
-        rowData: nodes,
-        totalNodes: totalNodes,
-      });
-
-      if (!isSearch) {
-        setStats(statsRecord);
-      }
-    }).catch((error) => {
-      console.error("Error loading nodes:", error);
-      setPageData({
-        isLoading: false,
-        rowData: [],
-        totalNodes: 0,
-      });
-      setStats({
-        numBondedOperators: 0,
-        totalAuthorizedAmount: 0,
-        totalStaked: 0,
-      });
+      const { nodes, statsRecord } = await Data.formatNodes(info?.appAuthorizations || []);
+      setAllNodes(nodes);
+      setStats(statsRecord);
+      setIsLoading(false);
+    }).catch(() => {
+      setAllNodes([]);
+      setStats({ numBondedOperators: 0, totalAuthorizedAmount: 0, totalStaked: 0 });
+      setIsLoading(false);
     });
-  }, [isSearch]);
-  
-  // Filter nodes when filter changes
-  useEffect(() => {
-    if (!rawData.length) return;
-    
-    const updateFilteredNodes = async () => {
-      if (selectedFilter === 'all') {
-        const {nodes} = await Data.formatNodes(rawData);
-        setPageData(prev => ({
-          ...prev,
-          rowData: nodes,
-          totalNodes: nodes.length
-        }));
-      } else {
-        const filteredAuths = filterNodesByStatus(rawData, selectedFilter);
-        const {nodes} = await Data.formatNodes(filteredAuths);
-        
-        setPageData(prev => ({
-          ...prev,
-          rowData: nodes,
-          totalNodes: nodes.length
-        }));
-      }
-    };
-    
-    updateFilteredNodes();
-  }, [selectedFilter, rawData]);
+  }, [isSearch, searchInput]);
+
+  const regularNodes = useMemo(() => allNodes.filter((n) => !n.isBetaStaker), [allNodes]);
+  const dataStakers = useMemo(() => allNodes.filter((n) => n.isBetaStaker), [allNodes]);
+
+  const displayNodes = useMemo(() => {
+    const nodes = [...regularNodes];
+    return nodes;
+  }, [regularNodes]);
+
+  const sorted = useMemo(() => {
+    const arr = [...displayNodes];
+    arr.sort((a, b) => {
+      let av = a[sortKey], bv = b[sortKey];
+      if (typeof av === "string") av = av?.toLowerCase() || "";
+      if (typeof bv === "string") bv = bv?.toLowerCase() || "";
+      if (av < bv) return sortDir === "asc" ? -1 : 1;
+      if (av > bv) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [displayNodes, sortKey, sortDir]);
+
+  const sortedDataStakers = useMemo(() => {
+    const arr = [...dataStakers];
+    arr.sort((a, b) => {
+      let av = a[sortKey], bv = b[sortKey];
+      if (typeof av === "string") av = av?.toLowerCase() || "";
+      if (typeof bv === "string") bv = bv?.toLowerCase() || "";
+      if (av < bv) return sortDir === "asc" ? -1 : 1;
+      if (av > bv) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [dataStakers, sortKey, sortDir]);
+
+  const paged = sorted.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+  const totalPages = Math.ceil(sorted.length / rowsPerPage);
+
+  const handleSort = (key) => {
+    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortKey(key); setSortDir("desc"); }
+    setPage(0);
+  };
+
+  const copyToClipBoard = (data) => {
+    try { navigator.clipboard.writeText(data); } catch (e) {}
+  };
+
+  const activeCount = regularNodes.filter((n) => n.nodeStatus === "Active" && n.isOperatorConfirmed).length;
+  const releasedCount = regularNodes.filter((n) => n.nodeStatus === "Released" || n.isReleased).length;
+
+  const columns = [
+    { key: "id", label: "Address", sortable: true },
+    { key: "registeredOperatorAddress", label: "Operator", sortable: true },
+    { key: "authorizedAmount", label: "Authorized Stake", sortable: true },
+    { key: "nodeStatus", label: "Status", sortable: true },
+    { key: "isOperatorConfirmed", label: "Confirmed", sortable: true },
+    { key: "bondedAt", label: "Bonded", sortable: true },
+  ];
+
+  const StatusBadge = ({ status, isBeta }) => {
+    if (isBeta) return <span className={styles.badge} style={{ background: "rgba(59,130,246,0.15)", color: "#3b82f6" }}>DATA</span>;
+    const color = STATUS_COLORS[status] || "#6b7280";
+    return <span className={styles.badge} style={{ background: `${color}20`, color }}>{status}</span>;
+  };
+
+  const renderRow = (node, idx) => (
+    <tr key={node.id + idx} className={styles.row}>
+      <td className={styles.cellAddr}>
+        <RouterLink to={`/node/${node.id}`} className={styles.addrLink}>
+          {node.id ? `${node.id.slice(0, 8)}…${node.id.slice(-6)}` : "—"}
+        </RouterLink>
+        <CopyButton onClick={() => copyToClipBoard(node.id)} />
+      </td>
+      <td className={styles.cellAddr}>
+        {node.registeredOperatorAddress ? (
+          <>
+            <RouterLink to={`/node/${node.id}`} className={styles.addrLink}>
+              {`${node.registeredOperatorAddress.slice(0, 8)}…${node.registeredOperatorAddress.slice(-6)}`}
+            </RouterLink>
+            <CopyButton onClick={() => copyToClipBoard(node.registeredOperatorAddress)} />
+          </>
+        ) : <span className={styles.muted}>—</span>}
+      </td>
+      <td className={styles.cellNum}>{Data.formatWeiDecimal(node.authorizedAmount)} <span className={styles.unit}>T</span></td>
+      <td>
+        <StatusBadge status={node.nodeStatus} isBeta={node.isBetaStaker} />
+      </td>
+      <td style={{ textAlign: "center" }}>
+        {node.isOperatorConfirmed ? <span style={{ color: "#22c55e" }}>✓</span> : <span style={{ color: "#ef4444" }}>✗</span>}
+      </td>
+      <td className={styles.cellMuted}>{node.bondedAt ? Data.formatTimeToText(node.bondedAt) : "—"}</td>
+    </tr>
+  );
 
   return (
-    <div style={{ background: "#F9FAFB", minHeight: "100vh", paddingBottom: "60px" }}>
-      <div style={{ maxWidth: "1600px", margin: "0 auto", padding: "24px 20px" }}>
-        {isSearch ? (
-          <h3 style={{ margin: 0, color: "#0A0A0A" }}>Search Results: {searchInput}</h3>
-        ) : (
-          <h1 style={{ 
-            margin: 0, 
-            fontSize: "2.5rem", 
-            fontWeight: 700, 
-            color: "#0A0A0A",
-            marginBottom: "24px"
-          }}>
-            Nodes
-          </h1>
-        )}
-      
-      <div style={{
-        display: "flex",
-        gap: "16px",
-        flexWrap: "wrap"
-      }}>
-        <StatsCard 
-          title="Total Nodes"
-          value={pageData.totalNodes || 0}
-          subtitle="nodes"
-          loading={pageData.isLoading}
-          tooltip="Total count of all staking providers in the network"
-        />
-        <StatsCard 
-          title="Confirmed Operators"
-          value={stats?.numBondedOperators || 0}
-          loading={pageData.isLoading}
-          tooltip="Count of nodes with confirmed operators (Active Confirmed status)"
-        />
-        <StatsCard 
-          title="Total Authorized"
-          value={
-            <>
-              {Data.formatWeiDecimalNoSurplus(stats?.totalAuthorizedAmount || 0)}
-              <span style={{ fontSize: "1rem", marginLeft: "4px", color: "#6B7280" }}>T</span>
-            </>
-          }
-          loading={pageData.isLoading}
-          tooltip="Sum of all authorized stake amounts across all nodes with amount > 0"
-        />
-        <StatsCard 
-          title="Total Staked"
-          value={
-            <>
-              {Data.formatWeiDecimalNoSurplus(stats?.totalStaked || 0)}
-              <span style={{ fontSize: "1rem", marginLeft: "4px", color: "#6B7280" }}>T</span>
-            </>
-          }
-          loading={pageData.isLoading}
-          tooltip="Sum of all staked T tokens across all staking providers"
-        />
-      </div>
-      
-      {/* Node Breakdown Section */}
-      {!isSearch && nodeCategories && (
-        <div style={{
-          marginTop: "32px",
-          marginBottom: "24px"
-        }}>
-          <h2 style={{
-            fontSize: "1.5rem",
-            fontWeight: 600,
-            color: "#0A0A0A",
-            marginBottom: "16px"
-          }}>
-            Node Status Breakdown
-          </h2>
-          
-          {/* Status Cards */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "16px"
-          }}>
-            {/* All Nodes Card */}
-            <div
-              onClick={() => setSelectedFilter('all')}
-              title="Total count of all staking providers in the network"
-              style={{
-                background: selectedFilter === 'all' ? "rgba(150, 255, 94, 0.15)" : "#FFFFFF",
-                border: selectedFilter === 'all' ? "2px solid #96FF5E" : "1px solid #E5E7EB",
-                borderRadius: "8px",
-                padding: "24px",
-                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.08)",
-                transition: "all 0.2s ease",
-                minWidth: "200px",
-                position: "relative",
-                overflow: "hidden",
-                cursor: "pointer"
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)";
-                e.currentTarget.style.transform = "translateY(-2px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.08)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              <div style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                height: "3px",
-                background: "#96FF5E"
-              }} />
-              
-              <div style={{
-                fontSize: "0.75rem",
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-                color: "#6B7280",
-                marginBottom: "8px"
-              }}>
-                All Nodes
-              </div>
-              
-              <div style={{
-                fontSize: "2rem",
-                fontWeight: 700,
-                color: "#0A0A0A",
-                lineHeight: 1.2,
-                fontFamily: "var(--font-mono, 'Space Mono', monospace)"
-              }}>
-                {nodeCategories.totals.total}
-              </div>
-              
-              <div style={{
-                fontSize: "0.875rem",
-                color: "#6B7280",
-                marginTop: "4px"
-              }}>
-                Total in network
-              </div>
+    <div className={styles.container}>
+      <div className={styles.inner}>
+        {/* Header Stats Bar */}
+        <div className={styles.headerBar}>
+          <h1 className={styles.title}>Nodes</h1>
+          <div className={styles.statsRow}>
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>Total</span>
+              <span className={styles.statValue}>{isLoading ? "…" : regularNodes.length}</span>
             </div>
-            
-            {Object.values(NodeStatus).map(status => {
-              // Define tooltips for each status
-              const tooltips = {
-                [NodeStatus.ACTIVE_CONFIRMED]: "Nodes with authorized stake amount > 0, have an operator address set, and operator is confirmed",
-                [NodeStatus.PENDING_CONFIRMATION]: "Nodes with authorized stake amount > 0, have an operator address set, but operator is not yet confirmed",
-                [NodeStatus.AUTHORIZED_NO_OPERATOR]: "Nodes with authorized stake amount > 0, but no operator address has been set",
-                [NodeStatus.DEAUTHORIZED_WITH_OPERATOR]: "Nodes with no authorized stake (amount = 0 or deauthorized), but still have an operator address",
-                [NodeStatus.DEAUTHORIZED_NO_OPERATOR]: "Nodes with no authorized stake and no operator address (never started or fully deauthorized)"
-              };
-              
-              return (
-              <div
-                key={status}
-                onClick={() => setSelectedFilter(status)}
-                title={tooltips[status]}
-                style={{
-                  background: selectedFilter === status ? `${NodeStatusColors[status]}15` : "#FFFFFF",
-                  border: selectedFilter === status ? `2px solid ${NodeStatusColors[status]}` : "1px solid #E5E7EB",
-                  borderRadius: "8px",
-                  padding: "24px",
-                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.08)",
-                  transition: "all 0.2s ease",
-                  minWidth: "200px",
-                  position: "relative",
-                  overflow: "hidden",
-                  cursor: "pointer"
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)";
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.08)";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-              >
-                <div style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: "3px",
-                  background: NodeStatusColors[status]
-                }} />
-                
-                <div style={{
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                  color: "#6B7280",
-                  marginBottom: "8px"
-                }}>
-                  {NodeStatusLabels[status]}
-                </div>
-                
-                <div style={{
-                  fontSize: "2rem",
-                  fontWeight: 700,
-                  color: "#0A0A0A",
-                  lineHeight: 1.2,
-                  fontFamily: "var(--font-mono, 'Space Mono', monospace)"
-                }}>
-                  {nodeCategories.counts[status]}
-                </div>
-                
-                <div style={{
-                  fontSize: "0.875rem",
-                  color: "#6B7280",
-                  marginTop: "4px"
-                }}>
-                  {((nodeCategories.counts[status] / nodeCategories.totals.total) * 100).toFixed(1)}% of total
-                </div>
-              </div>
-              );
-            })}
+            <div className={styles.statDivider} />
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>Active</span>
+              <span className={styles.statValue} style={{ color: "#22c55e" }}>{isLoading ? "…" : activeCount}</span>
+            </div>
+            <div className={styles.statDivider} />
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>Released</span>
+              <span className={styles.statValue} style={{ color: "#6b7280" }}>{isLoading ? "…" : releasedCount}</span>
+            </div>
+            <div className={styles.statDivider} />
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>Confirmed</span>
+              <span className={styles.statValue}>{isLoading ? "…" : stats?.numBondedOperators || 0}</span>
+            </div>
+            <div className={styles.statDivider} />
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>Authorized</span>
+              <span className={styles.statValue}>{isLoading ? "…" : Data.formatWeiDecimalNoSurplus(stats?.totalAuthorizedAmount || 0)} <span className={styles.unit}>T</span></span>
+            </div>
           </div>
         </div>
-      )}
-      
-      {/* Reward Eligibility Breakdown */}
-      {!isSearch && rewardCounts && (
-        <div style={{ marginTop: "32px", marginBottom: "24px" }}>
-          <h2 style={{
-            fontSize: "1.5rem",
-            fontWeight: 600,
-            color: "#0A0A0A",
-            marginBottom: "8px"
-          }}>
-            Reward Eligibility
-          </h2>
-          <p style={{ color: "#6B7280", fontSize: "0.875rem", marginBottom: "16px", marginTop: 0 }}>
-            Why some authorized nodes don't receive rewards. Eligible nodes may still receive reduced rewards due to heartbeat penalties.
-          </p>
-          
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: "12px"
-          }}>
-            {Object.values(RewardStatus).map(status => (
-              <div
-                key={status}
-                title={RewardStatusLabels[status]}
-                style={{
-                  background: "#FFFFFF",
-                  border: "1px solid #E5E7EB",
-                  borderRadius: "8px",
-                  padding: "16px 20px",
-                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.08)",
-                  position: "relative",
-                  overflow: "hidden"
-                }}
-              >
-                <div style={{
-                  position: "absolute",
-                  top: 0, left: 0, right: 0,
-                  height: "3px",
-                  background: RewardStatusColors[status]
-                }} />
-                <div style={{
-                  fontSize: "0.7rem",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                  color: "#6B7280",
-                  marginBottom: "6px"
-                }}>
-                  {RewardStatusIcons[status]} {RewardStatusLabels[status]}
-                </div>
-                <div style={{
-                  fontSize: "1.75rem",
-                  fontWeight: 700,
-                  color: "#0A0A0A",
-                  fontFamily: "var(--font-mono, 'Space Mono', monospace)"
-                }}>
-                  {rewardCounts[status] || 0}
-                </div>
+
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <>
+            {/* Main Table */}
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    {columns.map((col) => (
+                      <th
+                        key={col.key}
+                        className={styles.th}
+                        onClick={col.sortable ? () => handleSort(col.key) : undefined}
+                        style={{ cursor: col.sortable ? "pointer" : "default" }}
+                      >
+                        {col.label}
+                        {col.sortable && <SortIcon active={sortKey === col.key} direction={sortDir} />}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {paged.map(renderRow)}
+                </tbody>
+              </table>
+
+              {sorted.length === 0 && <div className={styles.nodata}>No nodes found</div>}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className={styles.pagination}>
+                <button disabled={page === 0} onClick={() => setPage(page - 1)} className={styles.pageBtn}>← Prev</button>
+                <span className={styles.pageInfo}>Page {page + 1} of {totalPages} · {sorted.length} nodes</span>
+                <button disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)} className={styles.pageBtn}>Next →</button>
+                <select value={rowsPerPage} onChange={(e) => { setRowsPerPage(Number(e.target.value)); setPage(0); }} className={styles.pageSelect}>
+                  {[25, 50, 100, 250].map((n) => <option key={n} value={n}>{n}/page</option>)}
+                </select>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      <div className={styles.table_content} style={{ marginTop: "24px" }}>
-        <NodesTable
-          columns={Data.node_columns}
-          data={pageData.rowData}
-          isLoading={pageData.isLoading}
-          network={network}
-        />
+            )}
+
+            {/* Data Stakers Toggle */}
+            {dataStakers.length > 0 && (
+              <div className={styles.dataStakerSection}>
+                <button
+                  className={styles.dataStakerToggle}
+                  onClick={() => setShowDataStakers(!showDataStakers)}
+                >
+                  {showDataStakers ? "▾" : "▸"} Show data stakers ({dataStakers.length})
+                </button>
+                {showDataStakers && (
+                  <div className={styles.tableWrap} style={{ marginTop: 8 }}>
+                    <table className={styles.table}>
+                      <thead>
+                        <tr>
+                          {columns.map((col) => (
+                            <th key={col.key} className={styles.th}>{col.label}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sortedDataStakers.map(renderRow)}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
       </div>
-    </div>
     </div>
   );
 };

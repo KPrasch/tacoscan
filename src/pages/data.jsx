@@ -525,8 +525,10 @@ export const formatRitualsData = (rawData, timeout) => {
       const threshold = ritual.threshold ?? null;
       const latestTransaction = transactions[0];
 
-      // Check if this is a heartbeat ritual (3 or fewer participants)
-      const isHeartbeat = participants.length <= 3;
+      // Heartbeat detection: use timing-based heuristic from detectHeartbeatGroups
+      // Not participant count — mainnet rituals legitimately have 2 participants
+      // This flag is set to false here; detectHeartbeatGroups handles actual detection
+      const isHeartbeat = false;
 
       return {
         id: ritual.id,
@@ -605,7 +607,9 @@ export const formatNodes = async (rawData) => {
     totalStaked: 0,
   };
 
+  // Exclude beta stakers from aggregate stats
   nodes.forEach((node) => {
+    if (node.isBetaStaker) return;
     if (node.isOperatorConfirmed) {
       statsRecord.numBondedOperators += 1;
     }
@@ -1452,7 +1456,7 @@ export const getRitualFeeModel = async (ritualId) => {
 // ─── Domain Stats ──────────────────────────────────────────────────────────
 export const getDomainStats = async () => {
   const results = {};
-  const query = `query { domainStatss(first: 10) {
+  const query = `query { domainStats_collection(first: 10) {
     id totalRituals successfulRituals failedRituals activeRituals
     totalStakingProviders activeStakingProviders totalAuthorized totalSlashed
     totalRewardEvents totalRewardsDistributed totalRewardsWithdrawn
@@ -1469,9 +1473,9 @@ export const getDomainStats = async () => {
     safeFetch(SUBGRAPH_BASE, query, 'Base'),
   ]);
 
-  (ethStats.domainStatss || []).forEach(s => { results[`eth-${s.id}`] = { ...s, chain: 'ethereum' }; });
-  (polyStats.domainStatss || []).forEach(s => { results[`poly-${s.id}`] = { ...s, chain: 'polygon' }; });
-  (baseStats.domainStatss || []).forEach(s => { results[`base-${s.id}`] = { ...s, chain: 'base' }; });
+  (ethStats.domainStats_collection || []).forEach(s => { results[`eth-${s.id}`] = { ...s, chain: 'ethereum' }; });
+  (polyStats.domainStats_collection || []).forEach(s => { results[`poly-${s.id}`] = { ...s, chain: 'polygon' }; });
+  (baseStats.domainStats_collection || []).forEach(s => { results[`base-${s.id}`] = { ...s, chain: 'base' }; });
 
   return results;
 };

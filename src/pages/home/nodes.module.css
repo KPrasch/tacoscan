@@ -1,0 +1,241 @@
+.container {
+  background: #0F1318;
+  min-height: 100vh;
+  color: #e5e7eb;
+}
+
+.inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 16px 60px;
+}
+
+/* Header */
+.headerBar {
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f9fafb;
+  margin: 0 0 12px 0;
+  font-family: var(--font-display, 'ABC Diatype', sans-serif);
+}
+
+.statsRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+}
+
+.stat {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.statLabel {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8b949e;
+  font-weight: 600;
+}
+
+.statValue {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #f0f6fc;
+  font-family: var(--font-mono, 'Space Mono', 'Consolas', monospace);
+}
+
+.statDivider {
+  width: 1px;
+  height: 20px;
+  background: #30363d;
+}
+
+.unit {
+  font-size: 0.7rem;
+  color: #8b949e;
+  font-weight: 400;
+}
+
+/* Table */
+.tableWrap {
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0d1117;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8b949e;
+  background: #161b22;
+  border-bottom: 1px solid #21262d;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.th:hover {
+  color: #c9d1d9;
+}
+
+.row {
+  border-bottom: 1px solid #161b22;
+  transition: background 0.1s;
+}
+
+.row:hover {
+  background: #161b22;
+}
+
+.row td {
+  padding: 6px 12px;
+  vertical-align: middle;
+  font-size: 0.8125rem;
+  color: #c9d1d9;
+}
+
+.cellAddr {
+  font-family: var(--font-mono, 'Space Mono', 'Consolas', monospace);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.addrLink {
+  color: #58a6ff;
+  text-decoration: none;
+  font-family: var(--font-mono, 'Space Mono', 'Consolas', monospace);
+  font-size: 0.8125rem;
+}
+
+.addrLink:hover {
+  color: #79c0ff;
+  text-decoration: underline;
+}
+
+.cellNum {
+  font-family: var(--font-mono, 'Space Mono', 'Consolas', monospace);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cellMuted {
+  color: #8b949e;
+  font-size: 0.75rem;
+}
+
+.muted {
+  color: #484f58;
+}
+
+/* Status Badge */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 8px 0;
+}
+
+.pageBtn {
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: #30363d;
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pageInfo {
+  font-size: 0.75rem;
+  color: #8b949e;
+}
+
+.pageSelect {
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+/* No data */
+.nodata {
+  padding: 40px 0;
+  text-align: center;
+  color: #484f58;
+  font-size: 0.875rem;
+}
+
+/* Data Stakers Section */
+.dataStakerSection {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid #21262d;
+}
+
+.dataStakerToggle {
+  background: none;
+  border: 1px solid #30363d;
+  color: #8b949e;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-display, 'ABC Diatype', sans-serif);
+}
+
+.dataStakerToggle:hover {
+  color: #c9d1d9;
+  border-color: #484f58;
+  background: #161b22;
+}
