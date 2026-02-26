@@ -663,103 +663,250 @@ const SigningCohortDetail = () => {
             </div>
           )}
 
-          {/* Multisig Tab */}
-          {activeTab === "multisig" && cohort?.multisig && (
+          {/* Multisig Activity Tab */}
+          {activeTab === "multisig" && (
             <>
-              <div className={styles.card}>
-                <h2 className={styles.cardTitle}>Multisig Clone</h2>
-                <div className={styles.cardContent}>
-                  <div className={styles.infoGrid}>
-                    <div className={styles.infoItem}>
-                      <span className={styles.infoLabel}>Address</span>
-                      <span className={styles.infoValue} style={{ fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
-                        {cohort.multisig.id}
-                      </span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <span className={styles.infoLabel}>Threshold</span>
-                      <span className={styles.infoValue}>{cohort.multisig.threshold}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <span className={styles.infoLabel}>Executions</span>
-                      <span className={styles.infoValue}>{cohort.multisig.executionCount}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <span className={styles.infoLabel}>Total Value</span>
-                      <span className={styles.infoValue}>{cohort.multisig.totalValue || '0'}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <span className={styles.infoLabel}>Cleared</span>
-                      <span className={styles.infoValue}>{cohort.multisig.isCleared ? 'Yes' : 'No'}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {cohort?.multisig ? (
+                <>
+                  {/* Multisig Clone Info */}
+                  <div className={styles.card}>
+                    <h2 className={styles.cardTitle}>Multisig Clone</h2>
+                    <div className={styles.cardContent}>
+                      <div className={styles.infoGrid}>
+                        <div className={styles.infoItem}>
+                          <span className={styles.infoLabel}>Clone Address</span>
+                          <a
+                            href={`https://basescan.org/address/${cohort.multisig.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.addressLink}
+                            style={{ fontSize: '12px' }}
+                          >
+                            {cohort.multisig.id}
+                          </a>
+                        </div>
+                        <div className={styles.infoItem}>
+                          <span className={styles.infoLabel}>Threshold</span>
+                          <span className={styles.infoValue}>
+                            {cohort.multisig.threshold} of {cohort.multisig.signers?.length || cohort?.signersCount}
+                          </span>
+                        </div>
+                        <div className={styles.infoItem}>
+                          <span className={styles.infoLabel}>Execution Count</span>
+                          <span className={styles.infoValue}>{cohort.multisig.executionCount}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                          <span className={styles.infoLabel}>Total Value</span>
+                          <span className={styles.infoValue}>{cohort.multisig.totalValue || '0'}</span>
+                        </div>
+                        <div className={styles.infoItem}>
+                          <span className={styles.infoLabel}>Cleared</span>
+                          <span className={styles.infoValue}>{cohort.multisig.isCleared ? 'Yes' : 'No'}</span>
+                        </div>
+                        {cohort.multisig.lastExecutedAt && (
+                          <div className={styles.infoItem}>
+                            <span className={styles.infoLabel}>Last Executed</span>
+                            <span className={styles.infoValue}>
+                              {formatTimeToText(parseInt(cohort.multisig.lastExecutedAt) * 1000)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
 
-              {/* Multisig Executions */}
-              {cohort.multisig.executions?.length > 0 && (
-                <div className={styles.card}>
-                  <h2 className={styles.cardTitle}>Executions ({cohort.multisig.executions.length})</h2>
-                  <div className={styles.cardContent}>
-                    <div className={styles.tableContainer}>
-                      <table className={styles.table}>
-                        <thead>
-                          <tr>
-                            <th>Nonce</th>
-                            <th>Sender</th>
-                            <th>Destination</th>
-                            <th>Value</th>
-                            <th>Time</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {cohort.multisig.executions.map((exec, idx) => (
-                            <tr key={idx}>
-                              <td>{exec.nonce}</td>
-                              <td className={styles.addressCell}>{formatString(exec.sender)}</td>
-                              <td className={styles.addressCell}>{formatString(exec.destination)}</td>
-                              <td>{exec.value || '0'}</td>
-                              <td>{exec.timestamp ? formatTimeToText(parseInt(exec.timestamp) * 1000) : '-'}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      {/* Signers list */}
+                      {cohort.multisig.signers?.length > 0 && (
+                        <div style={{ marginTop: '12px' }}>
+                          <span className={styles.infoLabel}>Signers</span>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
+                            {cohort.multisig.signers.map((signer, idx) => (
+                              <a
+                                key={idx}
+                                href={`https://basescan.org/address/${signer}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.addressLink}
+                                style={{ fontSize: '11px', background: '#f3f4f6', padding: '2px 6px', borderRadius: '3px' }}
+                              >
+                                {formatString(signer)}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              )}
 
-              {/* Signer Events */}
-              {cohort.multisig.signerEvents?.length > 0 && (
-                <div className={styles.card}>
-                  <h2 className={styles.cardTitle}>Signer Events</h2>
-                  <div className={styles.cardContent}>
-                    <div className={styles.tableContainer}>
-                      <table className={styles.table}>
-                        <thead>
-                          <tr>
-                            <th>Event</th>
-                            <th>Signer</th>
-                            <th>New Signer</th>
-                            <th>Time</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {cohort.multisig.signerEvents.map((evt, idx) => (
-                            <tr key={idx}>
-                              <td>{evt.eventType?.replace(/_/g, ' ')}</td>
-                              <td className={styles.addressCell}>{formatString(evt.signer)}</td>
-                              <td className={styles.addressCell}>{evt.newSigner ? formatString(evt.newSigner) : '-'}</td>
-                              <td>{evt.timestamp ? formatTimeToText(parseInt(evt.timestamp) * 1000) : '-'}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                  {/* Multisig Executions Table */}
+                  <div className={styles.card}>
+                    <h2 className={styles.cardTitle}>
+                      Multisig Executions ({cohort.multisig.executions?.length || 0})
+                    </h2>
+                    <div className={styles.cardContent}>
+                      {cohort.multisig.executions?.length > 0 ? (
+                        <div className={styles.tableContainer}>
+                          <table className={styles.table}>
+                            <thead>
+                              <tr>
+                                <th>Nonce</th>
+                                <th>Executor</th>
+                                <th>Target</th>
+                                <th>Value</th>
+                                <th>Gas</th>
+                                <th>Time</th>
+                                <th>Tx Hash</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {cohort.multisig.executions.map((exec, idx) => (
+                                <tr key={idx}>
+                                  <td style={{ fontWeight: 600 }}>{exec.nonce}</td>
+                                  <td className={styles.addressCell}>
+                                    <a href={`https://basescan.org/address/${exec.sender}`} target="_blank" rel="noopener noreferrer" className={styles.addressLink}>
+                                      {formatString(exec.sender)}
+                                    </a>
+                                  </td>
+                                  <td className={styles.addressCell}>
+                                    <a href={`https://basescan.org/address/${exec.destination}`} target="_blank" rel="noopener noreferrer" className={styles.addressLink}>
+                                      {formatString(exec.destination)}
+                                    </a>
+                                  </td>
+                                  <td>{exec.value || '0'}</td>
+                                  <td style={{ color: '#6b7280', fontSize: '11px' }}>{exec.gasUsed || '-'}</td>
+                                  <td>{exec.timestamp ? formatTimeToText(parseInt(exec.timestamp) * 1000) : '-'}</td>
+                                  <td>
+                                    {exec.transactionHash ? (
+                                      <a href={`https://basescan.org/tx/${exec.transactionHash}`} target="_blank" rel="noopener noreferrer" className={styles.addressLink}>
+                                        {formatString(exec.transactionHash)}
+                                      </a>
+                                    ) : '-'}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div className={styles.noData}>No executions recorded</div>
+                      )}
                     </div>
                   </div>
+
+                  {/* Signer Events */}
+                  {cohort.multisig.signerEvents?.length > 0 && (
+                    <div className={styles.card}>
+                      <h2 className={styles.cardTitle}>Signer Events</h2>
+                      <div className={styles.cardContent}>
+                        <div className={styles.tableContainer}>
+                          <table className={styles.table}>
+                            <thead>
+                              <tr>
+                                <th>Event</th>
+                                <th>Signer</th>
+                                <th>New Signer</th>
+                                <th>Time</th>
+                                <th>Tx Hash</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {cohort.multisig.signerEvents.map((evt, idx) => (
+                                <tr key={idx}>
+                                  <td>{evt.eventType?.replace(/_/g, ' ')}</td>
+                                  <td className={styles.addressCell}>
+                                    <a href={`https://basescan.org/address/${evt.signer}`} target="_blank" rel="noopener noreferrer" className={styles.addressLink}>
+                                      {formatString(evt.signer)}
+                                    </a>
+                                  </td>
+                                  <td className={styles.addressCell}>
+                                    {evt.newSigner ? (
+                                      <a href={`https://basescan.org/address/${evt.newSigner}`} target="_blank" rel="noopener noreferrer" className={styles.addressLink}>
+                                        {formatString(evt.newSigner)}
+                                      </a>
+                                    ) : '-'}
+                                  </td>
+                                  <td>{evt.timestamp ? formatTimeToText(parseInt(evt.timestamp) * 1000) : '-'}</td>
+                                  <td>
+                                    {evt.transactionHash ? (
+                                      <a href={`https://basescan.org/tx/${evt.transactionHash}`} target="_blank" rel="noopener noreferrer" className={styles.addressLink}>
+                                        {formatString(evt.transactionHash)}
+                                      </a>
+                                    ) : '-'}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className={styles.card}>
+                  <div className={styles.noData}>No multisig deployed for this cohort</div>
                 </div>
               )}
             </>
+          )}
+
+          {/* Executions Tab (Op Executions - Base L2) */}
+          {activeTab === "executions" && (
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>
+                Op Executions — Base L2 ({opExecutions.length})
+              </h2>
+              <div className={styles.cardContent}>
+                {opExecutions.length > 0 ? (
+                  <div className={styles.tableContainer}>
+                    <table className={styles.table}>
+                      <thead>
+                        <tr>
+                          <th>Target</th>
+                          <th>Result</th>
+                          <th>Gas</th>
+                          <th>Time</th>
+                          <th>Tx Hash</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {opExecutions.map((exec, idx) => (
+                          <tr key={idx}>
+                            <td className={styles.addressCell}>
+                              <a href={`https://basescan.org/address/${exec.target}`} target="_blank" rel="noopener noreferrer" className={styles.addressLink}>
+                                {formatString(exec.target)}
+                              </a>
+                            </td>
+                            <td>
+                              <span style={{
+                                display: 'inline-block',
+                                padding: '2px 6px',
+                                borderRadius: '3px',
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                background: exec.result === 'true' || exec.result === '1' ? '#d1fae5' : '#fee2e2',
+                                color: exec.result === 'true' || exec.result === '1' ? '#059669' : '#dc2626',
+                              }}>
+                                {exec.result === 'true' || exec.result === '1' ? 'Success' : exec.result || 'Unknown'}
+                              </span>
+                            </td>
+                            <td style={{ color: '#6b7280', fontSize: '11px' }}>{exec.gasUsed || '-'}</td>
+                            <td>{exec.timestamp ? formatTimeToText(parseInt(exec.timestamp) * 1000) : '-'}</td>
+                            <td>
+                              {exec.transactionHash ? (
+                                <a href={`https://basescan.org/tx/${exec.transactionHash}`} target="_blank" rel="noopener noreferrer" className={styles.addressLink}>
+                                  {formatString(exec.transactionHash)}
+                                </a>
+                              ) : '-'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className={styles.noData}>No op executions found for this cohort's domain</div>
+                )}
+              </div>
+            </div>
           )}
         </div>
 
