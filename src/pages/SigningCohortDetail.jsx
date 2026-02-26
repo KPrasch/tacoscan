@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styles from "./SigningCohortDetail.module.css";
-import { formatString, formatDate, calculateTimeMoment, formatTimeToText, getSigningCohortDetail } from "./data";
+import { formatString, formatDate, calculateTimeMoment, formatTimeToText, getSigningCohortDetail, getOpExecutionsByDomain } from "./data";
 import PolicyComposer from "../components/PolicyComposer";
 import ConditionRenderer from "../components/ConditionRenderer";
 
@@ -14,6 +14,7 @@ const SigningCohortDetail = () => {
   const [showRawJson, setShowRawJson] = useState({});
   const [activeTab, setActiveTab] = useState("overview");
   const [showPolicyComposer, setShowPolicyComposer] = useState(false);
+  const [opExecutions, setOpExecutions] = useState([]);
 
   useEffect(() => {
     const fetchCohortDetails = async () => {
@@ -45,6 +46,12 @@ const SigningCohortDetail = () => {
             updatedAt: cohortData.updatedAt,
           };
           setCohort(transformed);
+
+          // Fetch op executions by domain
+          if (cohortData.domain) {
+            const opExecs = await getOpExecutionsByDomain(cohortData.domain);
+            setOpExecutions(opExecs);
+          }
         }
       } catch (error) {
         console.error("Error fetching cohort details:", error);
@@ -134,6 +141,24 @@ const SigningCohortDetail = () => {
             Overview
           </button>
           <button
+            className={`${styles.tab} ${activeTab === "multisig" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("multisig")}
+          >
+            Multisig Activity
+            {cohort?.multisig?.executions?.length > 0 && (
+              <span className={styles.tabBadge}>{cohort.multisig.executions.length}</span>
+            )}
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === "executions" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("executions")}
+          >
+            Executions
+            {opExecutions.length > 0 && (
+              <span className={styles.tabBadge}>{opExecutions.length}</span>
+            )}
+          </button>
+          <button
             className={`${styles.tab} ${activeTab === "policies" ? styles.activeTab : ""}`}
             onClick={() => setActiveTab("policies")}
           >
@@ -154,14 +179,6 @@ const SigningCohortDetail = () => {
               <span className={styles.tabBadge}>{cohort.signatures.length}</span>
             )}
           </button>
-          {cohort?.multisig && (
-            <button
-              className={`${styles.tab} ${activeTab === "multisig" ? styles.activeTab : ""}`}
-              onClick={() => setActiveTab("multisig")}
-            >
-              Multisig
-            </button>
-          )}
         </div>
 
         {/* Main Content Grid */}

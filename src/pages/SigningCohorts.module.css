@@ -359,6 +359,33 @@
   margin-left: 18px;
 }
 
+.numericCell {
+  text-align: center;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.executionBadge {
+  display: inline-block;
+  background: #DBEAFE;
+  color: #1E40AF;
+  border: 1px solid #93C5FD;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.valueAmount {
+  color: #059669;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.zeroValue {
+  color: #9CA3AF;
+  font-size: 12px;
+}
+
 .status {
   display: inline-block;
   padding: 4px 12px;
