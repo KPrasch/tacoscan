@@ -53,7 +53,7 @@ const Header = () => {
                   More <span className={styles.dropdownArrow}>▼</span>
                 </button>
                 <div className={styles.dropdownContent}>
-                  <a href="/activity">Network Activity</a>
+                  <a href="/activity">Protocol</a>
                   <a href="/contracts">Smart Contracts</a>
                   <a href="https://playground.taco.build/">Playground</a>
                   <a href="https://docs.taco.build">Documentation</a>

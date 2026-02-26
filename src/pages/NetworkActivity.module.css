@@ -81,6 +81,83 @@
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
+/* Tab Navigation */
+.tabNav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 4px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #6B7280;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  background: #F3F4F6;
+  color: #374151;
+}
+
+.tabActive {
+  background: #0A0A0A;
+  color: #96FF5E;
+  border-color: #96FF5E;
+  font-weight: 600;
+}
+
+.tabActive:hover {
+  background: #0A0A0A;
+  color: #96FF5E;
+}
+
+.tabIcon {
+  font-size: 14px;
+}
+
+.tabLabel {
+  font-size: 12px;
+}
+
+.tabCount {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: #F3F4F6;
+  color: #6B7280;
+  font-weight: 600;
+}
+
+.tabActive .tabCount {
+  background: rgba(150, 255, 94, 0.15);
+  color: #96FF5E;
+}
+
+/* Empty state */
+.emptyState {
+  padding: 40px 20px;
+  text-align: center;
+  color: #9CA3AF;
+  font-size: 14px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
 /* Filters Section */
 .filtersSection {
   display: flex;

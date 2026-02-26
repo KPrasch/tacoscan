@@ -1583,6 +1583,9 @@ export const getSigningCohortsFromSubgraph = async () => {
           signatures(first: 100) {
             id provider signer signature transactionHash timestamp
           }
+          multisig {
+            id executionCount totalValue lastExecutedAt isCleared
+          }
         }
       }
     `);
@@ -1792,6 +1795,24 @@ export const getAllInfractions = async () => {
     ].sort((a, b) => b.timestamp - a.timestamp);
   } catch (e) {
     console.warn('Error fetching infractions:', e);
+    return [];
+  }
+};
+
+// ─── Op Executions by Domain ───────────────────────────────────────────────
+export const getOpExecutionsByDomain = async (domain) => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_BASE, `
+      query GetOpExecutions($domain: Int!) {
+        opExecutions(where: { domain: $domain }, first: 200, orderBy: timestamp, orderDirection: desc) {
+          id domain target result
+          transactionHash blockNumber timestamp gasUsed
+        }
+      }
+    `, { domain: parseInt(domain) });
+    return data?.opExecutions || [];
+  } catch (e) {
+    console.warn('Error fetching op executions by domain:', e);
     return [];
   }
 };

@@ -189,13 +189,21 @@ const NodeDetail = () => {
         amount: e.amount,
         beneficiary: e.beneficiary,
         timestamp: parseInt(e.timestamp) * 1000,
-        txHash: e.transactionHash,
+        txHash: e.transactionHash || e.txHash,
       })),
       infractions: (data.infractions || []).map(i => ({
         type: i.infractionTypeName,
         ritualId: i.ritual?.id,
         timestamp: parseInt(i.timestamp) * 1000,
       })),
+      authorizationHistory: (data.appAuthHistories || []).map(e => ({
+        type: e.eventType,
+        fromAmount: e.fromAmount,
+        toAmount: e.amount || e.eventAmount,
+        timestamp: e.timestamp ? parseInt(e.timestamp) * 1000 : Date.now(),
+        blockNumber: e.blockNumber,
+        txHash: e.txHash,
+      })).sort((a, b) => b.timestamp - a.timestamp),
       events: allEvents
         .map((event) => ({
           type: event.eventType,
@@ -392,6 +400,12 @@ const NodeDetail = () => {
             onClick={() => setActiveTab("rituals")}
           >
             DKG Rituals
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === "authorization" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("authorization")}
+          >
+            Authorization History
           </button>
           <button
             className={`${styles.tab} ${activeTab === "events" ? styles.activeTab : ""}`}
@@ -600,6 +614,61 @@ const NodeDetail = () => {
             </div>
           )}
 
+          {activeTab === "authorization" && (
+            <div className={styles.eventsContent}>
+              <div className={styles.tableContainer}>
+                <table className={styles.dataTable}>
+                  <thead>
+                    <tr>
+                      <th>Event</th>
+                      <th>Amount</th>
+                      <th>Block</th>
+                      <th>Time</th>
+                      <th>Transaction</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {nodeData.authorizationHistory?.length > 0 ? (
+                      nodeData.authorizationHistory.map((evt, idx) => {
+                        const fmtAmt = (amount) => {
+                          if (!amount) return "-";
+                          try {
+                            const wei = BigInt(amount.toString());
+                            const divisor = BigInt("1000000000000000000");
+                            return new Intl.NumberFormat().format(Number(wei / divisor)) + " T";
+                          } catch { return "-"; }
+                        };
+                        return (
+                          <tr key={idx}>
+                            <td className={styles.eventType}>{evt.type?.replace(/_/g, ' ')}</td>
+                            <td>{fmtAmt(evt.toAmount)}</td>
+                            <td>
+                              {evt.blockNumber ? (
+                                <a href={`https://etherscan.io/block/${evt.blockNumber}`} target="_blank" rel="noopener noreferrer" className={styles.txLink}>
+                                  {evt.blockNumber}
+                                </a>
+                              ) : '-'}
+                            </td>
+                            <td>{formatTimeToText(evt.timestamp)}</td>
+                            <td>
+                              {evt.txHash ? (
+                                <a href={`https://etherscan.io/tx/${evt.txHash}`} target="_blank" rel="noopener noreferrer" className={styles.txLink}>
+                                  {formatString(evt.txHash)}
+                                </a>
+                              ) : '-'}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr><td colSpan="5" className={styles.noData}>No authorization events</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {activeTab === "events" && (
             <div className={styles.eventsContent}>
               <div className={styles.tableContainer}>
@@ -699,6 +768,7 @@ const NodeDetail = () => {
                       <th>Amount</th>
                       <th>Beneficiary</th>
                       <th>Time</th>
+                      <th>Transaction</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -720,10 +790,17 @@ const NodeDetail = () => {
                             ) : '-'}
                           </td>
                           <td>{formatTimeToText(evt.timestamp)}</td>
+                          <td>
+                            {evt.txHash ? (
+                              <a href={`https://etherscan.io/tx/${evt.txHash}`} target="_blank" rel="noopener noreferrer" className={styles.txLink}>
+                                {formatString(evt.txHash)}
+                              </a>
+                            ) : '-'}
+                          </td>
                         </tr>
                       ))
                     ) : (
-                      <tr><td colSpan="4" className={styles.noData}>No reward events</td></tr>
+                      <tr><td colSpan="5" className={styles.noData}>No reward events</td></tr>
                     )}
                   </tbody>
                 </table>

@@ -34,6 +34,10 @@ const SigningCohorts = () => {
           multisigAddress: cohort.multisigAddress,
           signatureCount: (cohort.signatures || []).length,
           createdAt: cohort.createdAt,
+          // Multisig summary
+          executionCount: cohort.multisig?.executionCount || 0,
+          totalValue: cohort.multisig?.totalValue || '0',
+          lastExecutedAt: cohort.multisig?.lastExecutedAt,
         }));
 
         setCohorts(transformedCohorts);
@@ -152,7 +156,12 @@ const SigningCohorts = () => {
               <th onClick={() => handleSort('state')} className={styles.sortable}>
                 State {sortBy === 'state' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
-              <th>Policies</th>
+              <th onClick={() => handleSort('executionCount')} className={styles.sortable}>
+                Executions {sortBy === 'executionCount' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
+              <th onClick={() => handleSort('totalValue')} className={styles.sortable}>
+                Total Value {sortBy === 'totalValue' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
               <th onClick={() => handleSort('isActive')} className={styles.sortable}>
                 Status {sortBy === 'isActive' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
