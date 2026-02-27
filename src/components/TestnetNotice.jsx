@@ -23,7 +23,7 @@ const TestnetNotice = () => {
         <div className={styles.content}>
           <span className={styles.badge}>{networkName}</span>
           <span className={styles.message}>
-            Connected to {networkName}. Data is fetched directly from contracts (subgraph not available).
+            Connected to {networkName}. Data indexed via Goldsky subgraphs.
           </span>
         </div>
       </div>
