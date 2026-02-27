@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { getNodeDetail, getTimeout, isBetaStaker } from "./data";
 import { formatString, formatWeiDecimal, formatTimeToText } from "./data";
 import styles from "./NodeDetail.module.css";
-import { getRewardStatus, getRewardExplanation, RewardStatusLabels, RewardStatusColors, RewardStatusIcons, RewardStatus, BETA_STAKERS, NODES_REQUESTED_EXIT } from "../utils/rewardEligibility";
+import { getRewardStatus, getRewardExplanation, RewardStatusLabels, RewardStatusColors, RewardStatusIcons, RewardStatus, BETA_STAKERS, hasRequestedExit } from "../utils/rewardEligibility";
 
 const NodeDetail = () => {
   const { address } = useParams();
@@ -107,7 +107,7 @@ const NodeDetail = () => {
     const isBeta = await isBetaStaker(stakingProvider);
     
     // Determine reward eligibility
-    const rewardStatus = getRewardStatus(auth);
+    const rewardStatus = getRewardStatus(auth, data);
 
     // Use BigInt for accurate wei to token conversion
     const formatAmount = (weiAmount) => {
@@ -173,7 +173,7 @@ const NodeDetail = () => {
       rewardStatus: rewardStatus,
       rewardStatusLabel: RewardStatusLabels[rewardStatus],
       rewardExplanation: getRewardExplanation(rewardStatus),
-      isRequestedExit: NODES_REQUESTED_EXIT.has(stakingProvider.toLowerCase()),
+      isRequestedExit: hasRequestedExit(data),
       // V2 extended fields
       isReleased: data.isReleased || false,
       isSlashed: data.isSlashed || false,

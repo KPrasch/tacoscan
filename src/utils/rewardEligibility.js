@@ -39,23 +39,15 @@ export const BETA_STAKERS = new Set([
   "0xc1268db05E7bD38BD85b2C3Fef80F8968a2c933A",
 ].map(a => a.toLowerCase()));
 
-// Nodes that requested exit from rituals
-export const NODES_REQUESTED_EXIT = new Set([
-  "0x43df8c68a56249CC151dfb3a7E82cC7Fd624cF2a",
-  "0x095086293d57C5aD45f3f5243054AE199b005163",
-  "0x735dcf0cAf62cd1bC8E763e43Bb1aA11DBC56025",
-  "0x5838636dCDd92113998FEcbcDeDf5B0d8bEB4920",
-  "0xa7baCa5A92842689359Fb1782e75D6eFF59152e6",
-  "0x557C836714aFd04f796686b0a50528714B549C74",
-  "0xdA08C16C86B78cD56CB10FDc0370EFc549d8638B",
-  "0xa6E3A08FaE33898fC31C4f6C7a584827D809352D",
-  "0xB0C9F472b2066691Ab7FEE5b6702c28ab35888b2",
-  "0xE6C074228932F53C9E50928AD69DB760649A8C4d",
-  "0x02faA4286eF91247f8D09F36618D4694717F76bB",
-  "0x39A2D252769363D070a77fE3ad24b9954e1fB876",
-  "0x9Aa35dCE841A43693Cde23B86c394E1aEFb61c65",
-  "0x58d665406Cf0F890daD766389DF879E84cc55671",
-].map(a => a.toLowerCase()));
+/**
+ * Check if a node has requested exit — derived on-chain from the
+ * deauthorizing field on StakingProvider (deauthorizing > 0).
+ * No more hardcoded address lists.
+ */
+export function hasRequestedExit(stakingProvider) {
+  const deauthorizing = stakingProvider?.deauthorizing;
+  return deauthorizing && BigInt(deauthorizing) > 0n;
+}
 
 export const RewardStatus = {
   ELIGIBLE: 'reward_eligible',
@@ -97,7 +89,7 @@ export const RewardStatusIcons = {
  * Determine why a node is or isn't receiving rewards.
  * Returns the most relevant reason.
  */
-export function getRewardStatus(authorization) {
+export function getRewardStatus(authorization, stakingProviderData) {
   const stakingProvider = (authorization.stake?.id || authorization.id?.split('-')[0] || '').toLowerCase();
   const hasAmount = authorization.amount && Number(authorization.amount) > 0;
   const hasOperator = !!authorization.tacoOperator?.operator;
@@ -107,7 +99,7 @@ export function getRewardStatus(authorization) {
   if (BETA_STAKERS.has(stakingProvider)) {
     return RewardStatus.BETA_STAKER;
   }
-  if (NODES_REQUESTED_EXIT.has(stakingProvider)) {
+  if (hasRequestedExit(stakingProviderData || authorization)) {
     return RewardStatus.REQUESTED_EXIT;
   }
   
