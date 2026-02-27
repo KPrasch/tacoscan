@@ -1,7 +1,7 @@
 .container {
-  background: #0F1318;
+  background: var(--bg-primary);
   min-height: 100vh;
-  color: #e5e7eb;
+  color: var(--text-primary);
 }
 
 .inner {
@@ -18,7 +18,7 @@
 .title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #f9fafb;
+  color: var(--text-primary);
   margin: 0 0 12px 0;
   font-family: var(--font-display, 'ABC Diatype', sans-serif);
 }
@@ -29,8 +29,8 @@
   gap: 16px;
   flex-wrap: wrap;
   padding: 10px 16px;
-  background: #161b22;
-  border: 1px solid #21262d;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
 }
 
@@ -44,35 +44,35 @@
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #8b949e;
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
 .statValue {
   font-size: 0.875rem;
   font-weight: 700;
-  color: #f0f6fc;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', 'Consolas', monospace);
 }
 
 .statDivider {
   width: 1px;
   height: 20px;
-  background: #30363d;
+  background: var(--border-color);
 }
 
 .unit {
   font-size: 0.7rem;
-  color: #8b949e;
+  color: var(--text-secondary);
   font-weight: 400;
 }
 
 /* Table */
 .tableWrap {
-  border: 1px solid #21262d;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   overflow: hidden;
-  background: #0d1117;
+  background: var(--bg-secondary);
 }
 
 .table {
@@ -88,31 +88,31 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #8b949e;
-  background: #161b22;
-  border-bottom: 1px solid #21262d;
+  color: var(--text-secondary);
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
   white-space: nowrap;
   user-select: none;
 }
 
 .th:hover {
-  color: #c9d1d9;
+  color: var(--text-primary);
 }
 
 .row {
-  border-bottom: 1px solid #161b22;
+  border-bottom: 1px solid var(--border-light, #F3F4F6);
   transition: background 0.1s;
 }
 
 .row:hover {
-  background: #161b22;
+  background: var(--bg-primary);
 }
 
 .row td {
   padding: 6px 12px;
   vertical-align: middle;
   font-size: 0.8125rem;
-  color: #c9d1d9;
+  color: var(--text-primary);
 }
 
 .cellAddr {
@@ -125,14 +125,14 @@
 }
 
 .addrLink {
-  color: #58a6ff;
+  color: var(--accent-green);
   text-decoration: none;
   font-family: var(--font-mono, 'Space Mono', 'Consolas', monospace);
   font-size: 0.8125rem;
 }
 
 .addrLink:hover {
-  color: #79c0ff;
+  color: var(--accent-green-hover);
   text-decoration: underline;
 }
 
@@ -143,12 +143,12 @@
 }
 
 .cellMuted {
-  color: #8b949e;
+  color: var(--text-tertiary);
   font-size: 0.75rem;
 }
 
 .muted {
-  color: #484f58;
+  color: var(--text-tertiary);
 }
 
 /* Status Badge */
@@ -174,9 +174,9 @@
 }
 
 .pageBtn {
-  background: #21262d;
-  border: 1px solid #30363d;
-  color: #c9d1d9;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
   padding: 4px 12px;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -185,7 +185,7 @@
 }
 
 .pageBtn:hover:not(:disabled) {
-  background: #30363d;
+  background: var(--bg-primary);
 }
 
 .pageBtn:disabled {
@@ -195,13 +195,13 @@
 
 .pageInfo {
   font-size: 0.75rem;
-  color: #8b949e;
+  color: var(--text-secondary);
 }
 
 .pageSelect {
-  background: #21262d;
-  border: 1px solid #30363d;
-  color: #c9d1d9;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -211,7 +211,7 @@
 .nodata {
   padding: 40px 0;
   text-align: center;
-  color: #484f58;
+  color: var(--text-tertiary);
   font-size: 0.875rem;
 }
 
@@ -219,13 +219,13 @@
 .dataStakerSection {
   margin-top: 32px;
   padding-top: 16px;
-  border-top: 1px solid #21262d;
+  border-top: 1px solid var(--border-color);
 }
 
 .dataStakerToggle {
   background: none;
-  border: 1px solid #30363d;
-  color: #8b949e;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   padding: 6px 14px;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -235,7 +235,7 @@
 }
 
 .dataStakerToggle:hover {
-  color: #c9d1d9;
-  border-color: #484f58;
-  background: #161b22;
+  color: var(--text-primary);
+  border-color: var(--text-tertiary);
+  background: var(--bg-primary);
 }
