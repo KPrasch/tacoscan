@@ -202,7 +202,7 @@ const RitualDetail = () => {
                       className={styles.copyBtn}
                       title="Copy address"
                     >
-                      📋
+                      Copy
                     </button>
                   </div>
                 </div>
@@ -276,7 +276,7 @@ const RitualDetail = () => {
                           className={styles.copyBtn}
                           title="Copy address"
                         >
-                          📋
+                          Copy
                         </button>
                       </>
                     ) : (
@@ -302,7 +302,7 @@ const RitualDetail = () => {
                           className={styles.copyBtn}
                           title="Copy address"
                         >
-                          📋
+                          Copy
                         </button>
                       </>
                     ) : (
@@ -323,7 +323,7 @@ const RitualDetail = () => {
                       className={styles.copyBtn}
                       title="Copy public key"
                     >
-                      📋
+                      Copy
                     </button>
                   </div>
                 </div>

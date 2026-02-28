@@ -312,18 +312,18 @@ function ContextVarDisplay({ varName, showDescription = false, sourceInfo = null
   const getVarIcon = (name) => {
     const nameLower = (name || '').toLowerCase();
     if (nameLower.includes('recipient') || nameLower.includes('to') || nameLower.includes('target')) {
-      return '📍';
+      return '→';
     }
     if (nameLower.includes('amount') || nameLower.includes('value') || nameLower.includes('max')) {
-      return '💰';
+      return '#';
     }
     if (nameLower.includes('token')) {
-      return '🪙';
+      return 'T';
     }
     if (nameLower.includes('sender') || nameLower.includes('from')) {
-      return '👤';
+      return '@';
     }
-    return '↩';
+    return '←';
   };
 
   const icon = getVarIcon(varName);

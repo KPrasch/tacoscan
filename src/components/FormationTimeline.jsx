@@ -12,7 +12,7 @@ const FormationTimeline = ({ transactions = [] }) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const getEventDotClass = (eventType) => {
+  const getDotClass = (eventType) => {
     if (eventType?.includes('Initiate Ritual')) return styles.dotPurple;
     if (eventType?.includes('Start Ritual')) return styles.dotBlue;
     if (eventType?.includes('Posted Transcripts')) return styles.dotGreen;
@@ -23,20 +23,13 @@ const FormationTimeline = ({ transactions = [] }) => {
   const formatDateTime = (timestamp) => {
     const date = new Date(timestamp * 1000);
     return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
     });
   };
 
   if (!transactions || transactions.length === 0) {
     return (
-      <div className={styles.emptyState}>
-        <p>No transactions recorded yet</p>
-      </div>
+      <div className={styles.emptyState}>No transactions recorded</div>
     );
   }
 
@@ -44,67 +37,26 @@ const FormationTimeline = ({ transactions = [] }) => {
     <div className={styles.timeline}>
       {transactions.map((tx, index) => {
         const eventType = tx.description || tx.eventName || 'Transaction';
-        const dotClass = getEventDotClass(eventType);
-        
+        const dotClass = getDotClass(eventType);
+
         return (
-          <div key={index} className={styles.timelineCard}>
-            <div className={`${styles.cardIndicator} ${dotClass}`}></div>
-            
-            <div className={styles.cardContent}>
-              <div className={styles.cardHeader}>
-                <div className={styles.eventLeft}>
-                  <div className={`${styles.eventDot} ${dotClass}`}></div>
-                  <span className={styles.eventTitle}>{eventType}</span>
-                </div>
-                <span className={styles.eventTime}>
-                  {formatDateTime(tx.timestamp)}
-                </span>
-              </div>
-              
-              <div className={styles.cardDetails}>
-                {tx.txHash && (
-                  <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>Tx Hash:</span>
-                    <a 
-                      href={`https://polygonscan.com/tx/${tx.txHash}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.detailValue}
-                    >
-                      {formatTxHash(tx.txHash)}
-                    </a>
-                  </div>
-                )}
-                
-                {tx.from && (
-                  <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>From:</span>
-                    <a 
-                      href={`https://polygonscan.com/address/${tx.from}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.detailValue}
-                    >
-                      {formatAddress(tx.from)}
-                    </a>
-                  </div>
-                )}
-                
-                {tx.to && (
-                  <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>To:</span>
-                    <a 
-                      href={`https://polygonscan.com/address/${tx.to}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.detailValue}
-                    >
-                      {formatAddress(tx.to)}
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
+          <div key={index} className={styles.timelineRow}>
+            <div className={`${styles.dot} ${dotClass}`} />
+            <span className={styles.eventName}>{eventType}</span>
+            {tx.txHash ? (
+              <a
+                href={`https://polygonscan.com/tx/${tx.txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.txLink}
+              >
+                {formatTxHash(tx.txHash)}
+              </a>
+            ) : <span />}
+            {tx.from ? (
+              <span className={styles.addressText}>{formatAddress(tx.from)}</span>
+            ) : <span />}
+            <span className={styles.eventTime}>{formatDateTime(tx.timestamp)}</span>
           </div>
         );
       })}

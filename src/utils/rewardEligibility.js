@@ -77,12 +77,12 @@ export const RewardStatusColors = {
 };
 
 export const RewardStatusIcons = {
-  [RewardStatus.ELIGIBLE]: '✅',
-  [RewardStatus.BETA_STAKER]: '⭐',
-  [RewardStatus.REQUESTED_EXIT]: '🚪',
-  [RewardStatus.NOT_AUTHORIZED]: '⛔',
-  [RewardStatus.NO_CONFIRMED_OPERATOR]: '⚠️',
-  [RewardStatus.PENALIZED_FULL]: '❌',
+  [RewardStatus.ELIGIBLE]: '✓',
+  [RewardStatus.BETA_STAKER]: 'β',
+  [RewardStatus.REQUESTED_EXIT]: '→',
+  [RewardStatus.NOT_AUTHORIZED]: '—',
+  [RewardStatus.NO_CONFIRMED_OPERATOR]: '!',
+  [RewardStatus.PENALIZED_FULL]: '✗',
 };
 
 /**

@@ -57,7 +57,7 @@ const Heartbeats = () => {
       <div className={styles.container}>
         <div className={styles.pageHeader}>
           <div className={styles.headerContent}>
-            <h1 className={styles.pageTitle}>💓 Heartbeats</h1>
+            <h1 className={styles.pageTitle}>Heartbeats</h1>
             <p className={styles.pageSubtitle}>
               Weekly liveness checks — small DKG rituals (≤3 participants) that verify node availability.
               Distinct from full DKG key generation ceremonies.

@@ -1,7 +1,7 @@
 .link {
   cursor: pointer;
   transition: color 0.2s ease;
-  font-family: "Work Sans", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .underlineAlways {

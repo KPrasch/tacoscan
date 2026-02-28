@@ -3,7 +3,7 @@
 .pageWrapper {
   background: var(--bg-primary, #F9FAFB);
   min-height: 100vh;
-  padding-bottom: 60px;
+  padding-bottom: 24px;
 }
 
 .container {
@@ -23,7 +23,7 @@
   background: white;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 40px;
+  padding: 16px;
   text-align: center;
 }
 

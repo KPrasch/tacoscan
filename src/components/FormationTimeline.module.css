@@ -1,195 +1,87 @@
+/* Formation Timeline — dense, Etherscan-style */
 .timeline {
   display: flex;
   flex-direction: column;
   gap: 0;
   padding: 0;
-  position: relative;
 }
 
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 28px;
-  top: 40px;
-  bottom: 40px;
-  width: 1px;
-  background: #E5E7EB;
-  z-index: 0;
-}
-
-.timelineCard {
-  position: relative;
-  background: white;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  padding: 0;
-  margin-bottom: 24px;
-  margin-left: 56px;
-  transition: all 0.2s ease;
-  overflow: hidden;
-}
-
-.timelineCard:last-child {
-  margin-bottom: 0;
-}
-
-.timelineCard:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.cardIndicator {
-  position: absolute;
-  left: -40px;
-  top: 24px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 0 0 1px #E5E7EB;
-  z-index: 1;
-}
-
-.cardIndicator.dotGreen {
-  background: #10B981;
-}
-
-.cardIndicator.dotBlue {
-  background: #3B82F6;
-}
-
-.cardIndicator.dotPurple {
-  background: #8B5CF6;
-}
-
-.cardIndicator.dotGray {
-  background: #6B7280;
-}
-
-.cardContent {
-  padding: 20px 24px;
-}
-
-.cardHeader {
-  display: flex;
+.timelineRow {
+  display: grid;
+  grid-template-columns: 8px 1fr auto auto auto;
+  gap: 8px;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
 }
 
-.eventLeft {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.timelineRow:last-child {
+  border-bottom: none;
 }
 
-.eventDot {
-  width: 10px;
-  height: 10px;
+.timelineRow:hover {
+  background: var(--bg-secondary);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.eventDot.dotGreen {
-  background: #10B981;
-}
+.dotGreen { background: var(--status-active); }
+.dotBlue { background: var(--status-data); }
+.dotPurple { background: #8B5CF6; }
+.dotGray { background: var(--text-tertiary); }
 
-.eventDot.dotBlue {
-  background: #3B82F6;
-}
-
-.eventDot.dotPurple {
-  background: #8B5CF6;
-}
-
-.eventDot.dotGray {
-  background: #6B7280;
-}
-
-.eventTitle {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  font-size: 15px;
+.eventName {
   font-weight: 600;
-  color: #111827;
-}
-
-.eventTime {
-  font-size: 13px;
-  color: #9CA3AF;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: var(--text-primary);
   white-space: nowrap;
 }
 
-.cardDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-left: 20px;
-}
-
-.detailRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-}
-
-.detailLabel {
-  color: #6B7280;
-  min-width: 70px;
-  font-weight: 400;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-.detailValue {
-  color: #047857;
+.txLink {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-green);
   text-decoration: none;
-  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
-  font-size: 13px;
-  font-weight: 500;
-  transition: color 0.2s ease;
 }
 
-.detailValue:hover {
-  color: #059669;
+.txLink:hover {
   text-decoration: underline;
+}
+
+.addressText {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.eventTime {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  text-align: right;
 }
 
 .emptyState {
   text-align: center;
-  padding: 60px 20px;
-  color: #6B7280;
-  font-size: 15px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  padding: 24px;
+  color: var(--text-secondary);
+  font-size: 13px;
 }
 
 @media (max-width: 768px) {
-  .timeline::before {
-    left: 20px;
-  }
-  
-  .timelineCard {
-    margin-left: 40px;
-  }
-  
-  .cardIndicator {
-    left: -32px;
-  }
-  
-  .cardHeader {
-    flex-wrap: wrap;
+  .timelineRow {
+    grid-template-columns: 8px 1fr;
+    gap: 4px;
   }
   
   .eventTime {
-    width: 100%;
-    margin-top: 8px;
-    font-size: 12px;
-  }
-  
-  .cardContent {
-    padding: 16px;
-  }
-  
-  .cardDetails {
-    padding-left: 0;
+    grid-column: 2;
+    text-align: left;
+    font-size: 11px;
   }
 }

@@ -52,10 +52,17 @@ const getEventAddress = (event) => {
 // ── Tab definitions ────────────────────────────────────────────────────────
 const TABS = [
   { id: "all",            label: "All Events",      categories: null },
+  { id: "ritual",         label: "DKG Rituals",     categories: ["ritual"] },
+  { id: "authorization",  label: "Authorization",   categories: ["authorization"] },
+  { id: "reward",         label: "Rewards",          categories: ["reward"] },
+  { id: "infraction",     label: "Infractions",      categories: ["infraction"] },
   { id: "bridge",         label: "Bridge",           categories: ["bridge"] },
   { id: "governance",     label: "Governance",       categories: ["governance"] },
   { id: "reimbursement",  label: "Reimbursements",   categories: ["reimbursement"] },
   { id: "subscription",   label: "Subscriptions",    categories: ["subscription", "policy"] },
+  { id: "signing",        label: "Signing",          categories: ["signing"] },
+  { id: "access_control", label: "Access Control",   categories: ["access_control"] },
+  { id: "handover",       label: "Handover",         categories: ["handover"] },
 ];
 
 // ── Chain badge component ──────────────────────────────────────────────────
@@ -308,10 +315,17 @@ const AllEventsTable = ({ events }) => (
 // ── Table renderer per tab ─────────────────────────────────────────────────
 const TABLE_COMPONENTS = {
   all: AllEventsTable,
+  ritual: AllEventsTable,
+  authorization: AllEventsTable,
+  reward: AllEventsTable,
+  infraction: AllEventsTable,
   bridge: BridgeTable,
   governance: GovernanceTable,
   reimbursement: ReimbursementsTable,
   subscription: SubscriptionsTable,
+  signing: AllEventsTable,
+  access_control: AllEventsTable,
+  handover: AllEventsTable,
 };
 
 // ════════════════════════════════════════════════════════════════════════════

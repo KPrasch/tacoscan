@@ -217,7 +217,7 @@
 }
 
 .table_detail{
-  font-family: 'Work Sans', sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   border: 0 !important;
@@ -230,5 +230,5 @@
   font-weight: 500;
 }
 .numbers{
-  font-family: Helvetica Neue;
+  font-family: var(--font-sans);
 }

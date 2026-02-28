@@ -466,7 +466,7 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
                         onClick={() => navigator.clipboard.writeText(feeModelAddress)}
                         title="Copy address"
                       >
-                        📋
+                        Copy
                       </button>
                     </div>
                   </div>
@@ -805,7 +805,7 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
                         onClick={() => navigator.clipboard.writeText(ritual.accessController)}
                         title="Copy address"
                       >
-                        📋
+                        Copy
                       </button>
                     </div>
                   </div>
@@ -1009,7 +1009,7 @@ export const RitualManagement = ({ ritual, defaultTab = null }) => {
       {/* Error Message */}
       {error && (
         <div className={styles.errorMessage}>
-          <span className={styles.errorIcon}>⚠️</span>
+          <span className={styles.errorIcon}>!</span>
           {error}
         </div>
       )}

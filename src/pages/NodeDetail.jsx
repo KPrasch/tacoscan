@@ -266,7 +266,7 @@ const NodeDetail = () => {
                     gap: "6px",
                   }}
                 >
-                  <span style={{ fontSize: "14px" }}>⭐</span> Beta Staker
+                  Beta Staker
                 </span>
               )}
               {nodeData.isDeauthorized ? (
@@ -289,7 +289,7 @@ const NodeDetail = () => {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "6px",
-                }}>🚪 Requested Exit</span>
+                }}>Requested Exit</span>
               )}
               <span style={{
                 background: RewardStatusColors[nodeData.rewardStatus] + '20',
@@ -319,7 +319,7 @@ const NodeDetail = () => {
             onClick={() => copyToClipboard(address)}
             title="Copy address"
           >
-            📋
+            Copy
           </button>
           <a
             href={`https://etherscan.io/address/${address}`}
@@ -471,13 +471,13 @@ const NodeDetail = () => {
                   </div>
                   {nodeData.isSlashed && (
                     <div className={styles.infoRow}>
-                      <span className={styles.infoLabel}>⚠️ Slashed:</span>
+                      <span className={styles.infoLabel} style={{ color: '#EF4444' }}>Slashed:</span>
                       <span className={styles.infoValue} style={{ color: '#EF4444' }}>Yes</span>
                     </div>
                   )}
                   {nodeData.isPenalized && (
                     <div className={styles.infoRow}>
-                      <span className={styles.infoLabel}>⚠️ Penalized:</span>
+                      <span className={styles.infoLabel} style={{ color: '#F59E0B' }}>Penalized:</span>
                       <span className={styles.infoValue} style={{ color: '#EF4444' }}>Yes</span>
                     </div>
                   )}
@@ -514,7 +514,7 @@ const NodeDetail = () => {
                 </div>
                 {nodeData.rewardStatus === 'reward_eligible' && (
                   <div style={{ fontSize: '0.8rem', color: '#6B7280', fontStyle: 'italic' }}>
-                    💡 Rewards are calculated based on authorized stake × time × 3.75% APR (capped at 15M T). 
+                    Rewards are calculated based on authorized stake × time × 3.75% APR (capped at 15M T). 
                     Nodes failing heartbeat rituals receive penalties: 2 failures = 33% penalty, 3 = 67%, 4+ = 100%.
                   </div>
                 )}

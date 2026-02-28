@@ -1,7 +1,7 @@
 .cohortDetail {
     background: #f9fafb;
     min-height: 100vh;
-    padding-bottom: 60px;
+    padding-bottom: 24px;
 }
 
 .container {
@@ -22,7 +22,7 @@
 
 .error {
     text-align: center;
-    padding: 40px;
+    padding: 16px;
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
@@ -192,7 +192,7 @@
 
 .mainContent {
     display: grid;
-    gap: 24px;
+    gap: 12px;
 }
 
 .card {
@@ -1458,7 +1458,7 @@
 
 .emptyState {
     text-align: center;
-    padding: 60px 20px;
+    padding: 24px 12px;
 }
 
 .emptyStateText {

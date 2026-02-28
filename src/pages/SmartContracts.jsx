@@ -247,7 +247,7 @@ const SmartContracts = () => {
                     onClick={() => copyToClipboard(contract.address)}
                     title="Copy address"
                   >
-                    📋
+                    Copy
                   </button>
                 </div>
               )}
@@ -306,7 +306,7 @@ const SmartContracts = () => {
                                   onClick={() => copyToClipboard(JSON.stringify(func, null, 2))}
                                   title="Copy function ABI"
                                 >
-                                  📋
+                                  Copy
                                 </button>
                               </div>
                             ))}

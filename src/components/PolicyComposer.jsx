@@ -5,7 +5,7 @@ import styles from './PolicyComposer.module.css';
 const LIMIT_TEMPLATES = {
   contractAddress: {
     name: 'Contract Allow List',
-    icon: '📜',
+    icon: 'ACL',
     description: 'Limit transactions to specific contracts',
     function: 'execute',
     signature: 'execute((address,uint256,bytes))',
@@ -17,7 +17,7 @@ const LIMIT_TEMPLATES = {
   },
   recipientAddress: {
     name: 'Recipient Allow List',
-    icon: '👤',
+    icon: 'RCP',
     description: 'Limit transfers to specific addresses',
     function: 'transfer',
     signature: 'transfer(address,uint256)',
@@ -28,7 +28,7 @@ const LIMIT_TEMPLATES = {
   },
   transfer: {
     name: 'Token Transfer Limit',
-    icon: '💸',
+    icon: 'TXF',
     description: 'Limit the maximum amount for token transfers',
     function: 'transfer',
     signature: 'transfer(address,uint256)',
@@ -38,7 +38,7 @@ const LIMIT_TEMPLATES = {
   },
   approve: {
     name: 'Approval Limit',
-    icon: '✅',
+    icon: 'APR',
     description: 'Limit the maximum approval amount for tokens',
     function: 'approve',
     signature: 'approve(address,uint256)',
@@ -48,7 +48,7 @@ const LIMIT_TEMPLATES = {
   },
   execute: {
     name: 'Transaction Value Limit',
-    icon: '💰',
+    icon: 'VAL',
     description: 'Limit the maximum ETH value for transactions',
     function: 'execute',
     signature: 'execute((address,uint256,bytes))',
@@ -59,7 +59,7 @@ const LIMIT_TEMPLATES = {
   },
   withdraw: {
     name: 'Withdrawal Limit',
-    icon: '🏦',
+    icon: 'WDR',
     description: 'Limit withdrawal amounts',
     function: 'withdraw',
     signature: 'withdraw(uint256)',
@@ -69,7 +69,7 @@ const LIMIT_TEMPLATES = {
   },
   swap: {
     name: 'Swap Limit',
-    icon: '🔄',
+    icon: 'SWP',
     description: 'Limit swap input amounts',
     function: 'swap',
     signature: 'swap(uint256,uint256,address[],address,uint256)',
@@ -79,7 +79,7 @@ const LIMIT_TEMPLATES = {
   },
   custom: {
     name: 'Custom Limit',
-    icon: '🔧',
+    icon: 'CST',
     description: 'Create a custom transaction limit',
     function: '',
     signature: '',
