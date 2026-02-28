@@ -1,5 +1,5 @@
 .cohortDetail {
-    background: #f9fafb;
+    background: var(--bg-primary);
     min-height: 100vh;
     padding-bottom: 24px;
 }
@@ -16,15 +16,15 @@
     align-items: center;
     height: 50vh;
     font-size: 16px;
-    color: #6b7280;
+    color: var(--text-secondary);
     font-family: var(--font-mono, "Space Mono", monospace);
 }
 
 .error {
     text-align: center;
     padding: 16px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     margin-top: 40px;
 }
@@ -36,7 +36,7 @@
 }
 
 .error p {
-    color: #6b7280;
+    color: var(--text-secondary);
     margin-bottom: 20px;
 }
 
@@ -63,7 +63,7 @@
 }
 
 .breadcrumbLink {
-    color: #9ca3af;
+    color: var(--text-tertiary);
     text-decoration: none;
     transition: color 0.2s;
 }
@@ -102,7 +102,7 @@
 
 .headerStatLabel {
     font-size: 11px;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -141,11 +141,11 @@
     display: flex;
     gap: 0;
     margin-bottom: 16px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-sm);
 }
 
 .tab {
@@ -156,7 +156,7 @@
     border-radius: 6px;
     font-size: 14px;
     font-weight: 500;
-    color: #6b7280;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s;
     font-family: var(--font-mono, "Space Mono", monospace);
@@ -167,8 +167,8 @@
 }
 
 .tab:hover {
-    background: #f9fafb;
-    color: #374151;
+    background: var(--bg-primary);
+    color: var(--text-primary);
 }
 
 .activeTab {
@@ -196,11 +196,11 @@
 }
 
 .card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-sm);
 }
 
 /* Fix for cards without header */
@@ -210,7 +210,7 @@
     padding: 16px 20px;
     margin: 0;
     border-bottom: 1px solid #e5e7eb;
-    background: #f9fafb;
+    background: var(--bg-primary);
     color: #1f2937;
     font-family: var(--font-mono, "Space Mono", monospace);
 }
@@ -221,7 +221,7 @@
     align-items: center;
     padding: 8px 14px;
     border-bottom: 1px solid #e5e7eb;
-    background: #f9fafb;
+    background: var(--bg-primary);
 }
 
 .cardTitle {
@@ -255,7 +255,7 @@
 
 .managePoliciesButton:hover {
     background: #047857;
-    border-color: #047857;
+    border-color: var(--accent-green-hover);
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -264,13 +264,13 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 6px 12px;
     font-size: 12px;
     font-weight: 500;
-    color: #6b7280;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s;
     font-family: var(--font-mono, "Space Mono", monospace);
@@ -279,9 +279,9 @@
 .globalJsonToggle:hover {
     background: #d1fae5;
     border-color: #10b981;
-    color: #059669;
+    color: var(--accent-green-hover);
     transform: translateY(-1px);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-sm);
 }
 
 .globalJsonToggle .jsonIcon {
@@ -308,7 +308,7 @@
 
 .infoLabel {
     font-size: 12px;
-    color: #6b7280;
+    color: var(--text-secondary);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -329,15 +329,15 @@
 }
 
 .chainItem {
-    background: #f3f4f6;
+    background: var(--bg-tertiary);
     padding: 8px 16px;
     border-radius: 6px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-color);
 }
 
 .chainId {
     font-size: 14px;
-    color: #374151;
+    color: var(--text-primary);
     font-weight: 500;
     font-family: var(--font-mono, "Space Mono", monospace);
 }
@@ -366,7 +366,7 @@
 
 .conditionKey {
     font-weight: 600;
-    color: #374151;
+    color: var(--text-primary);
     min-width: 150px;
     font-family: var(--font-mono, "Space Mono", monospace);
     font-size: 13px;
@@ -374,7 +374,7 @@
 
 .conditionValue {
     flex: 1;
-    color: #059669;
+    color: var(--accent-green-hover);
     font-family: var(--font-mono, "Space Mono", monospace);
     font-size: 13px;
     word-break: break-all;
@@ -388,7 +388,7 @@
     margin: 0;
     font-family: var(--font-mono, "Space Mono", monospace);
     font-size: 13px;
-    color: #374151;
+    color: var(--text-primary);
     line-height: 1.5;
 }
 
@@ -411,7 +411,7 @@
 .chainLabel {
     font-size: 12px;
     font-weight: 700;
-    color: #6b7280;
+    color: var(--text-secondary);
     letter-spacing: 1px;
     font-family: var(--font-mono, "Space Mono", monospace);
     text-transform: uppercase;
@@ -423,13 +423,13 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     padding: 4px 10px;
     font-size: 11px;
     font-weight: 500;
-    color: #6b7280;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s;
     font-family: var(--font-mono, "Space Mono", monospace);
@@ -438,9 +438,9 @@
 }
 
 .jsonToggle:hover {
-    background: #f9fafb;
-    border-color: #059669;
-    color: #059669;
+    background: var(--bg-primary);
+    border-color: var(--accent-green-hover);
+    color: var(--accent-green-hover);
 }
 
 .jsonToggle:active {
@@ -462,13 +462,13 @@
 
 /* JSON Container */
 .jsonContainer {
-    background: #f9fafb;
+    background: var(--bg-primary);
     border-radius: 6px;
     padding: 16px;
     overflow-x: auto;
     max-height: 500px;
     overflow-y: auto;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-color);
 }
 
 .jsonHeader {
@@ -479,12 +479,12 @@
 
 .copyJsonButton {
     padding: 4px 12px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -499,7 +499,7 @@
     margin: 0;
     font-family: var(--font-mono, "Space Mono", monospace);
     font-size: 12px;
-    color: #374151;
+    color: var(--text-primary);
     line-height: 1.6;
     white-space: pre;
 }
@@ -511,7 +511,7 @@
 }
 
 .jsonContainer::-webkit-scrollbar-track {
-    background: #f3f4f6;
+    background: var(--bg-tertiary);
     border-radius: 4px;
 }
 
@@ -526,8 +526,8 @@
 
 /* Condition rendering styles */
 .conditionBlock {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     overflow: hidden;
     margin: 8px 0;
@@ -540,13 +540,13 @@
     gap: 8px;
     padding: 10px 12px;
     border-bottom: 1px solid #e5e7eb;
-    background: #f3f4f6;
+    background: var(--bg-tertiary);
 }
 
 .headerLabel {
     font-size: 11px;
     font-weight: 500;
-    color: #6b7280;
+    color: var(--text-secondary);
     margin-right: 6px;
     font-family: var(--font-mono, "Space Mono", monospace);
 }
@@ -574,7 +574,7 @@
 .conditionDescription {
     font-size: 12px;
     font-weight: 400;
-    color: #6b7280;
+    color: var(--text-secondary);
     font-family: var(--font-mono, "Space Mono", monospace);
     margin-bottom: 8px;
 }
@@ -616,44 +616,44 @@
 
 /* Condition type colors - matching app style guide */
 .typeContract {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 .typeTime {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 .typeCompound {
     background: #e9d5ff;
     color: #6b21a8;
 }
 .typeJwt {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 .typeJson {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 .typeRpc {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 .typeContext {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 .typeSigning {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 .typeEcdsa {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 .typeDefault {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 
 .conditionSection {
@@ -668,7 +668,7 @@
 .sectionTitle {
     font-size: 10px;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 6px;
@@ -686,7 +686,7 @@
 
 .fieldLabel {
     font-weight: 500;
-    color: #6b7280;
+    color: var(--text-secondary);
     min-width: 80px;
 }
 
@@ -695,26 +695,26 @@
 }
 
 .addressLink {
-    color: #059669;
+    color: var(--accent-green-hover);
     text-decoration: none;
     transition: color 0.2s;
     font-family: var(--font-mono, "Space Mono", monospace);
 }
 
 .addressLink:hover {
-    color: #047857;
+    color: var(--accent-green-hover);
     text-decoration: underline;
 }
 
 .chainBadge {
     display: inline-block;
     padding: 2px 8px;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-size: 11px;
     font-weight: 500;
-    color: #374151;
+    color: var(--text-primary);
 }
 
 /* Function signature styling */
@@ -737,7 +737,7 @@
 }
 
 .functionParams {
-    color: #6b7280;
+    color: var(--text-secondary);
     font-weight: 500;
 }
 
@@ -754,18 +754,18 @@
 }
 
 .paramName {
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 12px;
     min-width: 80px;
 }
 
 .paramIndex {
-    color: #9ca3af;
+    color: var(--text-tertiary);
     font-size: 11px;
 }
 
 .paramValue {
-    color: #059669;
+    color: var(--accent-green-hover);
     font-family: var(--font-mono, "Space Mono", monospace);
     word-break: break-all;
 }
@@ -794,7 +794,7 @@
 .categoryLabel {
     font-size: 11px;
     font-weight: 700;
-    color: #374151;
+    color: var(--text-primary);
     letter-spacing: 1px;
     font-family: var(--font-mono, "Space Mono", monospace);
 }
@@ -803,7 +803,7 @@
     margin-left: 8px;
     font-size: 11px;
     font-weight: 400;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     font-style: italic;
     font-family: var(
         --font-sans,
@@ -818,8 +818,8 @@
 /* Clean condition cards */
 .conditionCard {
     position: relative;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 0;
     overflow: hidden;
@@ -946,17 +946,17 @@
 }
 
 .inlineOperator {
-    color: #059669;
+    color: var(--accent-green-hover);
     font-weight: 600;
     padding: 0 4px;
 }
 
 .compactCondition {
     padding: 2px 8px;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 11px;
 }
 
@@ -964,8 +964,8 @@
 .operandConditionContent .conditionBlock {
     margin: 0;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-    border: 1px solid #e5e7eb;
-    background: #ffffff;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
     border-radius: 6px;
     overflow: hidden;
 }
@@ -988,7 +988,7 @@
 /* Depth limit indicator */
 .depthLimited {
     padding: 6px 10px;
-    background: #f9fafb;
+    background: var(--bg-primary);
     border: 1px dashed #d1d5db;
     border-radius: 4px;
     margin: 4px 0;
@@ -996,7 +996,7 @@
 }
 
 .depthLimitedMessage {
-    color: #6b7280;
+    color: var(--text-secondary);
     font-style: italic;
     font-size: 11px;
     font-family: var(--font-mono, "Space Mono", monospace);
@@ -1015,8 +1015,8 @@
     align-items: center;
     gap: 4px;
     padding: 4px 8px;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-size: 11px;
 }
@@ -1035,14 +1035,14 @@
 }
 
 .operandTypeCompact {
-    color: #6b7280;
+    color: var(--text-secondary);
     font-family: var(--font-mono, "Space Mono", monospace);
     font-size: 11px;
 }
 
 /* Parameter validation styles */
 .validationItem {
-    background: #f9fafb;
+    background: var(--bg-primary);
     border-left: 3px solid #059669;
     padding: 8px 12px;
     margin: 6px 0;
@@ -1051,25 +1051,25 @@
 }
 
 .validationLabel {
-    color: #374151;
+    color: var(--text-primary);
     font-weight: 500;
     margin-right: 8px;
 }
 
 .validationOperator {
-    color: #059669;
+    color: var(--accent-green-hover);
     font-weight: 600;
     margin: 0 6px;
 }
 
 .validationValue {
-    color: #059669;
+    color: var(--accent-green-hover);
     font-weight: 600;
 }
 
 /* ECDSA specific */
 .publicKey {
-    color: #059669;
+    color: var(--accent-green-hover);
     font-family: var(--font-mono, "Space Mono", monospace);
     font-size: 12px;
 }
@@ -1077,7 +1077,7 @@
 .curveBadge {
     display: inline-block;
     background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
-    color: #374151;
+    color: var(--text-primary);
     padding: 4px 10px;
     border-radius: 4px;
     font-size: 11px;
@@ -1122,8 +1122,8 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     padding: 8px 12px;
     font-family: var(--font-mono, "Space Mono", monospace);
@@ -1131,7 +1131,7 @@
 }
 
 .testLabel {
-    color: #6b7280;
+    color: var(--text-secondary);
 }
 
 .testOperator {
@@ -1141,7 +1141,7 @@
 }
 
 .testValue {
-    color: #059669;
+    color: var(--accent-green-hover);
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -1150,7 +1150,7 @@
 
 /* Time range */
 .timeRange {
-    background: #f9fafb;
+    background: var(--bg-primary);
     border-radius: 4px;
     padding: 8px;
 }
@@ -1217,8 +1217,8 @@
 .abiCallValidation {
     margin: 12px 0;
     padding: 12px;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
 }
 
@@ -1234,8 +1234,8 @@
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-family: var(--font-mono, "Space Mono", monospace);
     font-size: 12px;
@@ -1274,7 +1274,7 @@
 }
 
 .limitOperator {
-    color: #059669;
+    color: var(--accent-green-hover);
     font-weight: 700;
     font-size: 14px;
     font-family: var(--font-mono, "Space Mono", monospace);
@@ -1306,7 +1306,7 @@
     padding-top: 12px;
     border-top: 1px dashed #e5e7eb;
     font-size: 12px;
-    color: #6b7280;
+    color: var(--text-secondary);
 }
 
 .signingContextLabel {
@@ -1332,14 +1332,14 @@
     border: none;
     cursor: pointer;
     padding: 4px;
-    color: #6b7280;
+    color: var(--text-secondary);
     transition: all 0.15s;
     border-radius: 4px;
 }
 
 .toggleButton:hover {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 
 .toggleIcon {
@@ -1348,7 +1348,7 @@
 }
 
 .validationLabel {
-    color: #6b7280;
+    color: var(--text-secondary);
     font-weight: 500;
     min-width: 120px;
 }
@@ -1360,7 +1360,7 @@
 }
 
 .validationValue {
-    color: #059669;
+    color: var(--accent-green-hover);
     font-weight: 600;
 }
 
@@ -1376,7 +1376,7 @@
 }
 
 .table thead {
-    background: #f9fafb;
+    background: var(--bg-primary);
     border-bottom: 2px solid #e5e7eb;
 }
 
@@ -1384,7 +1384,7 @@
     padding: 6px 10px;
     text-align: left;
     font-weight: 600;
-    color: #374151;
+    color: var(--text-primary);
     text-transform: uppercase;
     font-size: 11px;
     letter-spacing: 0.5px;
@@ -1396,7 +1396,7 @@
 }
 
 .table tbody tr:hover {
-    background: #f9fafb;
+    background: var(--bg-primary);
 }
 
 .table tbody tr:last-child {
@@ -1411,7 +1411,7 @@
 
 .indexCell {
     font-weight: 600;
-    color: #6b7280;
+    color: var(--text-secondary);
 }
 
 .addressCell {
@@ -1419,19 +1419,19 @@
 }
 
 .addressLink {
-    color: #059669;
+    color: var(--accent-green-hover);
     text-decoration: none;
     transition: color 0.2s;
     font-family: var(--font-mono, "Space Mono", monospace);
 }
 
 .addressLink:hover {
-    color: #047857;
+    color: var(--accent-green-hover);
     text-decoration: underline;
 }
 
 .roleCell {
-    color: #374151;
+    color: var(--text-primary);
     font-size: 13px;
 }
 
@@ -1443,7 +1443,7 @@
     display: inline-block;
     padding: 2px 8px;
     background: #d1fae5;
-    color: #059669;
+    color: var(--accent-green-hover);
     border-radius: 4px;
     font-size: 12px;
     font-weight: 500;
@@ -1451,7 +1451,7 @@
 
 .noData {
     text-align: center;
-    color: #6b7280;
+    color: var(--text-secondary);
     padding: 20px;
     font-style: italic;
 }
@@ -1462,14 +1462,14 @@
 }
 
 .emptyStateText {
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 16px;
     margin: 0 0 8px 0;
     font-family: var(--font-mono, "Space Mono", monospace);
 }
 
 .emptyStateDescription {
-    color: #9ca3af;
+    color: var(--text-tertiary);
     font-size: 14px;
     margin: 0;
     font-family: var(
@@ -1492,14 +1492,14 @@
     display: flex;
     justify-content: space-between;
     padding: 12px;
-    background: #f9fafb;
+    background: var(--bg-primary);
     border-radius: 6px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-color);
 }
 
 .detailLabel {
     font-size: 14px;
-    color: #6b7280;
+    color: var(--text-secondary);
     font-weight: 500;
 }
 
@@ -1565,7 +1565,7 @@
 }
 
 .contextVarDesc {
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 11px;
     font-style: italic;
     margin-left: 4px;
@@ -1582,21 +1582,21 @@
 }
 
 .fieldOperator {
-    color: #059669;
+    color: var(--accent-green-hover);
     font-weight: 600;
     margin: 0 6px;
     font-family: var(--font-mono, "Space Mono", monospace);
 }
 
 .limitOperator {
-    color: #059669;
+    color: var(--accent-green-hover);
     font-weight: 600;
     margin: 0 8px;
     font-family: var(--font-mono, "Space Mono", monospace);
 }
 
 .amountValue {
-    color: #059669;
+    color: var(--accent-green-hover);
     font-weight: 600;
     font-family: var(--font-mono, "Space Mono", monospace);
 }
@@ -1616,8 +1616,8 @@
    ============================ */
 
 .sequentialContainer {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     overflow: hidden;
 }
@@ -1717,8 +1717,8 @@
    ============================ */
 
 .nestedCompound {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     overflow: hidden;
 }
@@ -1728,8 +1728,8 @@
 }
 
 .operandCard {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     overflow: hidden;
 }
@@ -1768,7 +1768,7 @@
 
 .nestedChildren {
     padding: 12px 16px;
-    background: #f9fafb;
+    background: var(--bg-primary);
     border-top: 1px solid #e5e7eb;
 }
 
@@ -1782,7 +1782,7 @@
 
 .nestedChild .conditionBlock {
     margin: 0;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     overflow: hidden;
 }

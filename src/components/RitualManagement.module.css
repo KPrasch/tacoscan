@@ -7,17 +7,17 @@
 
 /* Header */
 .header {
-  background: #FFFFFF;
+  background: var(--bg-surface);
   border-radius: 8px;
   padding: 20px 24px;
   margin-bottom: 20px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-color);
 }
 
 .title {
   font-size: 24px;
   font-weight: 700;
-  color: #0A0A0A;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
@@ -30,22 +30,22 @@
 
 .label {
   font-size: 14px;
-  color: #96FF5E;
+  color: var(--accent-green);
   font-weight: 600;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
 .authority {
   font-size: 13px;
-  color: #6B7280;
+  color: var(--text-secondary);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
 /* Tabs */
 .tabs {
   display: flex;
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px 8px 0 0;
   overflow: hidden;
 }
@@ -54,11 +54,11 @@
   flex: 1;
   max-width: 200px;
   padding: 14px 20px;
-  background: #F9FAFB;
+  background: var(--bg-primary);
   border: none;
   font-size: 14px;
   font-weight: 600;
-  color: #6B7280;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
   border-right: 1px solid #E5E7EB;
@@ -71,12 +71,12 @@
 
 .tab:hover {
   background: rgba(150, 255, 94, 0.05);
-  color: #0A0A0A;
+  color: var(--text-primary);
 }
 
 .activeTab {
-  background: #FFFFFF;
-  color: #0A0A0A;
+  background: var(--bg-surface);
+  color: var(--text-primary);
 }
 
 .activeTab::after {
@@ -91,8 +91,8 @@
 
 /* Tab Content */
 .tabContent {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-top: none;
   border-radius: 0 0 8px 8px;
   padding: 24px;
@@ -107,8 +107,8 @@
 }
 
 .periodCard {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 20px;
 }
@@ -123,14 +123,14 @@
 .periodTitle {
   font-size: 18px;
   font-weight: 600;
-  color: #0A0A0A;
+  color: var(--text-primary);
   margin: 0 0 4px 0;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
 .periodNumber {
   font-size: 13px;
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .statusBadge {
@@ -143,7 +143,7 @@
 
 .statusBadge.paid {
   background: rgba(16, 185, 129, 0.1);
-  color: #10B981;
+  color: var(--status-active);
 }
 
 .statusBadge.unpaid {
@@ -153,7 +153,7 @@
 
 .statusBadge.available {
   background: rgba(59, 130, 246, 0.1);
-  color: #3B82F6;
+  color: var(--status-data);
 }
 
 /* Slot Metrics */
@@ -163,7 +163,7 @@
   gap: 16px;
   margin-bottom: 20px;
   padding: 16px 0;
-  border-bottom: 1px solid #F3F4F6;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .metric {
@@ -174,14 +174,14 @@
   display: block;
   font-size: 24px;
   font-weight: 700;
-  color: #0A0A0A;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', monospace);
   margin-bottom: 4px;
 }
 
 .metricLabel {
   font-size: 11px;
-  color: #6B7280;
+  color: var(--text-secondary);
   text-transform: uppercase;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -204,22 +204,22 @@
 .slotInput {
   flex: 1;
   padding: 12px 16px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 14px;
   font-family: var(--font-mono, 'Space Mono', monospace);
-  background: #FFFFFF;
+  background: var(--bg-surface);
   transition: all 0.2s;
 }
 
 .slotInput:focus {
   outline: none;
-  border-color: #96FF5E;
+  border-color: var(--accent-green);
   box-shadow: 0 0 0 3px rgba(150, 255, 94, 0.1);
 }
 
 .slotInput:disabled {
-  background: #F3F4F6;
+  background: var(--bg-tertiary);
   cursor: not-allowed;
 }
 
@@ -227,7 +227,7 @@
   position: absolute;
   right: 16px;
   font-size: 12px;
-  color: #9CA3AF;
+  color: var(--text-tertiary);
   pointer-events: none;
 }
 
@@ -254,26 +254,26 @@
 }
 
 .feeRow.total {
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid var(--border-color);
   padding-top: 8px;
   margin-top: 4px;
 }
 
 .feeLabel {
   font-size: 13px;
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .feeValue {
   font-size: 13px;
-  color: #374151;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
 .feeAmount {
   font-size: 16px;
   font-weight: 600;
-  color: #0A0A0A;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
@@ -289,7 +289,7 @@
 }
 
 .payButton.primary {
-  background: #10B981;
+  background: var(--status-active);
   color: #FFFFFF;
 }
 
@@ -309,7 +309,7 @@
   background: rgba(16, 185, 129, 0.05);
   border: 1px solid rgba(16, 185, 129, 0.2);
   border-radius: 6px;
-  color: #374151;
+  color: var(--text-primary);
   font-size: 14px;
   text-align: center;
 }
@@ -326,8 +326,8 @@
 /* Access Controller Card */
 .accessControllerCard,
 .feeModelCard {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 24px;
@@ -336,7 +336,7 @@
 .cardTitle {
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   margin: 0 0 20px 0;
   font-family: var(--font-sans);
 }
@@ -354,7 +354,7 @@
 }
 
 .contractInfo .label {
-  color: #6B7280;
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
   min-width: 110px;
@@ -368,7 +368,7 @@
 }
 
 .contractLink {
-  color: #047857;
+  color: var(--accent-green-hover);
   text-decoration: none;
   font-family: var(--font-mono);
   font-size: 13px;
@@ -377,13 +377,13 @@
 }
 
 .contractLink:hover {
-  color: #059669;
+  color: var(--accent-green-hover);
   text-decoration: underline;
 }
 
 .copyButton {
   background: transparent;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 4px 8px;
   cursor: pointer;
@@ -392,17 +392,17 @@
 }
 
 .copyButton:hover {
-  background: #F9FAFB;
-  border-color: #D1D5DB;
+  background: var(--bg-primary);
+  border-color: var(--text-tertiary);
 }
 
 .contractInfo .value {
-  color: #374151;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
 .statusActive {
-  color: #10B981;
+  color: var(--status-active);
   font-weight: 600;
   font-size: 14px;
 }
@@ -412,7 +412,7 @@
 .notAuthorizedInfo {
   padding: 20px;
   text-align: center;
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .noAccessController p,
@@ -425,7 +425,7 @@
 .noAccessController .subtext,
 .noFeeModel .subtext {
   font-size: 13px;
-  color: #9CA3AF;
+  color: var(--text-tertiary);
 }
 
 .notAuthorizedInfo {
@@ -444,14 +444,14 @@
 .sectionTitle {
   font-size: 20px;
   font-weight: 600;
-  color: #0A0A0A;
+  color: var(--text-primary);
   margin: 0;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
 .sectionDescription {
   font-size: 14px;
-  color: #6B7280;
+  color: var(--text-secondary);
   margin: 0;
   line-height: 1.5;
 }
@@ -471,30 +471,30 @@
 .addressInput {
   flex: 1;
   padding: 12px 16px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 14px;
   font-family: var(--font-mono, 'Space Mono', monospace);
-  background: #FFFFFF;
+  background: var(--bg-surface);
   transition: all 0.2s;
 }
 
 .addressInput:focus {
   outline: none;
-  border-color: #96FF5E;
+  border-color: var(--accent-green);
   box-shadow: 0 0 0 3px rgba(150, 255, 94, 0.1);
 }
 
 .addressInput:disabled {
-  background: #F3F4F6;
+  background: var(--bg-tertiary);
   cursor: not-allowed;
 }
 
 .removeButton {
   width: 36px;
   height: 36px;
-  border: 1px solid #E5E7EB;
-  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
   border-radius: 6px;
   color: #EF4444;
   font-size: 18px;
@@ -517,7 +517,7 @@
   border: 1px dashed #E5E7EB;
   background: transparent;
   border-radius: 6px;
-  color: #6B7280;
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -525,8 +525,8 @@
 }
 
 .addMoreButton:hover:not(:disabled) {
-  border-color: #10B981;
-  color: #10B981;
+  border-color: var(--status-active);
+  color: var(--status-active);
   background: rgba(16, 185, 129, 0.05);
 }
 
@@ -548,7 +548,7 @@
 }
 
 .actionButton.authorize {
-  background: #10B981;
+  background: var(--status-active);
   color: #FFFFFF;
 }
 
@@ -582,8 +582,8 @@
 }
 
 .timelineSection {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 24px;
   margin-bottom: 20px;
@@ -603,7 +603,7 @@
 .statLabel {
   display: block;
   font-size: 11px;
-  color: #6B7280;
+  color: var(--text-secondary);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -629,18 +629,18 @@
 }
 
 .statValue.expired {
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 /* Timeline Bar */
 .timelineBar {
   position: relative;
   height: 40px;
-  background: #F3F4F6;
+  background: var(--bg-tertiary);
   border-radius: 8px;
   overflow: visible;
   margin: 20px 0;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-color);
 }
 
 .progressBar {
@@ -717,22 +717,22 @@
 
 .labelTitle {
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .labelDate {
-  color: #6B7280;
+  color: var(--text-secondary);
   font-size: 12px;
 }
 
 .timelineTrack {
   position: relative;
   height: 60px;
-  background: #F9FAFB;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   overflow: hidden;
   display: flex;
@@ -775,7 +775,7 @@
 .segmentLabel {
   font-size: 12px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -786,7 +786,7 @@
   bottom: 0;
   width: 3px;
   background: #0A0A0A;
-  box-shadow: 0 0 0 2px #FFFFFF;
+  box-shadow: 0 0 0 2px var(--bg-primary);
   z-index: 10;
 }
 
@@ -810,7 +810,7 @@
   margin-top: 12px;
   padding: 0 4px;
   font-size: 11px;
-  color: #6B7280;
+  color: var(--text-secondary);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
@@ -825,8 +825,8 @@
 .warningCard {
   text-align: center;
   padding: 40px;
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   max-width: 500px;
 }
@@ -840,27 +840,27 @@
 .warningCard h3 {
   font-size: 20px;
   font-weight: 600;
-  color: #0A0A0A;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
 }
 
 .warningCard p {
   font-size: 14px;
-  color: #6B7280;
+  color: var(--text-secondary);
   margin: 0 0 16px 0;
   line-height: 1.5;
 }
 
 .authorityInfo {
   padding: 12px;
-  background: #F9FAFB;
+  background: var(--bg-primary);
   border-radius: 6px;
   margin-top: 16px;
 }
 
 .address {
   font-family: var(--font-mono, 'Space Mono', monospace);
-  color: #96FF5E;
+  color: var(--accent-green);
   word-break: break-all;
 }
 
@@ -895,7 +895,7 @@
   .tab {
     max-width: 100%;
     border-right: none;
-    border-bottom: 1px solid #E5E7EB;
+    border-bottom: 1px solid var(--border-color);
   }
 
   .tab:last-child {

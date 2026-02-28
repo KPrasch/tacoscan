@@ -2,18 +2,18 @@
   max-width: 1600px;
   margin: 0 auto;
   padding: 16px 20px;
-  background: #F9FAFB;
+  background: var(--bg-primary);
   min-height: 100vh;
 }
 
 /* Header Section */
 .header {
-  background: #FFFFFF;
+  background: var(--bg-surface);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .headerTop {
@@ -33,7 +33,7 @@
   font-size: 18px;
   font-weight: 700;
   margin: 0;
-  color: #0A0A0A;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
@@ -47,7 +47,7 @@
   gap: 4px;
   padding: 4px 12px;
   background: rgba(5, 150, 105, 0.1);
-  color: #059669;
+  color: var(--accent-green-hover);
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
@@ -72,27 +72,27 @@
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
-  background: #F9FAFB;
+  background: var(--bg-primary);
   border-radius: 8px;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
 .addressLabel {
   font-size: 13px;
-  color: #6B7280;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .address {
   font-size: 14px;
-  color: #0A0A0A;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .copyButton {
   padding: 4px 8px;
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
@@ -100,21 +100,21 @@
 }
 
 .copyButton:hover {
-  background: #F3F4F6;
+  background: var(--bg-tertiary);
   transform: translateY(-1px);
 }
 
 .etherscanLink {
   margin-left: auto;
   font-size: 13px;
-  color: #059669;  /* Standard darker green */
+  color: var(--accent-green-hover);  /* Standard darker green */
   text-decoration: none;
   font-weight: 500;
   transition: opacity 0.2s;
 }
 
 .etherscanLink:hover {
-  color: #047857;  /* Darker on hover */
+  color: var(--accent-green-hover);  /* Darker on hover */
   text-decoration: underline;
 }
 
@@ -127,8 +127,8 @@
 }
 
 .statCard {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 12px 14px;
   transition: all 0.2s;
@@ -141,7 +141,7 @@
 
 .statLabel {
   font-size: 11px;
-  color: #6B7280;
+  color: var(--text-secondary);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -151,19 +151,19 @@
 .statValue {
   font-size: 18px;
   font-weight: 700;
-  color: #0A0A0A;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', monospace);
   margin-bottom: 4px;
 }
 
 .statSubtext {
   font-size: 12px;
-  color: #059669;
+  color: var(--accent-green-hover);
   font-weight: 500;
 }
 
 .operatorLink {
-  color: #059669;  /* Standard darker green for better readability */
+  color: var(--accent-green-hover);  /* Standard darker green for better readability */
   text-decoration: none;
   font-size: 16px;
   font-weight: 500;
@@ -171,21 +171,21 @@
 
 .operatorLink:hover {
   text-decoration: underline;
-  color: #047857;  /* Slightly darker on hover */
+  color: var(--accent-green-hover);  /* Slightly darker on hover */
 }
 
 /* Tabs */
 .tabsContainer {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
 }
 
 .tabs {
   display: flex;
-  border-bottom: 1px solid #E5E7EB;
-  background: #F9FAFB;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-primary);
 }
 
 .tab {
@@ -196,20 +196,20 @@
   border: none;
   font-size: 14px;
   font-weight: 600;
-  color: #6B7280;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
 }
 
 .tab:hover {
-  color: #0A0A0A;
+  color: var(--text-primary);
   background: rgba(150, 255, 94, 0.05);
 }
 
 .activeTab {
-  color: #0A0A0A;
-  background: #FFFFFF;
+  color: var(--text-primary);
+  background: var(--bg-surface);
 }
 
 .activeTab::after {
@@ -234,7 +234,7 @@
 
 .infoSection {
   padding: 12px;
-  background: #F9FAFB;
+  background: var(--bg-primary);
   border-radius: 6px;
 }
 
@@ -242,7 +242,7 @@
   font-size: 14px;
   font-weight: 600;
   margin: 0 0 10px 0;
-  color: #0A0A0A;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
@@ -256,7 +256,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .infoRow:last-child {
@@ -265,13 +265,13 @@
 
 .infoLabel {
   font-size: 13px;
-  color: #6B7280;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .infoValue {
   font-size: 14px;
-  color: #0A0A0A;
+  color: var(--text-primary);
   font-weight: 600;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
@@ -279,7 +279,7 @@
 .statusActive {
   padding: 2px 8px;
   background: rgba(150, 255, 94, 0.1);
-  color: #96FF5E;
+  color: var(--accent-green);
   border-radius: 4px;
   font-size: 12px;
   font-weight: 600;
@@ -308,7 +308,7 @@
 }
 
 .dataTable thead {
-  background: #F9FAFB;
+  background: var(--bg-primary);
 }
 
 .dataTable th {
@@ -316,19 +316,19 @@
   text-align: left;
   font-size: 11px;
   font-weight: 600;
-  color: #6B7280;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .dataTable tbody tr {
-  border-bottom: 1px solid #F3F4F6;
+  border-bottom: 1px solid var(--border-light);
   transition: background 0.2s;
 }
 
 .dataTable tbody tr:hover {
-  background: #F9FAFB;
+  background: var(--bg-primary);
 }
 
 .dataTable tbody tr:last-child {
@@ -338,11 +338,11 @@
 .dataTable td {
   padding: 6px 10px;
   font-size: 12px;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .idLink {
-  color: #059669;
+  color: var(--accent-green-hover);
   text-decoration: none;
   font-weight: 500;
 }
@@ -352,13 +352,13 @@
 }
 
 .addressLink {
-  color: #6B7280;
+  color: var(--text-secondary);
   text-decoration: none;
   font-weight: 400;
 }
 
 .addressLink:hover {
-  color: #059669;
+  color: var(--accent-green-hover);
 }
 
 .status {
@@ -374,12 +374,12 @@
 .status.successful,
 .status.finalized {
   background: rgba(5, 150, 105, 0.1);
-  color: #059669;
+  color: var(--accent-green-hover);
 }
 
 .status.expired {
   background: rgba(107, 114, 128, 0.1);
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .status.timeout,
@@ -394,24 +394,24 @@
 }
 
 .txLink {
-  color: #059669;  /* Standard darker green */
+  color: var(--accent-green-hover);  /* Standard darker green */
   text-decoration: none;
   font-weight: 500;
 }
 
 .txLink:hover {
-  color: #047857;  /* Darker on hover */
+  color: var(--accent-green-hover);  /* Darker on hover */
   text-decoration: underline;
 }
 
 .eventType {
   font-weight: 600;
-  color: #0A0A0A;
+  color: var(--text-primary);
 }
 
 .noData {
   text-align: center;
-  color: #9CA3AF;
+  color: var(--text-tertiary);
   padding: 32px !important;
   font-style: italic;
 }
@@ -424,10 +424,10 @@
   align-items: center;
   min-height: 400px;
   font-size: 16px;
-  color: #6B7280;
-  background: #FFFFFF;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
   border-radius: 8px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-color);
 }
 
 .errorState {

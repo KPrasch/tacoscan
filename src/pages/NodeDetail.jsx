@@ -508,12 +508,12 @@ const NodeDetail = () => {
                   <div style={{ fontWeight: 600, marginBottom: '8px', color: RewardStatusColors[nodeData.rewardStatus] }}>
                     {RewardStatusIcons[nodeData.rewardStatus]} {nodeData.rewardStatusLabel}
                   </div>
-                  <div style={{ color: '#4B5563', fontSize: '0.875rem', lineHeight: 1.5 }}>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.5 }}>
                     {nodeData.rewardExplanation}
                   </div>
                 </div>
                 {nodeData.rewardStatus === 'reward_eligible' && (
-                  <div style={{ fontSize: '0.8rem', color: '#6B7280', fontStyle: 'italic' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
                     Rewards are calculated based on authorized stake × time × 3.75% APR (capped at 15M T). 
                     Nodes failing heartbeat rituals receive penalties: 2 failures = 33% penalty, 3 = 67%, 4+ = 100%.
                   </div>

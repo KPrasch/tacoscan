@@ -34,7 +34,7 @@
 }
 
 .primary {
-  color: #96FF5E;
+  color: var(--accent-green);
 }
 
 .primary:hover:not(.disabled) {
@@ -42,7 +42,7 @@
 }
 
 .secondary {
-  color: #dc004e;
+  color: #ef4444;
 }
 
 .secondary:hover:not(.disabled) {

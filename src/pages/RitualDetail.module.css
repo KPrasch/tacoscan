@@ -20,7 +20,7 @@
 }
 
 .errorMessage {
-  background: white;
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 16px;
@@ -52,7 +52,7 @@
 
 /* Header Section */
 .header {
-  background: white;
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 12px 16px;
@@ -81,7 +81,7 @@
 
 .ritualId {
   font-family: var(--font-mono);
-  color: #059669;
+  color: var(--accent-green-hover);
 }
 
 .statusBadge {
@@ -147,16 +147,16 @@
 }
 
 .infoCard {
-  background: white;
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 14px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
   transition: box-shadow 0.2s;
 }
 
 .infoCard:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .cardTitle {
@@ -185,7 +185,7 @@
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 500;
-  color: #6B7280;
+  color: var(--text-secondary);
   min-width: 65px;
   margin-right: 8px;
 }
@@ -210,13 +210,13 @@
 .addressLink {
   font-family: var(--font-mono);
   font-size: 13px;
-  color: #10B981; /* Darker green for better readability */
+  color: var(--status-active); /* Darker green for better readability */
   text-decoration: none;
   transition: all 0.2s;
 }
 
 .addressLink:hover {
-  color: #059669; /* Even darker on hover */
+  color: var(--accent-green-hover); /* Even darker on hover */
   text-decoration: underline;
 }
 
@@ -270,7 +270,7 @@
 
 /* Participants Section */
 .participantsSection {
-  background: white;
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 14px;
@@ -332,17 +332,17 @@
 
 .statusIcon.success {
   background: rgba(16, 185, 129, 0.15);
-  color: #10B981; /* Readable green */
+  color: var(--status-active); /* Readable green */
 }
 
 .statusIcon.pending {
   background: rgba(107, 114, 128, 0.1);
-  color: #9CA3AF;
+  color: var(--text-tertiary);
 }
 
 /* Timeline Section */
 .timelineSection {
-  background: white;
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 14px;
@@ -387,21 +387,21 @@
   height: 12px;
   border-radius: 50%;
   background: var(--taco-green);
-  border: 2px solid white;
+  border: 2px solid var(--bg-primary);
   box-shadow: 0 0 0 2px var(--border-color);
 }
 
 .timelineContent {
-  background: white;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   transition: box-shadow 0.2s;
 }
 
 .timelineContent:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
 }
 
 .timelineHeader {
@@ -415,14 +415,14 @@
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   letter-spacing: -0.01em;
 }
 
 .timelineTime {
   font-family: var(--font-mono);
   font-size: 12px;
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .timelineTx {
@@ -435,13 +435,13 @@
 .txLink {
   font-family: var(--font-mono);
   font-size: 13px;
-  color: #10B981; /* Readable green */
+  color: var(--status-active); /* Readable green */
   text-decoration: none;
   transition: all 0.2s;
 }
 
 .txLink:hover {
-  color: #059669; /* Darker on hover */
+  color: var(--accent-green-hover); /* Darker on hover */
   text-decoration: underline;
 }
 

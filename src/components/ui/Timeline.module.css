@@ -53,13 +53,13 @@
 }
 
 .timelineDot.primary {
-  background-color: #96FF5E;
-  border-color: #96FF5E;
+  background-color: var(--accent-green);
+  border-color: var(--accent-green);
 }
 
 .timelineDot.secondary {
-  background-color: #dc004e;
-  border-color: #dc004e;
+  background-color: #ef4444;
+  border-color: #ef4444;
 }
 
 .timelineDot.success {
@@ -78,8 +78,8 @@
 }
 
 .timelineDot.info {
-  background-color: #96FF5E;
-  border-color: #96FF5E;
+  background-color: var(--accent-green);
+  border-color: var(--accent-green);
 }
 
 .timelineConnector {

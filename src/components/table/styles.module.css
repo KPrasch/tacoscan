@@ -1,12 +1,12 @@
 .table {
   border-collapse: collapse;
   width: 100%;
-  background-color: #fff;
+  background-color: var(--bg-surface);
   border-radius: 12px;
   font-family: var(--font-display, 'ABC Diatype');
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-color);
 }
 
 .table th {
@@ -18,19 +18,19 @@
   font-family: var(--font-display, 'ABC Diatype');
   -webkit-font-smoothing: antialiased;
   font-size: 0.75rem;
-  color: #6B7280;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .table td {
-  border-bottom: 1px solid #F3F4F6;
+  border-bottom: 1px solid var(--border-light);
   font-family: var(--font-mono, 'OCR-X');
   -webkit-font-smoothing: antialiased;
   font-weight: 500;
   font-size: 0.75rem;
   padding: 6px 8px;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .table .selected{
@@ -40,12 +40,12 @@
 .nodata{
   padding-top: 30px;
   padding-bottom: 10px;
-  background-color: #fff;
+  background-color: var(--bg-surface);
   text-align: center;
 }
 
 .link {
-  color: #10B981; /* Readable green for tables */
+  color: var(--status-active); /* Readable green for tables */
   text-decoration: none;
   font-family: var(--font-mono, 'OCR-X');
   font-size: 0.8125rem;
@@ -56,7 +56,7 @@
 }
 
 .link:hover {
-  color: #059669; /* Darker on hover */
+  color: var(--accent-green-hover); /* Darker on hover */
   text-decoration: underline;
 }
 
@@ -87,7 +87,7 @@
 
 .container_detail{
   margin:0;
-  background: #F9FAFB; /* Light gray background matching style guide */
+  background: var(--bg-primary); /* Light gray background matching style guide */
 }
 .detail_item{
   display: flex;
@@ -97,7 +97,7 @@
 
 .timelineContainer {
   padding: 20px 16px 28px;
-  background-color: white;
+  background-color: var(--bg-surface);
   border-radius: 8px;
   overflow-x: auto;
   margin: 0;
@@ -150,8 +150,8 @@
   padding: 0;
   position: relative;
   z-index: 1;
-  border: 3px solid white;
-  box-shadow: 0 0 0 1px #E5E7EB;
+  border: 3px solid var(--bg-primary);
+  box-shadow: 0 0 0 1px var(--border-color);
 }
 
 .timelineItem :global(.MuiTimelineContent-root) {
@@ -174,7 +174,7 @@
 .timelineTime {
   font-family: var(--font-mono, 'OCR-X');
   font-size: 0.75rem;
-  color: #6B7280;
+  color: var(--text-secondary);
   margin-bottom: 2px;
 }
 
@@ -184,7 +184,7 @@
   line-height: 1.4;
   text-align: center;
   padding: 0 8px;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .bySpan{
@@ -197,7 +197,7 @@
 .descriptionSpan{
   font-family: var(--font-display, 'ABC Diatype');
   font-size: 0.875rem;
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .span_note{
@@ -205,14 +205,14 @@
 }
 
 .by_link{
-  color: #10B981; /* Readable green for tables */
+  color: var(--status-active); /* Readable green for tables */
   font-size: 0.8rem;
   text-decoration: none;
   transition: all 0.2s;
 }
 
 .by_link:hover {
-  color: #059669; /* Darker on hover */
+  color: var(--accent-green-hover); /* Darker on hover */
   text-decoration: underline;
 }
 

@@ -468,7 +468,7 @@ const Dashboard = () => {
                           {ritual.totalParticipants <= 3 && (
                             <span style={{
                               background: 'rgba(107, 114, 128, 0.1)',
-                              color: '#6B7280',
+                              color: 'var(--text-secondary)',
                               padding: '2px 6px',
                               borderRadius: '4px',
                               fontSize: '10px',

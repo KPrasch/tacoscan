@@ -83,7 +83,7 @@ const ChainBadge = ({ chain }) => (
 
 // ── Category badge component ───────────────────────────────────────────────
 const CategoryBadge = ({ category }) => {
-  const meta = CATEGORY_META[category] || { label: category, color: "#6B7280" };
+  const meta = CATEGORY_META[category] || { label: category, color: "var(--text-secondary)" };
   return (
     <span
       style={{

@@ -40,7 +40,7 @@
 }
 
 .warning {
-  background-color: #fff3e0;
+  background-color: var(--bg-surface)3e0;
   color: #e65100;
 }
 

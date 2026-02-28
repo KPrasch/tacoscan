@@ -1,5 +1,5 @@
 .networkActivity {
-  background: #F9FAFB;
+  background: var(--bg-primary);
   min-height: 100vh;
   padding-bottom: 24px;
 }
@@ -16,7 +16,7 @@
   align-items: center;
   height: 50vh;
   font-size: 16px;
-  color: #6B7280;
+  color: var(--text-secondary);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
@@ -47,7 +47,7 @@
 
 .pageSubtitle {
   font-size: 12px;
-  color: #9CA3AF;
+  color: var(--text-tertiary);
   margin: 0;
   line-height: 1.5;
 }
@@ -67,7 +67,7 @@
 
 .statLabel {
   font-size: 11px;
-  color: #9CA3AF;
+  color: var(--text-tertiary);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -77,7 +77,7 @@
 .statValue {
   font-size: 18px;
   font-weight: 700;
-  color: #96FF5E;
+  color: var(--accent-green);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
@@ -89,8 +89,8 @@
   gap: 16px;
   margin-bottom: 24px;
   padding: 10px 14px;
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
 }
 
@@ -106,15 +106,15 @@
   border-radius: 6px;
   font-size: 14px;
   font-family: var(--font-mono, 'Space Mono', monospace);
-  background: #F9FAFB;
+  background: var(--bg-primary);
   transition: all 0.2s ease;
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: #96FF5E;
+  border-color: var(--accent-green);
   box-shadow: 0 0 0 3px rgba(150, 255, 94, 0.1);
-  background: #FFFFFF;
+  background: var(--bg-surface);
 }
 
 .filterControls {
@@ -129,20 +129,20 @@
   border-radius: 6px;
   font-size: 13px;
   font-family: var(--font-mono, 'Space Mono', monospace);
-  background: #FFFFFF;
-  color: #374151;
+  background: var(--bg-surface);
+  color: var(--text-primary);
   cursor: pointer;
 }
 
 .filterSelect:focus {
   outline: none;
-  border-color: #96FF5E;
+  border-color: var(--accent-green);
 }
 
 /* Table Section */
 .tableSection {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
@@ -153,13 +153,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 14px;
-  border-bottom: 1px solid #E5E7EB;
-  background: #F9FAFB;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-primary);
 }
 
 .tableInfo {
   font-size: 11px;
-  color: #6B7280;
+  color: var(--text-secondary);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
@@ -174,7 +174,7 @@
 }
 
 .activityTable thead {
-  background: #F9FAFB;
+  background: var(--bg-primary);
 }
 
 .activityTable th {
@@ -182,20 +182,20 @@
   text-align: left;
   font-size: 10px;
   font-weight: 600;
-  color: #6B7280;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid var(--border-color);
   white-space: nowrap;
 }
 
 .activityTable tbody tr {
-  border-bottom: 1px solid #F3F4F6;
+  border-bottom: 1px solid var(--border-light);
   transition: background 0.2s ease;
 }
 
 .activityTable tbody tr:hover {
-  background: #F9FAFB;
+  background: var(--bg-primary);
 }
 
 .activityTable tbody tr:last-child {
@@ -205,24 +205,24 @@
 .activityTable td {
   padding: 6px 10px;
   font-size: 12px;
-  color: #374151;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', monospace);
   vertical-align: middle;
 }
 
 /* Table Cell Styles */
 .txHash {
-  color: #6B7280;
+  color: var(--text-secondary);
   font-weight: 500;
   cursor: pointer;
 }
 
 .txHash:hover {
-  color: #059669;
+  color: var(--accent-green-hover);
 }
 
 .ritualLink {
-  color: #059669;
+  color: var(--accent-green-hover);
   text-decoration: none;
   font-weight: 600;
 }
@@ -232,12 +232,12 @@
 }
 
 .eventType {
-  background: #F3F4F6;
+  background: var(--bg-tertiary);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   white-space: nowrap;
 }
 
@@ -252,7 +252,7 @@
 }
 
 .timeAgo {
-  color: #9CA3AF;
+  color: var(--text-tertiary);
   font-size: 12px;
   white-space: nowrap;
 }
@@ -263,23 +263,23 @@
 }
 
 .addressLink {
-  color: #6B7280;
+  color: var(--text-secondary);
   text-decoration: none;
   font-family: var(--font-mono);
 }
 
 .addressLink:hover {
-  color: #96FF5E;
+  color: var(--accent-green);
 }
 
 .gasUsed {
-  color: #6B7280;
+  color: var(--text-secondary);
   text-align: right;
   font-weight: 500;
 }
 
 .gasPrice {
-  color: #6B7280;
+  color: var(--text-secondary);
   text-align: right;
   font-weight: 500;
 }
@@ -296,12 +296,12 @@
 
 .status.success {
   background: rgba(16, 185, 129, 0.1);
-  color: #10B981;
+  color: var(--status-active);
 }
 
 .status.processing {
   background: rgba(59, 130, 246, 0.1);
-  color: #3B82F6;
+  color: var(--status-data);
 }
 
 .status.failed {
@@ -316,16 +316,16 @@
   align-items: center;
   gap: 8px;
   padding: 10px;
-  border-top: 1px solid #E5E7EB;
-  background: #F9FAFB;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-primary);
 }
 
 .pageButton {
   padding: 4px 8px;
   border: 1px solid #D1D5DB;
   border-radius: 4px;
-  background: #FFFFFF;
-  color: #374151;
+  background: var(--bg-surface);
+  color: var(--text-primary);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -334,14 +334,14 @@
 }
 
 .pageButton:hover:not(:disabled) {
-  background: #F3F4F6;
-  border-color: #96FF5E;
+  background: var(--bg-tertiary);
+  border-color: var(--accent-green);
 }
 
 .pageButton.active {
   background: #96FF5E;
-  border-color: #96FF5E;
-  color: #0A0A0A;
+  border-color: var(--accent-green);
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -413,8 +413,8 @@
 }
 /* Top earners / offenders section */
 .topEarners {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 14px;
   margin-bottom: 16px;
@@ -424,7 +424,7 @@
   font-size: 14px;
   font-weight: 600;
   margin: 0 0 10px 0;
-  color: #374151;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
@@ -439,14 +439,14 @@
   align-items: center;
   gap: 12px;
   padding: 5px 10px;
-  background: #F9FAFB;
+  background: var(--bg-primary);
   border-radius: 6px;
 }
 
 .earnerRank {
   font-size: 13px;
   font-weight: 700;
-  color: #6B7280;
+  color: var(--text-secondary);
   min-width: 30px;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
@@ -455,6 +455,6 @@
   margin-left: auto;
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }

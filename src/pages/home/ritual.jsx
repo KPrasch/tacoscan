@@ -188,7 +188,7 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                                     margin: 0,
                                     fontSize: '16px',
                                     fontWeight: 600,
-                                    color: '#111827',
+                                    color: 'var(--text-primary)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '8px'
@@ -199,12 +199,12 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                                         year: 'numeric',
                                         timeZone: 'UTC'
                                     })}
-                                    <span style={{ fontSize: '12px', color: '#6B7280' }}>→</span>
+                                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>→</span>
                                 </h3>
                                 <p style={{
                                     margin: '4px 0 0 0',
                                     fontSize: '14px',
-                                    color: '#6B7280'
+                                    color: 'var(--text-secondary)'
                                 }}>
                                     {group.weekNumber === 0 ? 'This Week' : 
                                      group.weekNumber === 1 ? 'Last Week' :
@@ -245,20 +245,20 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                             marginBottom: '16px'
                         }}>
                             <div>
-                                <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '2px' }}>Total</div>
-                                <div style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>{group.stats.total}</div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '2px' }}>Total</div>
+                                <div style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)' }}>{group.stats.total}</div>
                             </div>
                             <div>
-                                <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '2px' }}>Successful</div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '2px' }}>Successful</div>
                                 <div style={{ fontSize: '20px', fontWeight: 600, color: '#059669' }}>{group.stats.successful}</div>
                             </div>
                             <div>
-                                <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '2px' }}>Failed</div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '2px' }}>Failed</div>
                                 <div style={{ fontSize: '20px', fontWeight: 600, color: '#DC2626' }}>{group.stats.failed}</div>
                             </div>
                             <div>
-                                <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '2px' }}>Success Rate</div>
-                                <div style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>{group.stats.successRate}%</div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '2px' }}>Success Rate</div>
+                                <div style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)' }}>{group.stats.successRate}%</div>
                             </div>
                         </div>
                         
@@ -266,7 +266,7 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                             <summary style={{
                                 cursor: 'pointer',
                                 fontSize: '14px',
-                                color: '#4B5563',
+                                color: 'var(--text-secondary)',
                                 fontWeight: 500,
                                 userSelect: 'none'
                             }}>
@@ -284,7 +284,7 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                                     background: '#F9FAFB',
                                     borderRadius: '4px',
                                     fontSize: '12px',
-                                    color: '#6B7280'
+                                    color: 'var(--text-secondary)'
                                 }}>
                                     <strong>Execution Window:</strong> {new Date(group.rituals[0]?.initTimeStamp).toLocaleString('en-US', {
                                         timeZone: 'UTC',
@@ -304,12 +304,12 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                                         justifyContent: 'space-between',
                                         alignItems: 'center',
                                         padding: '8px 0',
-                                        borderBottom: '1px solid #F3F4F6'
+                                        borderBottom: '1px solid var(--border-light)'
                                     }}>
                                         <a
                                             href={`/ritual/${ritual.id}`}
                                             style={{
-                                                color: '#3B82F6',
+                                                color: 'var(--status-data)',
                                                 textDecoration: 'none',
                                                 fontSize: '14px',
                                                 fontFamily: 'var(--font-mono)'
@@ -332,7 +332,7 @@ const RitualPage = ({network = 'polygon', isSearch = false, searchInput = ''} = 
                                         </span>
                                         <span style={{
                                             fontSize: '13px',
-                                            color: '#6B7280'
+                                            color: 'var(--text-secondary)'
                                         }}>
                                             {ritual.totalParticipants} participants
                                         </span>

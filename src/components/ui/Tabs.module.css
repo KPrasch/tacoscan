@@ -30,7 +30,7 @@
 }
 
 .tab.active {
-  color: #0A0A0A;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -41,7 +41,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background-color: #96FF5E;
+  background-color: var(--accent-green);
 }
 
 .tabPanel {

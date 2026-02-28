@@ -114,7 +114,7 @@ const RitualDetail = () => {
                 {ritual.totalParticipants <= 3 && (
                   <span style={{
                     background: 'rgba(107, 114, 128, 0.1)',
-                    color: '#6B7280',
+                    color: 'var(--text-secondary)',
                     padding: '4px 10px',
                     borderRadius: '6px',
                     fontSize: '12px',
@@ -407,33 +407,33 @@ const RitualDetail = () => {
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr>
-                        <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Address</th>
-                        <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Authorized</th>
-                        <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Transaction</th>
-                        <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Time</th>
+                        <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Address</th>
+                        <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Authorized</th>
+                        <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Transaction</th>
+                        <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Time</th>
                       </tr>
                     </thead>
                     <tbody>
                       {ritual.accessControls.map((ac, idx) => (
                         <tr key={idx}>
-                          <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
-                            <a href={`https://polygonscan.com/address/${ac.address}`} target="_blank" rel="noopener noreferrer" style={{ color: '#3B82F6' }}>
+                          <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border-light)', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
+                            <a href={`https://polygonscan.com/address/${ac.address}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--status-data)' }}>
                               {formatAddress(ac.address)}
                             </a>
                           </td>
-                          <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6' }}>
+                          <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border-light)' }}>
                             <span style={{ color: ac.isAuthorized ? '#10B981' : '#EF4444', fontWeight: 500 }}>
                               {ac.isAuthorized ? '✓ Yes' : '✗ No'}
                             </span>
                           </td>
-                          <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
+                          <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border-light)', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
                             {ac.transactionHash ? (
-                              <a href={`https://polygonscan.com/tx/${ac.transactionHash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#3B82F6' }}>
+                              <a href={`https://polygonscan.com/tx/${ac.transactionHash}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--status-data)' }}>
                                 {ac.transactionHash.slice(0, 10)}...
                               </a>
                             ) : '-'}
                           </td>
-                          <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6', fontSize: '13px' }}>
+                          <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border-light)', fontSize: '13px' }}>
                             {ac.timestamp ? new Date(parseInt(ac.timestamp) * 1000).toLocaleString() : '-'}
                           </td>
                         </tr>
@@ -452,27 +452,27 @@ const RitualDetail = () => {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr>
-                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Departing</th>
-                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Incoming</th>
-                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Status</th>
-                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Requested</th>
-                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid #E5E7EB', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Finalized</th>
+                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Departing</th>
+                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Incoming</th>
+                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Status</th>
+                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Requested</th>
+                      <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Finalized</th>
                     </tr>
                   </thead>
                   <tbody>
                     {ritual.handovers.map((h, idx) => (
                       <tr key={idx}>
-                        <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6' }}>
+                        <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border-light)' }}>
                           <Link to={`/address/${h.departingParticipant}`} className={styles.addressLink}>
                             {formatAddress(h.departingParticipant)}
                           </Link>
                         </td>
-                        <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6' }}>
+                        <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border-light)' }}>
                           <Link to={`/address/${h.incomingParticipant}`} className={styles.addressLink}>
                             {formatAddress(h.incomingParticipant)}
                           </Link>
                         </td>
-                        <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6' }}>
+                        <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border-light)' }}>
                           <span style={{
                             color: h.status === 'FINALIZED' ? '#10B981' : h.status === 'CANCELED' ? '#EF4444' : '#F59E0B',
                             fontWeight: 500
@@ -480,10 +480,10 @@ const RitualDetail = () => {
                             {h.status?.replace(/_/g, ' ')}
                           </span>
                         </td>
-                        <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6', fontSize: '13px' }}>
+                        <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border-light)', fontSize: '13px' }}>
                           {h.requestedAt ? new Date(parseInt(h.requestedAt) * 1000).toLocaleString() : '-'}
                         </td>
-                        <td style={{ padding: '10px 8px', borderBottom: '1px solid #F3F4F6', fontSize: '13px' }}>
+                        <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border-light)', fontSize: '13px' }}>
                           {h.finalizedAt ? new Date(parseInt(h.finalizedAt) * 1000).toLocaleString() : '-'}
                         </td>
                       </tr>
@@ -491,7 +491,7 @@ const RitualDetail = () => {
                   </tbody>
                 </table>
               ) : (
-                <p style={{ color: '#6B7280', padding: '24px 0' }}>No handovers for this ritual.</p>
+                <p style={{ color: 'var(--text-secondary)', padding: '24px 0' }}>No handovers for this ritual.</p>
               )}
             </div>
           )}

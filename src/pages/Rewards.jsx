@@ -148,7 +148,7 @@ const Rewards = () => {
                     {new Date(d.date).toLocaleDateString("en-US", { month: "short", year: "2-digit" })}
                   </span>
                   <span className={styles.earnerAmount}>{formatTokenAmount(d.thisDistributionAmount)} T</span>
-                  <span style={{ color: "#6B7280", fontSize: "0.8em" }}>{Object.keys(d.claims).length} stakers</span>
+                  <span style={{ color: "var(--text-secondary)", fontSize: "0.8em" }}>{Object.keys(d.claims).length} stakers</span>
                 </div>
               ))}
             </div>
@@ -177,7 +177,7 @@ const Rewards = () => {
               <tbody>
                 {paged.map((claim, idx) => (
                   <tr key={claim.address}>
-                    <td style={{ color: "#6B7280" }}>{(currentPage - 1) * itemsPerPage + idx + 1}</td>
+                    <td style={{ color: "var(--text-secondary)" }}>{(currentPage - 1) * itemsPerPage + idx + 1}</td>
                     <td>
                       <Link to={`/node/${claim.address}`} className={styles.addressLink}>
                         {formatString(claim.address)}
@@ -189,7 +189,7 @@ const Rewards = () => {
                           {formatString(claim.beneficiary)}
                         </Link>
                       ) : (
-                        <span style={{ color: "#6B7280" }}>same</span>
+                        <span style={{ color: "var(--text-secondary)" }}>same</span>
                       )}
                     </td>
                     <td style={{ fontWeight: 600, color: "#10B981" }}>
@@ -204,7 +204,7 @@ const Rewards = () => {
                           {formatTokenAmount(claim.penaltyThisDistribution)} T
                         </span>
                       ) : (
-                        <span style={{ color: "#6B7280" }}>—</span>
+                        <span style={{ color: "var(--text-secondary)" }}>—</span>
                       )}
                     </td>
                     <td>
@@ -219,7 +219,7 @@ const Rewards = () => {
                   </tr>
                 ))}
                 {paged.length === 0 && (
-                  <tr><td colSpan={7} style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>No stakers found</td></tr>
+                  <tr><td colSpan={7} style={{ textAlign: "center", padding: 40, color: "var(--text-secondary)" }}>No stakers found</td></tr>
                 )}
               </tbody>
             </table>

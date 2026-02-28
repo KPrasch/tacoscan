@@ -222,7 +222,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
               {row.isHeartbeat && (
                 <span style={{
                   background: 'rgba(107, 114, 128, 0.1)',
-                  color: '#6B7280',
+                  color: 'var(--text-secondary)',
                   padding: '2px 8px',
                   borderRadius: '4px',
                   fontSize: '11px',
@@ -303,7 +303,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                         fontSize: '1.25rem',
                         fontFamily: 'var(--font-display)',
                         fontWeight: 600,
-                        color: '#111827',
+                        color: 'var(--text-primary)',
                         letterSpacing: '-0.01em'
                       }}>
                         Ritual Details
@@ -318,7 +318,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                           <div style={{ 
                             fontSize: '0.8125rem',
                             fontWeight: 500,
-                            color: '#6B7280',
+                            color: 'var(--text-secondary)',
                             marginBottom: '8px',
                             textTransform: 'uppercase',
                             letterSpacing: '0.025em',
@@ -326,12 +326,12 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                           }}>
                             DKG ID
                           </div>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: '#111827', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
                             {row.id}
                             {row.isHeartbeat && (
                               <span style={{
                                 background: 'rgba(107, 114, 128, 0.1)',
-                                color: '#6B7280',
+                                color: 'var(--text-secondary)',
                                 padding: '3px 8px',
                                 borderRadius: '4px',
                                 fontSize: '11px',
@@ -348,7 +348,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                           <div style={{ 
                             fontSize: '0.8125rem',
                             fontWeight: 500,
-                            color: '#6B7280',
+                            color: 'var(--text-secondary)',
                             marginBottom: '8px',
                             textTransform: 'uppercase',
                             letterSpacing: '0.025em',
@@ -356,13 +356,13 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                           }}>
                             Threshold
                           </div>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: '#111827', fontWeight: 500 }}>{row.threshold}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 500 }}>{row.threshold}</div>
                         </div>
                         <div>
                           <div style={{ 
                             fontSize: '0.8125rem',
                             fontWeight: 500,
-                            color: '#6B7280',
+                            color: 'var(--text-secondary)',
                             marginBottom: '8px',
                             textTransform: 'uppercase',
                             letterSpacing: '0.025em',
@@ -370,13 +370,13 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                           }}>
                             Participants
                           </div>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: '#111827', fontWeight: 500 }}>{row.totalParticipants}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 500 }}>{row.totalParticipants}</div>
                         </div>
                         <div>
                           <div style={{ 
                             fontSize: '0.8125rem',
                             fontWeight: 500,
-                            color: '#6B7280',
+                            color: 'var(--text-secondary)',
                             marginBottom: '8px',
                             textTransform: 'uppercase',
                             letterSpacing: '0.025em',
@@ -404,7 +404,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                           <div style={{ 
                             fontSize: '0.8125rem',
                             fontWeight: 500,
-                            color: '#6B7280',
+                            color: 'var(--text-secondary)',
                             marginBottom: '8px',
                             textTransform: 'uppercase',
                             letterSpacing: '0.025em',
@@ -437,7 +437,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                         fontSize: '1.25rem',
                         fontFamily: 'var(--font-display)',
                         fontWeight: 600,
-                        color: '#111827',
+                        color: 'var(--text-primary)',
                         letterSpacing: '-0.01em'
                       }}>
                         Participants
@@ -450,7 +450,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                               fontWeight: 500,
                               fontSize: '0.8125rem',
                               letterSpacing: '0.025em',
-                              color: '#6B7280',
+                              color: 'var(--text-secondary)',
                               textTransform: 'uppercase',
                               borderBottom: '1px solid #E5E7EB',
                               padding: '14px 20px'
@@ -462,7 +462,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                               fontWeight: 500,
                               fontSize: '0.8125rem',
                               letterSpacing: '0.025em',
-                              color: '#6B7280',
+                              color: 'var(--text-secondary)',
                               textTransform: 'uppercase',
                               borderBottom: '1px solid #E5E7EB',
                               padding: '14px 20px'
@@ -474,7 +474,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                               fontWeight: 500,
                               fontSize: '0.8125rem',
                               letterSpacing: '0.025em',
-                              color: '#6B7280',
+                              color: 'var(--text-secondary)',
                               textTransform: 'uppercase',
                               borderBottom: '1px solid #E5E7EB',
                               padding: '14px 20px'
@@ -486,7 +486,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                               fontWeight: 500,
                               fontSize: '0.8125rem',
                               letterSpacing: '0.025em',
-                              color: '#6B7280',
+                              color: 'var(--text-secondary)',
                               textTransform: 'uppercase',
                               borderBottom: '1px solid #E5E7EB',
                               padding: '14px 20px'
@@ -523,10 +523,10 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                                   row.operatorAddresses[participant] !== "-" ? (
                                     Data.formatString(row.operatorAddresses[participant])
                                   ) : (
-                                    <span style={{ color: '#9CA3AF' }}>-</span>
+                                    <span style={{ color: 'var(--text-tertiary)' }}>-</span>
                                   )
                                 ) : (
-                                  <span style={{ color: '#9CA3AF' }}>-</span>
+                                  <span style={{ color: 'var(--text-tertiary)' }}>-</span>
                                 )}
                               </TableCell>
                               <TableCell style={{ padding: '16px 20px' }}>
@@ -553,7 +553,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                                   </span>
                                 ) : (
                                   <span style={{ 
-                                    color: "#6B7280",
+                                    color: "var(--text-secondary)",
                                     fontWeight: 500,
                                     fontSize: '0.875rem',
                                     fontFamily: 'var(--font-display)',
@@ -595,7 +595,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                                   </span>
                                 ) : (
                                   <span style={{ 
-                                    color: "#6B7280",
+                                    color: "var(--text-secondary)",
                                     fontWeight: 500,
                                     fontSize: '0.875rem',
                                     fontFamily: 'var(--font-display)',

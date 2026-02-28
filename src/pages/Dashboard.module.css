@@ -1,5 +1,5 @@
 .dashboard {
-  background: #F9FAFB;
+  background: var(--bg-primary);
   min-height: 100vh;
   padding-bottom: 24px;
 }
@@ -16,11 +16,11 @@
 }
 
 .overviewCard {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 16px;
-  color: #0A0A0A;
+  color: var(--text-primary);
 }
 
 .overviewHeader {
@@ -36,7 +36,7 @@
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .networkStatus {
@@ -44,7 +44,7 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #10B981;
+  color: var(--status-active);
   font-weight: 600;
 }
 
@@ -79,7 +79,7 @@
 
 .overviewLabel {
   font-size: 11px;
-  color: #6B7280;
+  color: var(--text-secondary);
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -88,13 +88,13 @@
 .overviewValue {
   font-size: 18px;
   font-weight: 700;
-  color: #0A0A0A;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
 .overviewChange {
   font-size: 13px;
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 /* Statistics Grid */
@@ -106,8 +106,8 @@
 }
 
 .statCard {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 12px 14px;
   transition: all 0.2s ease;
@@ -127,7 +127,7 @@
 
 .statTitle {
   font-size: 12px;
-  color: #6B7280;
+  color: var(--text-secondary);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -139,7 +139,7 @@
 }
 
 .statChange.up {
-  color: #10B981;
+  color: var(--status-active);
 }
 
 .statChange.down {
@@ -149,14 +149,14 @@
 .statValue {
   font-size: 20px;
   font-weight: 700;
-  color: #0A0A0A;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', monospace);
   margin-bottom: 4px;
 }
 
 .statSubtitle {
   font-size: 12px;
-  color: #9CA3AF;
+  color: var(--text-tertiary);
 }
 
 /* Recent Activity Tables */
@@ -168,8 +168,8 @@
 }
 
 .tableSection {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -179,20 +179,20 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 14px;
-  border-bottom: 1px solid #E5E7EB;
-  background: #F9FAFB;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-primary);
 }
 
 .tableTitle {
   font-size: 14px;
   font-weight: 600;
   margin: 0;
-  color: #0A0A0A;
+  color: var(--text-primary);
 }
 
 .viewAllLink {
   font-size: 13px;
-  color: #96FF5E;
+  color: var(--accent-green);
   text-decoration: none;
   font-weight: 500;
   transition: transform 0.2s ease;
@@ -212,7 +212,7 @@
 }
 
 .dataTable thead {
-  background: #F9FAFB;
+  background: var(--bg-primary);
 }
 
 .dataTable th {
@@ -220,19 +220,19 @@
   text-align: left;
   font-size: 10px;
   font-weight: 600;
-  color: #6B7280;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .dataTable tbody tr {
-  border-bottom: 1px solid #F3F4F6;
+  border-bottom: 1px solid var(--border-light);
   transition: background 0.2s ease;
 }
 
 .dataTable tbody tr:hover {
-  background: #F9FAFB;
+  background: var(--bg-primary);
 }
 
 .dataTable tbody tr:last-child {
@@ -242,12 +242,12 @@
 .dataTable td {
   padding: 6px 10px;
   font-size: 12px;
-  color: #374151;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
 .idLink, .hashLink, .blockLink {
-  color: #059669;
+  color: var(--accent-green-hover);
   text-decoration: none;
   font-weight: 500;
 }
@@ -257,12 +257,12 @@
 }
 
 .addressLink {
-  color: #6B7280;
+  color: var(--text-secondary);
   text-decoration: none;
 }
 
 .addressLink:hover {
-  color: #96FF5E;
+  color: var(--accent-green);
 }
 
 .status {
@@ -276,7 +276,7 @@
 
 .status.active {
   background: rgba(150, 255, 94, 0.1);
-  color: #96FF5E;
+  color: var(--accent-green);
 }
 
 .status.dkg_awaiting_transcripts {
@@ -286,17 +286,17 @@
 
 .status.dkg_awaiting_aggregations {
   background: rgba(59, 130, 246, 0.1);
-  color: #3B82F6;
+  color: var(--status-data);
 }
 
 .status.successful {
   background: rgba(16, 185, 129, 0.1);
-  color: #10B981;
+  color: var(--status-active);
 }
 
 .status.expired {
   background: rgba(107, 114, 128, 0.1);
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .status.time_out {
@@ -306,12 +306,12 @@
 
 .status.success {
   background: rgba(16, 185, 129, 0.1);
-  color: #10B981;
+  color: var(--status-active);
 }
 
 .status.processing {
   background: rgba(59, 130, 246, 0.1);
-  color: #3B82F6;
+  color: var(--status-data);
 }
 
 .status.pending {
@@ -325,7 +325,7 @@
 }
 
 .method {
-  background: #F3F4F6;
+  background: var(--bg-tertiary);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 11px;
@@ -333,23 +333,23 @@
 }
 
 .age {
-  color: #9CA3AF;
+  color: var(--text-tertiary);
   font-size: 12px;
 }
 
 .fee {
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .statValue {
   font-size: 15px;
   font-weight: 700;
-  color: #0A0A0A;
+  color: var(--text-primary);
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
 .description {
-  color: #6B7280;
+  color: var(--text-secondary);
   font-size: 12px;
 }
 
@@ -358,19 +358,19 @@
 .status.strong,
 .status.diverse {
   background: rgba(150, 255, 94, 0.1);
-  color: #96FF5E;
+  color: var(--accent-green);
 }
 
 .status.quiet,
 .status.normal {
   background: rgba(107, 114, 128, 0.1);
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 /* Chart Section */
 .chartSection {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 14px;
 }
@@ -379,7 +379,7 @@
   font-size: 16px;
   font-weight: 600;
   margin: 0 0 20px 0;
-  color: #0A0A0A;
+  color: var(--text-primary);
 }
 
 .chartPlaceholder {

@@ -81,16 +81,16 @@ const Heartbeats = () => {
   const maxCount = useMemo(() => Math.max(1, ...heatmapData.map(d => d.total)), [heatmapData]);
 
   const getHeatColor = (count, failed) => {
-    if (count === 0) return '#F3F4F6';
+    if (count === 0) return 'var(--bg-tertiary)';
     if (failed > 0) {
       const ratio = failed / count;
       if (ratio > 0.5) return '#FCA5A5';
       if (ratio > 0.2) return '#FBBF24';
     }
     const intensity = Math.min(count / maxCount, 1);
-    if (intensity < 0.25) return '#D1FAE5';
-    if (intensity < 0.5) return '#6EE7B7';
-    if (intensity < 0.75) return '#34D399';
+    if (intensity < 0.25) return '#1A3D2A';
+    if (intensity < 0.5) return '#1F5C3A';
+    if (intensity < 0.75) return '#1A8048';
     return '#059669';
   };
 
@@ -140,7 +140,7 @@ const Heartbeats = () => {
           </h3>
           <div className={styles.heatmapLegend}>
             <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Less</span>
-            {['#F3F4F6', '#D1FAE5', '#6EE7B7', '#34D399', '#059669'].map((c, i) => (
+            {['#222240', '#1A3D2A', '#1F5C3A', '#1A8048', '#059669'].map((c, i) => (
               <div key={i} style={{ width: 10, height: 10, background: c, borderRadius: 1 }} />
             ))}
             <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>More</span>
@@ -185,7 +185,7 @@ const Heartbeats = () => {
                 {groups.map((group, idx) => (
                   <tr key={idx} style={{ cursor: "pointer" }} onClick={() => navigate(`/heartbeat-group/${new Date(group.mondayMidnight).toISOString().split('T')[0]}`)}>
                     <td>
-                      <span className={styles.eventType} style={{ background: "#10B98120", color: "#10B981" }}>
+                      <span className={styles.eventType} style={{ background: "rgba(34, 197, 94, 0.15)", color: "#10B981" }}>
                         Week {group.weekNumber}
                       </span>
                     </td>
@@ -217,7 +217,7 @@ const Heartbeats = () => {
                   </tr>
                 ))}
                 {groups.length === 0 && (
-                  <tr><td colSpan={8} style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>No heartbeat groups found</td></tr>
+                  <tr><td colSpan={8} style={{ textAlign: "center", padding: 40, color: "var(--text-secondary)" }}>No heartbeat groups found</td></tr>
                 )}
               </tbody>
             </table>

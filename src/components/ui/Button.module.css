@@ -38,37 +38,37 @@
 
 /* Primary button style - lime green background */
 .contained {
-  background-color: #96FF5E;
-  color: #0A0A0A;
+  background-color: var(--accent-green);
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .contained:hover:not(.disabled) {
-  background-color: #7ACC47;
+  background-color: var(--accent-green-hover);
 }
 
 .contained:active:not(.disabled) {
-  background-color: #6BB83F;
+  background-color: var(--accent-green-hover);
 }
 
 .contained.primary {
-  background-color: #96FF5E;
-  color: #0A0A0A;
+  background-color: var(--accent-green);
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .contained.primary:hover:not(.disabled) {
-  background-color: #7ACC47;
+  background-color: var(--accent-green-hover);
 }
 
 .contained.primary:active:not(.disabled) {
-  background-color: #6BB83F;
+  background-color: var(--accent-green-hover);
 }
 
 /* Secondary button style - light gray background */
 .contained.secondary {
-  background-color: #F4F4F4;
-  color: #0A0A0A;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .contained.secondary:hover:not(.disabled) {
@@ -79,19 +79,19 @@
 /* Outlined/Ghost button style */
 .outlined {
   background-color: transparent;
-  border: 1px solid #E5E7EB;
-  color: #5A5A5A;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
 }
 
 .outlined:hover:not(.disabled) {
-  background-color: #F8F9FA;
-  color: #0A0A0A;
-  border-color: #96FF5E;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--accent-green);
 }
 
 .outlined.primary {
-  border-color: #96FF5E;
-  color: #0A0A0A;
+  border-color: var(--accent-green);
+  color: var(--text-primary);
 }
 
 .outlined.primary:hover:not(.disabled) {
@@ -100,34 +100,34 @@
 }
 
 .outlined.secondary {
-  border-color: #E5E7EB;
-  color: #5A5A5A;
+  border-color: var(--border-color);
+  color: var(--text-secondary);
 }
 
 .outlined.secondary:hover:not(.disabled) {
-  background-color: #F8F9FA;
-  color: #0A0A0A;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 /* Text button style */
 .text {
   background-color: transparent;
-  color: #5A5A5A;
+  color: var(--text-secondary);
   padding: 6px 8px;
 }
 
 .text:hover:not(.disabled) {
-  color: #0A0A0A;
-  background-color: #F8F9FA;
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
 }
 
 /* Disabled state */
 .disabled {
-  background-color: #F4F4F4 !important;
+  background-color: var(--bg-tertiary) !important;
   color: #909090 !important;
   cursor: not-allowed;
   opacity: 0.6;
-  border-color: #E5E7EB !important;
+  border-color: var(--border-color) !important;
 }
 
 .startIcon,

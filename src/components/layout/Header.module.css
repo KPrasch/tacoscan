@@ -75,7 +75,7 @@
 
 .navLink:hover {
   background: rgba(150, 255, 94, 0.1);
-  color: #96FF5E;
+  color: var(--accent-green);
 }
 
 .dropdown {
@@ -144,7 +144,7 @@
 
 .dropdownContent a:hover {
   background: rgba(150, 255, 94, 0.1);
-  color: #96FF5E;
+  color: var(--accent-green);
 }
 
 .headerActions {
@@ -155,7 +155,7 @@
 
 .connectButton {
   background: #96FF5E;
-  color: #0A0A0A;
+  color: var(--text-primary);
   border: none;
   padding: 6px 14px;
   border-radius: 5px;
@@ -194,7 +194,7 @@
 }
 
 .searchBar.focused {
-  border-color: #96FF5E;
+  border-color: var(--accent-green);
   box-shadow: 0 0 0 3px rgba(150, 255, 94, 0.1);
 }
 
@@ -213,7 +213,7 @@
 }
 
 .searchInput::placeholder {
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .searchButton {
@@ -222,7 +222,7 @@
   border: none;
   border-left: 1px solid #2A2A2A;
   cursor: pointer;
-  color: #96FF5E;
+  color: var(--accent-green);
   transition: all 0.2s ease;
 }
 
@@ -238,12 +238,12 @@
 .searchHint {
   margin-top: 8px;
   font-size: 12px;
-  color: #9CA3AF;
+  color: var(--text-tertiary);
   text-align: center;
 }
 
 .exampleLink {
-  color: #96FF5E;
+  color: var(--accent-green);
   text-decoration: none;
   margin: 0 4px;
 }
