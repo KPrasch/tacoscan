@@ -141,7 +141,7 @@ const Rewards = () => {
                 <div
                   key={d.date}
                   className={styles.earnerItem}
-                  style={{ cursor: "pointer", background: d.date === selectedDist ? "#1E293B" : undefined }}
+                  style={{ cursor: "pointer", background: d.date === selectedDist ? "#E5E7EB" : undefined }}
                   onClick={() => { setSelectedDist(d.date); setCurrentPage(1); }}
                 >
                   <span className={styles.earnerRank}>

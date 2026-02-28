@@ -30,8 +30,8 @@
 }
 
 .tab.active {
-  color: var(--text-primary);
-  font-weight: 600;
+  color: #0A0A0A;
+  font-weight: 700;
 }
 
 .tab.active::after {

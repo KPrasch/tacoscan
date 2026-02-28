@@ -30,8 +30,8 @@
 }
 
 .tableRow.selected {
-  border-left: 3px solid var(--color-primary-accent, #96FF5E);
-  background-color: rgba(150, 255, 94, 0.05);
+  border-left: 3px solid var(--color-primary-accent, #4ADE80);
+  background-color: rgba(74, 222, 128, 0.05);
 }
 
 .tableCell {
@@ -116,14 +116,14 @@
 }
 
 .select:hover {
-  border-color: var(--color-primary-accent, #96FF5E);
+  border-color: var(--color-primary-accent, #4ADE80);
   background-color: var(--color-tertiary-bg, #F4F4F4);
 }
 
 .select:focus {
   outline: none;
-  border-color: var(--color-primary-accent, #96FF5E);
-  box-shadow: 0 0 0 2px rgba(150, 255, 94, 0.2);
+  border-color: var(--color-primary-accent, #4ADE80);
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2);
 }
 
 .displayedRows {
@@ -154,7 +154,7 @@
 
 .paginationButton:hover:not(:disabled) {
   background-color: var(--color-tertiary-bg, #F4F4F4);
-  border-color: var(--color-primary-accent, #96FF5E);
+  border-color: var(--color-primary-accent, #4ADE80);
   color: var(--color-primary-text, #0A0A0A);
 }
 
@@ -177,7 +177,7 @@
 }
 
 .tableSortLabel:hover {
-  color: var(--color-primary-accent, #96FF5E);
+  color: var(--color-primary-accent, #4ADE80);
 }
 
 .tableSortLabel.active {
@@ -199,5 +199,5 @@
 
 .tableSortLabel.active .sortIcon {
   opacity: 1;
-  color: var(--color-primary-accent, #96FF5E);
+  color: var(--color-primary-accent, #4ADE80);
 }

@@ -51,7 +51,7 @@
 .statusDot {
   width: 8px;
   height: 8px;
-  background: #96FF5E;
+  background: #4ADE80;
   border-radius: 50%;
   animation: pulse 2s infinite;
 }
@@ -275,7 +275,7 @@
 }
 
 .status.active {
-  background: rgba(150, 255, 94, 0.1);
+  background: rgba(74, 222, 128, 0.1);
   color: var(--accent-green);
 }
 
@@ -357,7 +357,7 @@
 .status.high,
 .status.strong,
 .status.diverse {
-  background: rgba(150, 255, 94, 0.1);
+  background: rgba(74, 222, 128, 0.1);
   color: var(--accent-green);
 }
 
@@ -392,7 +392,7 @@
 
 .chartBar {
   width: 40px;
-  background: linear-gradient(to top, #96FF5E, #7FE545);
+  background: linear-gradient(to top, #4ADE80, #22c55e);
   border-radius: 4px 4px 0 0;
   transition: all 0.3s ease;
 }

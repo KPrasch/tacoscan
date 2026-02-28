@@ -27,14 +27,14 @@
 .footerTitle {
   font-size: 16px;
   font-weight: 700;
-  color: var(--accent-green);
+  color: #4ADE80;
   margin: 0 0 8px 0;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
 .footerDescription {
   font-size: 14px;
-  color: var(--text-tertiary);
+  color: #9CA3AF;
   line-height: 1.6;
   margin: 0 0 12px 0;
 }
@@ -52,7 +52,7 @@
 }
 
 .socialLink:hover {
-  color: var(--accent-green);
+  color: #4ADE80;
 }
 
 .footerSubtitle {
@@ -74,14 +74,14 @@
 }
 
 .footerLinks a {
-  color: var(--text-tertiary);
+  color: #9CA3AF;
   text-decoration: none;
   font-size: 14px;
   transition: all 0.2s ease;
 }
 
 .footerLinks a:hover {
-  color: var(--accent-green);
+  color: #4ADE80;
   transform: translateX(2px);
 }
 
@@ -98,7 +98,7 @@
 }
 
 .networkLabel {
-  color: var(--text-secondary);
+  color: #9CA3AF;
 }
 
 .networkValue {
@@ -119,7 +119,7 @@
 
 .copyright {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: #9CA3AF;
   margin: 0;
 }
 
@@ -129,14 +129,14 @@
 }
 
 .footerBottomLinks a {
-  color: var(--text-tertiary);
+  color: #9CA3AF;
   text-decoration: none;
   font-size: 13px;
   transition: color 0.2s ease;
 }
 
 .footerBottomLinks a:hover {
-  color: var(--accent-green);
+  color: #4ADE80;
 }
 
 /* Responsive */

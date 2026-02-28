@@ -42,7 +42,7 @@
 
 /* Header Section */
 .header {
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
     border-radius: 12px;
     padding: 16px 20px;
     margin-bottom: 16px;
@@ -490,7 +490,7 @@
 }
 
 .copyJsonButton:hover {
-    background: rgba(150, 255, 94, 0.1);
+    background: rgba(74, 222, 128, 0.1);
     border-color: #96ff5e;
     color: #0a0a0a;
 }

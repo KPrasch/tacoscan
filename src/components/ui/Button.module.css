@@ -38,31 +38,31 @@
 
 /* Primary button style - lime green background */
 .contained {
-  background-color: var(--accent-green);
-  color: var(--text-primary);
+  background-color: #0A0A0A;
+  color: #FFFFFF;
   font-weight: 600;
 }
 
 .contained:hover:not(.disabled) {
-  background-color: var(--accent-green-hover);
+  background-color: #222222;
 }
 
 .contained:active:not(.disabled) {
-  background-color: var(--accent-green-hover);
+  background-color: #222222;
 }
 
 .contained.primary {
-  background-color: var(--accent-green);
-  color: var(--text-primary);
+  background-color: #0A0A0A;
+  color: #FFFFFF;
   font-weight: 600;
 }
 
 .contained.primary:hover:not(.disabled) {
-  background-color: var(--accent-green-hover);
+  background-color: #222222;
 }
 
 .contained.primary:active:not(.disabled) {
-  background-color: var(--accent-green-hover);
+  background-color: #222222;
 }
 
 /* Secondary button style - light gray background */
@@ -73,7 +73,7 @@
 
 .contained.secondary:hover:not(.disabled) {
   background-color: #E5E7EB;
-  border: 1px solid #96FF5E;
+  border: 1px solid #4ADE80;
 }
 
 /* Outlined/Ghost button style */
@@ -95,7 +95,7 @@
 }
 
 .outlined.primary:hover:not(.disabled) {
-  background-color: rgba(150, 255, 94, 0.1);
+  background-color: rgba(74, 222, 128, 0.1);
   border-color: #7ACC47;
 }
 

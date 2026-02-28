@@ -1,9 +1,10 @@
 .header {
   width: 100%;
-  background: #0A0A0A;
+  background: #FFFFFF;
   position: sticky;
   top: 0;
   z-index: 1000;
+  border-bottom: 1px solid #E5E7EB;
 }
 
 .container {
@@ -14,7 +15,6 @@
 
 .mainHeader {
   padding: 10px 0;
-  border-bottom: 1px solid #1A1A1A;
 }
 
 .headerContent {
@@ -43,8 +43,8 @@
 .logoText {
   font-family: var(--font-mono);
   font-size: 20px;
-  font-weight: 400;
-  color: #FFFFFF;
+  font-weight: 700;
+  color: #0A0A0A;
   letter-spacing: 0.15em;
   margin-left: 10px;
   line-height: 1;
@@ -57,7 +57,7 @@
 }
 
 .navLink {
-  color: #E5E7EB;
+  color: #5A5A5A;
   text-decoration: none;
   font-size: 12px;
   font-weight: 500;
@@ -74,8 +74,8 @@
 }
 
 .navLink:hover {
-  background: rgba(150, 255, 94, 0.1);
-  color: var(--accent-green);
+  background: rgba(74, 222, 128, 0.1);
+  color: #0A0A0A;
 }
 
 .dropdown {
@@ -108,11 +108,11 @@
 .dropdownContent {
   display: none;
   position: absolute;
-  background: #1A1A1A;
+  background: #FFFFFF;
   min-width: 180px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  border: 1px solid #2A2A2A;
+  border: 1px solid #E5E7EB;
   z-index: 1001;
   top: calc(100% - 4px);
   padding-top: 4px;
@@ -123,7 +123,7 @@
 }
 
 .dropdownContent a {
-  color: #E5E7EB;
+  color: #5A5A5A;
   padding: 8px 14px;
   text-decoration: none;
   display: block;
@@ -143,8 +143,8 @@
 }
 
 .dropdownContent a:hover {
-  background: rgba(150, 255, 94, 0.1);
-  color: var(--accent-green);
+  background: rgba(74, 222, 128, 0.1);
+  color: #0A0A0A;
 }
 
 .headerActions {
@@ -154,8 +154,8 @@
 }
 
 .connectButton {
-  background: #96FF5E;
-  color: var(--text-primary);
+  background: #0A0A0A;
+  color: #FFFFFF;
   border: none;
   padding: 6px 14px;
   border-radius: 5px;
@@ -167,15 +167,15 @@
 }
 
 .connectButton:hover {
-  background: #7FE545;
+  background: #222222;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(150, 255, 94, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .searchSection {
-  background: #0F0F0F;
+  background: #F8F9FA;
   padding: 12px 0;
-  border-bottom: 1px solid #1A1A1A;
+  border-bottom: 1px solid #E5E7EB;
 }
 
 .searchForm {
@@ -186,8 +186,8 @@
 .searchBar {
   display: flex;
   align-items: center;
-  background: #1A1A1A;
-  border: 2px solid #2A2A2A;
+  background: #FFFFFF;
+  border: 2px solid #E5E7EB;
   border-radius: 8px;
   overflow: hidden;
   transition: all 0.2s ease;
@@ -195,7 +195,7 @@
 
 .searchBar.focused {
   border-color: var(--accent-green);
-  box-shadow: 0 0 0 3px rgba(150, 255, 94, 0.1);
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.15);
 }
 
 .searchInput {
@@ -205,7 +205,7 @@
   font-size: 13px;
   font-family: var(--font-mono, 'Space Mono', monospace);
   background: transparent;
-  color: #FFFFFF;
+  color: #0A0A0A;
 }
 
 .searchInput:focus {
@@ -213,21 +213,22 @@
 }
 
 .searchInput::placeholder {
-  color: var(--text-secondary);
+  color: #909090;
 }
 
 .searchButton {
   padding: 8px 14px;
   background: transparent;
   border: none;
-  border-left: 1px solid #2A2A2A;
+  border-left: 1px solid #E5E7EB;
   cursor: pointer;
-  color: var(--accent-green);
+  color: #0A0A0A;
   transition: all 0.2s ease;
 }
 
 .searchButton:hover {
-  background: rgba(150, 255, 94, 0.1);
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--accent-green-hover);
 }
 
 .searchButton svg {
@@ -238,12 +239,12 @@
 .searchHint {
   margin-top: 8px;
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: #909090;
   text-align: center;
 }
 
 .exampleLink {
-  color: var(--accent-green);
+  color: var(--accent-green-hover);
   text-decoration: none;
   margin: 0 4px;
 }

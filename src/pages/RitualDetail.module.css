@@ -120,7 +120,7 @@
 
 .tab:hover {
   color: var(--text-primary);
-  background: rgba(150, 255, 94, 0.05);
+  background: rgba(74, 222, 128, 0.05);
 }
 
 .activeTab {
@@ -130,7 +130,7 @@
 }
 
 .activeTab:hover {
-  background: rgba(150, 255, 94, 0.05);
+  background: rgba(74, 222, 128, 0.05);
 }
 
 /* Tab Content */

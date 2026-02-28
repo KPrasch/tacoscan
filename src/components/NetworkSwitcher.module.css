@@ -43,15 +43,15 @@
 }
 
 .networkButton:hover:not(:disabled) {
-  background: rgba(150, 255, 94, 0.1);
-  border-color: var(--network-color, #96FF5E);
+  background: rgba(74, 222, 128, 0.1);
+  border-color: var(--network-color, #4ADE80);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .networkButton.active {
-  background: var(--network-color, #96FF5E);
-  border-color: var(--network-color, #96FF5E);
+  background: var(--network-color, #4ADE80);
+  border-color: var(--network-color, #4ADE80);
   color: #FFFFFF;
   cursor: default;
   opacity: 0.9;
