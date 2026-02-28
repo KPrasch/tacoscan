@@ -6,12 +6,12 @@ import CopyButton from "../../components/CopyButton";
 import Loader from "../../components/loader";
 import { Tooltip } from "../../components/ui";
 
-const STATUS_COLORS = {
-  Active: "#22c55e",
-  Released: "#6b7280",
-  Slashed: "#ef4444",
-  Penalized: "#f59e0b",
-  Beta: "#3b82f6",
+const STATUS_BADGE_CLASSES = {
+  Active: "badgeActive",
+  Released: "badgeReleased", 
+  Slashed: "badgeSlashed",
+  Penalized: "badgePenalized",
+  Data: "badgeData",
 };
 
 const SortIcon = ({ active, direction }) => (
@@ -104,9 +104,9 @@ const NodesPage = ({ network = "polygon", isSearch = false, searchInput = "" } =
   ];
 
   const StatusBadge = ({ status, isBeta }) => {
-    if (isBeta) return <span className={styles.badge} style={{ background: "rgba(59,130,246,0.15)", color: "#3b82f6" }}>DATA</span>;
-    const color = STATUS_COLORS[status] || "#6b7280";
-    return <span className={styles.badge} style={{ background: `${color}20`, color }}>{status}</span>;
+    if (isBeta) return <span className={`badge ${STATUS_BADGE_CLASSES.Data}`}>DATA</span>;
+    const badgeClass = STATUS_BADGE_CLASSES[status] || STATUS_BADGE_CLASSES.Released;
+    return <span className={`badge ${badgeClass}`}>{status}</span>;
   };
 
   const renderRow = (node, idx) => (
@@ -131,8 +131,11 @@ const NodesPage = ({ network = "polygon", isSearch = false, searchInput = "" } =
       <td>
         <StatusBadge status={node.nodeStatus} isBeta={node.isBetaStaker} />
       </td>
-      <td style={{ textAlign: "center" }}>
-        {node.isOperatorConfirmed ? <span style={{ color: "#22c55e" }}>✓</span> : <span style={{ color: "#ef4444" }}>✗</span>}
+      <td style={{ textAlign: "center", fontSize: "11px", color: "var(--text-secondary)" }}>
+        {node.isOperatorConfirmed ? 
+          <span style={{ color: "var(--status-active)", fontWeight: "600" }}>YES</span> : 
+          <span style={{ color: "var(--status-slashed)", fontWeight: "600" }}>NO</span>
+        }
       </td>
       <td className={styles.cellMuted}>{node.bondedAt ? Data.formatTimeToText(node.bondedAt) : "—"}</td>
     </tr>

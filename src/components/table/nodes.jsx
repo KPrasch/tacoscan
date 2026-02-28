@@ -19,9 +19,7 @@ import {
   TableRow,
   TableSortLabel,
   Paper,
-  Link,
-  CheckSharpIcon,
-  CloseSharpIcon
+  Link
 } from "../ui";
 
 export const NodesTable = ({ columns, data, isLoading, network }) => {
@@ -158,20 +156,8 @@ export const NodesTable = ({ columns, data, isLoading, network }) => {
                 {Data.formatString(row.id)}
               </RouterLink>
               {row.isBetaStaker && (
-                <span style={{
-                  background: '#6366F1',
-                  color: '#FFFFFF',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  fontSize: '11px',
-                  fontWeight: 500,
-                  fontFamily: 'var(--font-mono)',
-                  letterSpacing: '0.025em',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}>
-                  <span style={{ fontSize: '12px' }}>⭐</span> BETA
+                <span className="badge badgeData">
+                  DATA
                 </span>
               )}
               <Tooltip title="Copied">
@@ -204,14 +190,14 @@ export const NodesTable = ({ columns, data, isLoading, network }) => {
               {Data.formatWeiDecimal(row.stakedAmount)}
             </span>
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" style={{ textAlign: "center", fontSize: "11px", color: "var(--text-secondary)" }}>
             {row.isOperatorConfirmed === true ? (
               <Tooltip title={"operator address is registered"}>
-                <CheckSharpIcon style={{ color: "green" }} />
+                <span style={{ color: "var(--status-active)", fontWeight: "600" }}>YES</span>
               </Tooltip>
             ) : (
               <Tooltip title={"operator address is not registered"}>
-                <CloseSharpIcon style={{ color: "red" }} />
+                <span style={{ color: "var(--status-slashed)", fontWeight: "600" }}>NO</span>
               </Tooltip>
             )}
           </TableCell>
@@ -219,13 +205,11 @@ export const NodesTable = ({ columns, data, isLoading, network }) => {
             {row.bondedAt ? Data.formatTimeToText(row.bondedAt) : "-"}
           </TableCell>
           <TableCell align="left">
-            <span style={{
-              color: row.nodeStatus === 'Slashed' ? '#EF4444' :
-                     row.nodeStatus === 'Penalized' ? '#F59E0B' :
-                     row.nodeStatus === 'Released' ? '#6B7280' : '#10B981',
-              fontWeight: 500,
-              fontSize: '0.875rem'
-            }}>
+            <span className={`badge ${
+              row.nodeStatus === 'Slashed' ? 'badgeSlashed' :
+              row.nodeStatus === 'Penalized' ? 'badgePenalized' :
+              row.nodeStatus === 'Released' ? 'badgeReleased' : 'badgeActive'
+            }`}>
               {row.nodeStatus || 'Active'}
             </span>
           </TableCell>

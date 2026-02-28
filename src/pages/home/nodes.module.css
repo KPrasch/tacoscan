@@ -26,39 +26,41 @@
 .statsRow {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
-  padding: 10px 16px;
+  padding: 8px 12px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 3px;
+  font-size: 13px;
 }
 
 .stat {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
 }
 
 .statLabel {
-  font-size: 0.7rem;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   color: var(--text-secondary);
   font-weight: 600;
 }
 
 .statValue {
-  font-size: 0.875rem;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--text-primary);
-  font-family: var(--font-mono, 'Space Mono', 'Consolas', monospace);
+  font-family: var(--font-display);
 }
 
 .statDivider {
   width: 1px;
-  height: 20px;
+  height: 16px;
   background: var(--border-color);
+  opacity: 0.5;
 }
 
 .unit {
@@ -78,21 +80,23 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.8125rem;
+  font-size: 13px;
 }
 
 .th {
-  padding: 8px 12px;
+  padding: 4px 8px;
   text-align: left;
-  font-size: 0.6875rem;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   color: var(--text-secondary);
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   white-space: nowrap;
   user-select: none;
+  height: 28px;
+  vertical-align: middle;
 }
 
 .th:hover {
@@ -100,35 +104,44 @@
 }
 
 .row {
-  border-bottom: 1px solid var(--border-light, #F3F4F6);
-  transition: background 0.1s;
+  border-bottom: 1px solid var(--border-light);
+  transition: background 0.15s;
 }
 
 .row:hover {
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
 }
 
 .row td {
-  padding: 6px 12px;
+  padding: 4px 8px;
   vertical-align: middle;
-  font-size: 0.8125rem;
+  font-size: 13px;
   color: var(--text-primary);
+  height: 32px;
 }
 
 .cellAddr {
-  font-family: var(--font-mono, 'Space Mono', 'Consolas', monospace);
-  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  font-size: 13px;
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
+.row:hover .cellAddr button {
+  opacity: 0.6 !important;
+}
+
+.cellAddr button:hover {
+  opacity: 1 !important;
+}
+
 .addrLink {
   color: var(--accent-green);
   text-decoration: none;
-  font-family: var(--font-mono, 'Space Mono', 'Consolas', monospace);
-  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  font-size: 13px;
 }
 
 .addrLink:hover {
@@ -137,31 +150,22 @@
 }
 
 .cellNum {
-  font-family: var(--font-mono, 'Space Mono', 'Consolas', monospace);
+  font-family: var(--font-mono);
   text-align: right;
   white-space: nowrap;
+  font-size: 13px;
 }
 
 .cellMuted {
   color: var(--text-tertiary);
-  font-size: 0.75rem;
+  font-size: 12px;
 }
 
 .muted {
   color: var(--text-tertiary);
 }
 
-/* Status Badge */
-.badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 3px;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-}
+/* Badge styles moved to global App.css for consistency */
 
 /* Pagination */
 .pagination {

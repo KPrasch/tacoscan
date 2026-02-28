@@ -1,22 +1,38 @@
-/* Root Variables - TACo Official Brand */
+/* Unified TACo Design System - Light Theme Professional */
 :root {
-  /* Official TACo Colors - These override the ones in fonts.css for consistency */
-  --bg-primary: var(--taco-off-white);
-  --bg-secondary: var(--taco-white);
-  --bg-dark: var(--taco-black);
-  --text-primary: var(--taco-black);
-  --text-secondary: var(--taco-gray);
-  --text-tertiary: var(--taco-gray-light);
-  --text-inverse: var(--taco-white);
-  --accent-green: var(--taco-green);
-  --accent-green-hover: var(--taco-green-hover);
-  --border-color: var(--taco-border);
+  /* Core Colors */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F9FAFB;
+  --bg-tertiary: #F3F4F6;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-tertiary: #9CA3AF;
+  --text-inverse: #FFFFFF;
+  
+  /* TACo Brand Colors */
+  --accent-green: #96FF5E;
+  --accent-green-hover: #7FE545;
+  
+  /* Status Colors */
+  --status-active: #22c55e;
+  --status-released: #6b7280;
+  --status-slashed: #ef4444;
+  --status-penalized: #f59e0b;
+  --status-data: #3b82f6;
+  
+  /* Borders */
+  --border-color: #E5E7EB;
   --border-light: #F3F4F6;
   
-  /* Shadows */
+  /* Typography */
+  --font-display: 'ABC Diatype', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-mono: 'Space Mono', 'Monaco', 'Consolas', monospace;
+  
+  /* Shadows - Etherscan minimal */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 4px 6px 0 rgba(0, 0, 0, 0.07);
 }
 
 * {
@@ -156,38 +172,45 @@ input::placeholder, textarea::placeholder {
   color: var(--text-tertiary);
 }
 
-/* Tables */
+/* Tables - Etherscan Density */
 table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
+  font-size: 13px;
 }
 
 th {
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   font-weight: 600;
   text-align: left;
-  padding: 6px 10px;
-  font-size: 0.7rem;
+  padding: 4px 8px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+  user-select: none;
+  height: 28px;
+  vertical-align: middle;
 }
 
 td {
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-bottom: 1px solid var(--border-light);
-  font-size: 0.8rem;
+  font-size: 13px;
   color: var(--text-primary);
+  height: 32px;
+  vertical-align: middle;
 }
 
 tbody tr {
-  transition: background 0.2s ease;
+  transition: background 0.15s ease;
 }
 
 tbody tr:hover {
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
 }
 
 tbody tr:last-child td {
@@ -250,35 +273,47 @@ tbody tr:last-child td {
   box-shadow: var(--shadow-md);
 }
 
-/* Badges */
+/* Professional Badge System - Etherscan Style */
 .badge {
   display: inline-block;
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-size: 0.675rem;
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.25px;
+  white-space: nowrap;
+  border: 1px solid transparent;
 }
 
-.badge-success {
-  background: rgba(150, 255, 94, 0.1);
-  color: var(--accent-green);
+.badgeActive {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--status-active);
+  border-color: rgba(34, 197, 94, 0.2);
 }
 
-.badge-warning {
-  background: rgba(251, 191, 36, 0.1);
-  color: #FBBf24;
+.badgeReleased {
+  background: rgba(107, 114, 128, 0.1);
+  color: var(--status-released);
+  border-color: rgba(107, 114, 128, 0.2);
 }
 
-.badge-info {
+.badgeSlashed {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--status-slashed);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.badgePenalized {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--status-penalized);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.badgeData {
   background: rgba(59, 130, 246, 0.1);
-  color: #3B82F6;
-}
-
-.badge-muted {
-  background: var(--bg-primary);
-  color: var(--text-secondary);
+  color: var(--status-data);
+  border-color: rgba(59, 130, 246, 0.2);
 }
 
 /* Loading States */

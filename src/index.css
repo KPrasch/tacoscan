@@ -1,56 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
 
-/* TACo Style Guide - Light Theme */
-:root {
-    /* Typography */
-    --font-mono: "Space Mono", monospace;
+/* Legacy color variables removed - using unified App.css variables */
 
-    /* Background Colors */
-    --color-primary-bg: #ffffff;
-    --color-secondary-bg: #f8f9fa;
-    --color-tertiary-bg: #f4f4f4;
-
-    /* Text Colors */
-    --color-primary-text: #0a0a0a;
-    --color-secondary-text: #5a5a5a;
-    --color-tertiary-text: #909090;
-    --color-inverse-text: #ffffff;
-
-    /* Accent Colors */
-    --color-primary-accent: #96ff5e;
-    --color-secondary-accent: #7acc47;
-    --color-tertiary-accent: #b8ff8f;
-
-    /* Functional Colors */
-    --color-border-default: #e5e7eb;
-    --color-border-focus: #96ff5e;
-    --color-error: #ef4444;
-    --color-success: #96ff5e;
-    --color-info: #3b82f6;
-
-    /* Dark Sections */
-    --color-dark-bg: #0a0a0a;
-    --color-dark-surface: #1a1a1a;
-    --color-dark-border: #2a2a2a;
-
-    /* Shadows */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-}
-
-body {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-feature-settings:
-        "ss02" 1,
-        "onum" 1;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background: var(--color-secondary-bg);
-    color: var(--color-primary-text);
-    min-height: 100vh;
-}
+/* Body styling now controlled by App.css for consistency */
 
 button:focus {
     outline: none;

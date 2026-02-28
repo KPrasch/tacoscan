@@ -16,14 +16,20 @@ const CopyButton = forwardRef(({ onClick, style, ...props }, ref) => (
       cursor: "pointer", 
       background: "none",
       border: "none",
-      padding: 0,
+      padding: "2px",
       display: "inline-flex",
       alignItems: "center",
+      opacity: 0,
+      transition: "opacity 0.15s ease",
+      width: "14px",
+      height: "14px",
       ...style 
     }}
+    onMouseEnter={(e) => e.target.style.opacity = "0.6"}
+    onMouseLeave={(e) => e.target.style.opacity = "0"}
     {...props}
   >
-    <ForwardedCopy />
+    <ForwardedCopy style={{ width: "12px", height: "12px" }} />
   </button>
 ));
 

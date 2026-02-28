@@ -69,7 +69,7 @@ const Infractions = () => {
       <div className={styles.container}>
         <div className={styles.pageHeader}>
           <div className={styles.headerContent}>
-            <h1 className={styles.pageTitle}>⚠️ Infractions</h1>
+            <h1 className={styles.pageTitle}>Infractions</h1>
             <p className={styles.pageSubtitle}>Network infractions — missed transcripts, aggregations, and penalties</p>
           </div>
           <div className={styles.headerStats}>

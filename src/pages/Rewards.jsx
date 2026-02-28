@@ -80,7 +80,7 @@ const Rewards = () => {
       <div className={styles.container}>
         <div className={styles.pageHeader}>
           <div className={styles.headerContent}>
-            <h1 className={styles.pageTitle}>💰 Rewards</h1>
+            <h1 className={styles.pageTitle}>Rewards</h1>
             <p className={styles.pageSubtitle}>
               Monthly TACo reward distributions — Merkle tree based payouts to stakers.
               Contract: <a href={`https://etherscan.io/address/${REWARDS_CONTRACT}`} target="_blank" rel="noopener noreferrer" style={{ color: "#3B82F6" }}>{formatString(REWARDS_CONTRACT)}</a>
