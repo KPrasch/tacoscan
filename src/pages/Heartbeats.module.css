@@ -458,3 +458,45 @@
   color: #374151;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
+
+/* Heartbeat Heatmap */
+.heatmapSection {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.heatmapGrid {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+.heatmapCol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.heatmapCell {
+  width: 10px;
+  height: 10px;
+  border-radius: 1px;
+  cursor: default;
+}
+
+.heatmapCell:hover {
+  outline: 1px solid var(--text-secondary);
+}
+
+.heatmapLegend {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 8px;
+  justify-content: flex-end;
+}
+

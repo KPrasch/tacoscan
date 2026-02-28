@@ -50,7 +50,57 @@ const Heartbeats = () => {
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   };
 
+  // Build heatmap data — daily heartbeat counts for last 52 weeks
+  const heatmapData = useMemo(() => {
+    const dayMap = {};
+    allHeartbeats.forEach(r => {
+      const ts = r.initTimeStamp || r.startedAt;
+      if (!ts) return;
+      const d = new Date(ts);
+      const key = d.toISOString().split('T')[0];
+      if (!dayMap[key]) dayMap[key] = { total: 0, successful: 0, failed: 0 };
+      dayMap[key].total++;
+      if (r.status === "SUCCESSFUL" || r.status === "ACTIVE") dayMap[key].successful++;
+      else dayMap[key].failed++;
+    });
+
+    // Generate 52 weeks of days ending today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const days = [];
+    // Start from the Sunday 52 weeks ago
+    const start = new Date(today);
+    start.setDate(start.getDate() - start.getDay() - 52 * 7);
+    for (let d = new Date(start); d <= today; d.setDate(d.getDate() + 1)) {
+      const key = d.toISOString().split('T')[0];
+      days.push({ date: key, ...( dayMap[key] || { total: 0, successful: 0, failed: 0 }) });
+    }
+    return days;
+  }, [allHeartbeats]);
+
+  const maxCount = useMemo(() => Math.max(1, ...heatmapData.map(d => d.total)), [heatmapData]);
+
+  const getHeatColor = (count, failed) => {
+    if (count === 0) return '#F3F4F6';
+    if (failed > 0) {
+      const ratio = failed / count;
+      if (ratio > 0.5) return '#FCA5A5';
+      if (ratio > 0.2) return '#FBBF24';
+    }
+    const intensity = Math.min(count / maxCount, 1);
+    if (intensity < 0.25) return '#D1FAE5';
+    if (intensity < 0.5) return '#6EE7B7';
+    if (intensity < 0.75) return '#34D399';
+    return '#059669';
+  };
+
   if (loading) return <div className={styles.networkActivity}><div className={styles.loading}>Loading heartbeat data...</div></div>;
+
+  // Group heatmap into weeks (columns)
+  const weeks = [];
+  for (let i = 0; i < heatmapData.length; i += 7) {
+    weeks.push(heatmapData.slice(i, i + 7));
+  }
 
   return (
     <div className={styles.networkActivity}>
@@ -80,6 +130,36 @@ const Heartbeats = () => {
               <span className={styles.statLabel}>Participants</span>
               <span className={styles.statValue}>{stats.uniqueParticipants}</span>
             </div>
+          </div>
+        </div>
+
+        {/* Heartbeat Heatmap */}
+        <div className={styles.heatmapSection}>
+          <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-secondary)' }}>
+            HEARTBEAT ACTIVITY — LAST 52 WEEKS
+          </h3>
+          <div className={styles.heatmapLegend}>
+            <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Less</span>
+            {['#F3F4F6', '#D1FAE5', '#6EE7B7', '#34D399', '#059669'].map((c, i) => (
+              <div key={i} style={{ width: 10, height: 10, background: c, borderRadius: 1 }} />
+            ))}
+            <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>More</span>
+            <div style={{ width: 10, height: 10, background: '#FCA5A5', borderRadius: 1, marginLeft: 8 }} />
+            <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Failures</span>
+          </div>
+          <div className={styles.heatmapGrid}>
+            {weeks.map((week, wi) => (
+              <div key={wi} className={styles.heatmapCol}>
+                {week.map((day, di) => (
+                  <div
+                    key={di}
+                    className={styles.heatmapCell}
+                    style={{ background: getHeatColor(day.total, day.failed) }}
+                    title={`${day.date}: ${day.total} heartbeats (${day.successful} ok, ${day.failed} failed)`}
+                  />
+                ))}
+              </div>
+            ))}
           </div>
         </div>
 
