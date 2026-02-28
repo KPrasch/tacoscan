@@ -41,12 +41,12 @@ export const BETA_STAKERS = new Set([
 
 /**
  * Check if a node has requested exit — derived on-chain from the
- * deauthorizing field on StakingProvider (deauthorizing > 0).
- * No more hardcoded address lists.
+ * isReleased flag on StakingProvider, set when authorized amount
+ * drops below minimumAuthorization.  Using deauthorizing > 0 was
+ * imprecise because partial stake reductions also set that field.
  */
 export function hasRequestedExit(stakingProvider) {
-  const deauthorizing = stakingProvider?.deauthorizing;
-  return deauthorizing && BigInt(deauthorizing) > 0n;
+  return stakingProvider?.isReleased === true;
 }
 
 export const RewardStatus = {
