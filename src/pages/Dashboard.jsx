@@ -326,36 +326,82 @@ const Dashboard = () => {
         </section>
 
 
-        {/* Domain Stats Section */}
+        {/* Protocol Statistics Section */}
         {domainStats && Object.keys(domainStats).length > 0 && (
           <section className={styles.networkOverview} style={{ marginTop: '24px' }}>
             <div className={styles.overviewCard}>
               <div className={styles.overviewHeader}>
                 <h2 className={styles.overviewTitle}>Protocol Statistics</h2>
               </div>
-              <div className={styles.overviewStats} style={{ flexWrap: 'wrap', gap: '16px' }}>
-                {Object.values(domainStats).map((s, i) => (
-                  <div key={i} className={styles.overviewStat} style={{ minWidth: '140px' }}>
-                    <span className={styles.overviewLabel}>{s.id?.toUpperCase()} ({s.chain})</span>
-                    <span className={styles.overviewValue} style={{ fontSize: '1.2rem' }}>
-                      {s.totalRituals || 0} rituals
-                    </span>
-                    <span className={styles.overviewChange}>
-                      {s.totalStakingProviders || 0} providers · {s.totalSigningCohorts || 0} cohorts
-                    </span>
-                    {s.totalInfractions > 0 && (
-                      <span className={styles.overviewChange} style={{ color: '#EF4444' }}>
-                        {s.totalInfractions} infractions
-                      </span>
-                    )}
-                    {s.totalPolicies > 0 && (
-                      <span className={styles.overviewChange}>
-                        {s.totalPolicies} policies
-                      </span>
-                    )}
+              {Object.values(domainStats).map((s, i) => {
+                // Build meaningful stats array - only non-zero values
+                const meaningfulStats = [];
+                
+                // Primary metrics (always show if non-zero)
+                if (s.totalRituals > 0) meaningfulStats.push({ label: 'Total Rituals', value: s.totalRituals.toLocaleString() });
+                if (s.successfulRituals > 0) meaningfulStats.push({ label: 'Successful', value: s.successfulRituals.toLocaleString() });
+                if (s.totalStakingProviders > 0) meaningfulStats.push({ label: 'Staking Providers', value: s.totalStakingProviders.toLocaleString() });
+                if (s.totalSigningCohorts > 0) meaningfulStats.push({ label: 'Signing Cohorts', value: s.totalSigningCohorts.toLocaleString() });
+                
+                // Secondary metrics (show if non-zero)
+                if (s.totalInfractions > 0) meaningfulStats.push({ label: 'Infractions', value: s.totalInfractions.toLocaleString(), color: '#ef4444' });
+                if (s.totalPolicies > 0) meaningfulStats.push({ label: 'Policies', value: s.totalPolicies.toLocaleString() });
+                if (s.activeRituals > 0) meaningfulStats.push({ label: 'Active Rituals', value: s.activeRituals.toLocaleString() });
+                if (s.activeStakingProviders > 0) meaningfulStats.push({ label: 'Active Providers', value: s.activeStakingProviders.toLocaleString() });
+                
+                // Financial metrics (show if non-zero)
+                if (s.totalRewardsDistributed > 0) meaningfulStats.push({ label: 'Rewards Distributed', value: s.totalRewardsDistributed.toLocaleString() });
+                if (s.totalSlashed > 0) meaningfulStats.push({ label: 'Total Slashed', value: s.totalSlashed.toLocaleString(), color: '#ef4444' });
+                
+                // Governance metrics (show if non-zero)
+                if (s.totalGovernanceEvents > 0) meaningfulStats.push({ label: 'Governance Events', value: s.totalGovernanceEvents.toLocaleString() });
+                
+                return meaningfulStats.length > 0 ? (
+                  <div key={i} style={{ marginBottom: '16px' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-secondary)', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                      {s.id?.toUpperCase()} ({s.chain})
+                    </h3>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '12px', 
+                      flexWrap: 'wrap', 
+                      padding: '8px 12px', 
+                      background: 'var(--bg-secondary)', 
+                      border: '1px solid var(--border-color)', 
+                      borderRadius: '3px',
+                      fontSize: '13px'
+                    }}>
+                      {meaningfulStats.map((stat, idx) => (
+                        <React.Fragment key={idx}>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                            <span style={{ 
+                              fontSize: '11px', 
+                              textTransform: 'uppercase', 
+                              letterSpacing: '0.3px', 
+                              color: 'var(--text-secondary)', 
+                              fontWeight: '600' 
+                            }}>
+                              {stat.label}
+                            </span>
+                            <span style={{ 
+                              fontSize: '13px', 
+                              fontWeight: '600', 
+                              color: stat.color || 'var(--text-primary)',
+                              fontFamily: 'var(--font-display)'
+                            }}>
+                              {stat.value}
+                            </span>
+                          </div>
+                          {idx < meaningfulStats.length - 1 && (
+                            <div style={{ width: '1px', height: '16px', background: 'var(--border-color)', opacity: '0.5' }} />
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
+                ) : null;
+              })}
             </div>
           </section>
         )}
