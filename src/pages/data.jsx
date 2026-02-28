@@ -988,6 +988,10 @@ const POLYGON_EVENTS_QUERY = `
       ritual { id }
       timestamp
     }
+    bridgeMessages(first: 100, orderBy: timestamp, orderDirection: desc) {
+      id domain messageType stakingProvider
+      transactionHash blockNumber timestamp
+    }
   }
 `;
 
@@ -1181,6 +1185,15 @@ export const getAllNetworkEvents = async () => {
         chain: 'polygon', category: 'infraction', type: e.infractionTypeName,
         stakingProvider: e.stakingProvider?.id, ritualId: e.ritual?.id,
         domain: e.domain, timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.bridgeMessages || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'bridge', type: 'BRIDGE_MESSAGE',
+        messageType: e.messageType, stakingProvider: e.stakingProvider,
+        domain: e.domain,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
       });
     });
 

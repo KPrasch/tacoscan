@@ -51,11 +51,11 @@ const getEventAddress = (event) => {
 
 // ── Tab definitions ────────────────────────────────────────────────────────
 const TABS = [
-  { id: "all",            label: "All Events",      icon: "📋", categories: null },
-  { id: "bridge",         label: "Bridge Messages",  icon: "🌉", categories: ["bridge"] },
-  { id: "governance",     label: "Governance",       icon: "🏛️", categories: ["governance"] },
-  { id: "reimbursement",  label: "Reimbursements",   icon: "💸", categories: ["reimbursement"] },
-  { id: "subscription",   label: "Subscriptions",    icon: "📄", categories: ["subscription", "policy"] },
+  { id: "all",            label: "All Events",      categories: null },
+  { id: "bridge",         label: "Bridge",           categories: ["bridge"] },
+  { id: "governance",     label: "Governance",       categories: ["governance"] },
+  { id: "reimbursement",  label: "Reimbursements",   categories: ["reimbursement"] },
+  { id: "subscription",   label: "Subscriptions",    categories: ["subscription", "policy"] },
 ];
 
 // ── Chain badge component ──────────────────────────────────────────────────
@@ -429,13 +429,12 @@ const NetworkActivity = () => {
 
         {/* Tabs */}
         <div className={styles.tabNav}>
-          {TABS.map(tab => (
+          {TABS.filter(tab => !tab.categories || (tabCounts[tab.id] || 0) > 0).map(tab => (
             <button
               key={tab.id}
               className={`${styles.tab} ${activeTab === tab.id ? styles.tabActive : ""}`}
               onClick={() => setActiveTab(tab.id)}
             >
-              <span className={styles.tabIcon}>{tab.icon}</span>
               <span className={styles.tabLabel}>{tab.label}</span>
               <span className={styles.tabCount}>{tabCounts[tab.id]?.toLocaleString() || 0}</span>
             </button>
