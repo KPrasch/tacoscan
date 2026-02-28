@@ -16,11 +16,11 @@
 }
 
 .overviewCard {
-  background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
-  border-radius: 12px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
   padding: 16px;
-  color: #FFFFFF;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  color: #0A0A0A;
 }
 
 .overviewHeader {
@@ -31,18 +31,21 @@
 }
 
 .overviewTitle {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
   margin: 0;
-  font-family: var(--font-mono, 'Space Mono', monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6B7280;
 }
 
 .networkStatus {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #96FF5E;
+  gap: 6px;
+  font-size: 12px;
+  color: #10B981;
+  font-weight: 600;
 }
 
 .statusDot {
@@ -76,21 +79,22 @@
 
 .overviewLabel {
   font-size: 11px;
-  color: #9CA3AF;
+  color: #6B7280;
   font-weight: 600;
   letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .overviewValue {
   font-size: 18px;
   font-weight: 700;
-  color: #FFFFFF;
+  color: #0A0A0A;
   font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
 .overviewChange {
-  font-size: 14px;
-  color: #96FF5E;
+  font-size: 13px;
+  color: #6B7280;
 }
 
 /* Statistics Grid */

@@ -69,5 +69,7 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "react-app-rewired": "^2.2.1"
+  }
 }
