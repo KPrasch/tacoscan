@@ -1586,7 +1586,7 @@ export const getGovernanceEvents = async () => {
 // ─── Signing Cohorts from Subgraph (v2 native) ────────────────────────────
 export const getSigningCohortsFromSubgraph = async () => {
   try {
-    const data = await gqlFetch(SUBGRAPH_BASE, `
+    const data = await gqlFetch(SUBGRAPH_ETHEREUM, `
       query {
         signingCohorts(first: 200, orderBy: createdAt, orderDirection: desc) {
           id domain chainId authority participants status
@@ -1612,7 +1612,7 @@ export const getSigningCohortsFromSubgraph = async () => {
 // ─── Signing Cohort Detail from Subgraph ───────────────────────────────────
 export const getSigningCohortDetail = async (cohortId) => {
   try {
-    const data = await gqlFetch(SUBGRAPH_BASE, `
+    const data = await gqlFetch(SUBGRAPH_ETHEREUM, `
       query GetCohort($id: ID!) {
         signingCohort(id: $id) {
           id domain chainId authority participants status
