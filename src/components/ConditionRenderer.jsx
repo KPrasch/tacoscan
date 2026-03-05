@@ -1,491 +1,337 @@
 /**
- * ConditionRenderer Component
+ * ConditionRenderer — two-column interactive condition view
  *
- * Renders interpreted TACo conditions from the conditionInterpreter module.
- * Fully unpacks all nested conditions including sequential steps.
+ * Left column: human-readable explanation per clause
+ * Right column: compact pseudocode block per clause
+ * Hover highlights both sides simultaneously.
  */
 
-import React from 'react';
-import { interpretCondition, categorizeCondition } from '../utils/conditionInterpreter';
-import styles from '../pages/SigningCohortDetail.module.css';
+import React, { useState } from 'react';
+import styles from './ConditionRenderer.module.css';
 
-/**
- * Get icon based on condition type
- */
-const getIcon = (type) => {
-  const icons = {
-    'compound': '',
-    'sequential': '',
-    'ecdsa': '',
-    'jwt': '',
-    'time': '',
-    'contract': '',
-    'json': '',
-    'rpc': '',
-    'context': '',
-    'signing-attribute': '',
-    'signing-abi-attribute': ''
-  };
-  return icons[type] || '';
+// ── Type accent colors ────────────────────────────────────────────────────────
+const TYPE_COLOR = {
+  'ecdsa':                  '#9b7fe8',
+  'jwt':                    '#b07fe8',
+  'time':                   '#d4915a',
+  'json':                   '#5b9bd5',
+  'json-rpc':               '#5b9bd5',
+  'context-variable':       '#888',
+  'context':                '#888',
+  'signing-attribute':      '#3a7d5e',
+  'signing-abi-attribute':  '#c0564a',
+  'contract':               '#c0564a',
+  'compound':               '#999',
+  'sequential':             '#5baaaa',
 };
 
-/**
- * Get style class based on condition type
- */
-const getTypeClass = (type, stylesObj) => {
-  if (type.includes('contract')) return stylesObj.typeContract;
-  if (type.includes('time')) return stylesObj.typeTime;
-  if (type.includes('compound') || type.includes('sequential')) return stylesObj.typeCompound;
-  if (type.includes('jwt')) return stylesObj.typeJwt;
-  if (type.includes('json')) return stylesObj.typeJson;
-  if (type.includes('rpc')) return stylesObj.typeRpc;
-  if (type.includes('context')) return stylesObj.typeContext;
-  if (type.includes('signing')) return stylesObj.typeSigning;
-  return stylesObj.typeDefault;
-};
+const typeColor = (t) => TYPE_COLOR[t] || '#999';
 
-/**
- * Render a sequential condition with all its steps expanded
- */
-function SequentialConditionCard({ condition, depth = 0 }) {
-  const children = condition.children || [];
-
-  return (
-    <div className={styles.sequentialContainer}>
-      <div className={`${styles.conditionHeader} ${styles.typeSequential}`}>
-        <span className={styles.conditionIcon}></span>
-        <span className={styles.conditionTypeName}>{condition.label}</span>
-        <span className={styles.stepCount}>{children.length} steps</span>
-      </div>
-
-      <div className={styles.sequentialSteps}>
-        {children.map((child, idx) => (
-          <div key={idx} className={styles.sequentialStep}>
-            {/* Step number and connector */}
-            <div className={styles.stepConnector}>
-              <span className={styles.stepNumber}>{idx + 1}</span>
-              {idx < children.length - 1 && <div className={styles.stepLine} />}
-            </div>
-
-            {/* Step content */}
-            <div className={styles.stepContent}>
-              {/* Render the child condition fully - variableName is shown in header */}
-              <ConditionCard condition={child} depth={depth + 1} isSequentialStep={true} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+// Dominant accent color for a clause (first non-compound leaf type)
+function accentColor(cond) {
+  const t = cond?.conditionType || '';
+  if (t === 'compound') {
+    const first = (cond.operands || [])[0];
+    return accentColor(first);
+  }
+  if (t === 'sequential') {
+    const first = (cond.conditionVariables || [])[0]?.condition;
+    return accentColor(first);
+  }
+  return typeColor(t);
 }
 
-/**
- * Render a compound condition (AND/OR) with all operands expanded
- */
-function CompoundConditionCard({ condition, depth = 0, groupByCategory = true }) {
-  const children = condition.children || [];
-  const operator = condition.operator || 'and';
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const short = (addr) =>
+  addr && addr.length > 12 ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : (addr || '');
 
-  // At top level, group by category (authorization vs limits)
-  if (groupByCategory && depth === 0) {
-    const authConditions = [];
-    const limitConditions = [];
+const testStr = (rvt) => (rvt ? ` ${rvt.comparator} ${rvt.value}` : '');
 
-    children.forEach((child, idx) => {
-      const childCategory = categorizeCondition(child.raw);
-      const childWithIndex = { ...child, displayIndex: idx + 1 };
-
-      if (childCategory === 'limits') {
-        limitConditions.push(childWithIndex);
-      } else {
-        authConditions.push(childWithIndex);
+const opsStr = (operations) =>
+  (operations || [])
+    .map((o) => {
+      if (o.operation === 'create2') {
+        return `create2(${short(o.value?.deployerAddress || '')})`;
       }
-    });
+      const v = typeof o.value === 'string' ? o.value.slice(0, 20) : (o.value ?? '');
+      return `${o.operation}${v}`;
+    })
+    .join(' ');
 
-    return (
-      <div className={styles.compoundContainer}>
-        {/* Authorization Conditions */}
-        {authConditions.length > 0 && (
-          <>
-            <div className={styles.categoryHeader}>
-              <span className={styles.categoryIcon}></span>
-              <span className={styles.categoryLabel}>AUTHORIZATION</span>
-              <span className={styles.categoryDescription}>Who can request & when</span>
-            </div>
-            {authConditions.map((child, idx) => (
-              <React.Fragment key={child.displayIndex}>
-                <div className={styles.conditionCard}>
-                  <span className={styles.conditionCardNumber}>{child.displayIndex}</span>
-                  <ConditionCard condition={child} depth={depth + 1} />
-                </div>
-                {idx < authConditions.length - 1 && (
-                  <div className={styles.operatorDivider}>
-                    <span className={styles.operatorText}>{operator.toUpperCase()}</span>
-                  </div>
-                )}
-              </React.Fragment>
-            ))}
-          </>
-        )}
-
-        {/* Operator divider */}
-        {authConditions.length > 0 && limitConditions.length > 0 && (
-          <div className={styles.operatorDivider}>
-            <span className={styles.operatorText}>{operator.toUpperCase()}</span>
-          </div>
-        )}
-
-        {/* Transaction Limits */}
-        {limitConditions.length > 0 && (
-          <>
-            <div className={styles.categoryHeader}>
-              <span className={styles.categoryIcon}></span>
-              <span className={styles.categoryLabel}>TRANSACTION LIMITS</span>
-              <span className={styles.categoryDescription}>How much & how often</span>
-            </div>
-            {limitConditions.map((child, idx) => (
-              <React.Fragment key={child.displayIndex}>
-                <div className={styles.conditionCard}>
-                  <span className={styles.conditionCardNumber}>{child.displayIndex}</span>
-                  <ConditionCard condition={child} depth={depth + 1} />
-                </div>
-                {idx < limitConditions.length - 1 && (
-                  <div className={styles.operatorDivider}>
-                    <span className={styles.operatorText}>{operator.toUpperCase()}</span>
-                  </div>
-                )}
-              </React.Fragment>
-            ))}
-          </>
-        )}
-      </div>
-    );
+// ── Compact one-line pseudocode per leaf ──────────────────────────────────────
+function leafLine(cond) {
+  const t = cond.conditionType || '';
+  if (t === 'ecdsa') {
+    const msg = cond.message ? `  ${cond.message}` : '';
+    return `ecdsa(${cond.curve || 'Ed25519'}, ${short(cond.verifyingKey)}${msg})`;
   }
+  if (t === 'json' || t === 'json-rpc') {
+    const q = (cond.query || cond.endpoint || '').slice(0, 40);
+    const ops = opsStr(cond.operations);
+    return `json(${q}${ops ? ', ' + ops : ''})${testStr(cond.returnValueTest)}`;
+  }
+  if (t === 'time') {
+    return `time(${opsStr(cond.operations)})${testStr(cond.returnValueTest)}`;
+  }
+  if (t === 'context-variable' || t === 'context') {
+    const ops = opsStr(cond.operations);
+    return `ctx(${cond.contextVariable || ''})${ops ? '  ' + ops : ''}`;
+  }
+  if (t === 'signing-attribute') {
+    return `signing.${cond.attributeName || ''}${testStr(cond.returnValueTest)}`;
+  }
+  if (t === 'signing-abi-attribute') {
+    const fn = Object.keys(cond.abiValidation?.allowedAbiCalls || {})[0] || 'execute(…)';
+    return `txlimit.${fn.replace(/\s+/g, '')}`;
+  }
+  if (t === 'jwt') return `jwt(${cond.parameterPath || ''})${testStr(cond.returnValueTest)}`;
+  if (t === 'contract') {
+    return `contract(${short(cond.contractAddress)}.${cond.functionAbi?.name || ''})${testStr(cond.returnValueTest)}`;
+  }
+  return t || 'condition';
+}
 
-  // Nested compound - render all children with operator between them
+const typeLabel = (t) =>
+  t.replace('signing-abi-attribute', 'txlimit')
+   .replace('signing-attribute', 'signing')
+   .replace('context-variable', 'ctx')
+   .replace('json-rpc', 'json');
+
+// ── Pseudocode block components ───────────────────────────────────────────────
+function SeqBlock({ cond, forceOpen }) {
+  const [open, setOpen] = useState(true);
+  const steps = cond.conditionVariables || [];
+  const isOpen = forceOpen !== undefined ? forceOpen : open;
+
   return (
-    <div className={styles.nestedCompound}>
-      <div className={`${styles.conditionHeader} ${styles.typeCompound}`}>
-        <span className={styles.conditionIcon}></span>
-        <span className={styles.conditionTypeName}>{operator.toUpperCase()} Condition</span>
-        <span className={styles.stepCount}>{children.length} conditions</span>
+    <div className={styles.block}>
+      <div className={styles.blockHeader} onClick={() => setOpen((o) => !o)}>
+        <span className={styles.keyword} style={{ color: typeColor('sequential') }}>seq</span>
+        <span className={styles.opBrace}>{isOpen ? '{' : '{ '}</span>
+        {!isOpen && <span className={styles.collapsedPreview}>{steps.length} steps</span>}
+        {!isOpen && <span className={styles.opBrace}>}</span>}
+        <span className={styles.chevron}>{isOpen ? '▾' : '▸'}</span>
       </div>
-
-      <div className={styles.compoundOperands}>
-        {children.map((child, idx) => (
-          <React.Fragment key={idx}>
-            <div className={styles.operandCard}>
-              <ConditionCard condition={child} depth={depth + 1} />
-            </div>
-            {idx < children.length - 1 && (
-              <div className={styles.operatorBadge}>
-                <span>{operator.toUpperCase()}</span>
+      {isOpen && (
+        <div className={styles.blockBody}>
+          {steps.map((step, i) => {
+            const sc = step.condition || step;
+            const t = sc.conditionType || '';
+            return (
+              <div key={i} className={styles.seqStep}>
+                <span className={styles.stepNum}>{i + 1}</span>
+                <span className={styles.varName}>:{step.varName}</span>
+                <span className={styles.stepSummary} style={{ color: typeColor(t) }}>
+                  {leafLine(sc)}
+                </span>
               </div>
-            )}
-          </React.Fragment>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/**
- * Render a single interpreted condition
- * @param {Object} props
- * @param {InterpretedCondition} props.condition - The interpreted condition
- * @param {number} [props.depth=0] - Nesting depth
- * @param {boolean} [props.isSequentialStep=false] - Whether this is a step in a sequential
- */
-function ConditionCard({ condition, depth = 0, isSequentialStep = false }) {
-  if (!condition) return null;
-
-  const category = categorizeCondition(condition.raw);
-  const isTransactionLimit = category === 'limits';
-
-  // Handle sequential conditions - fully unpack
-  if (condition.type === 'sequential' && condition.children && condition.children.length > 0) {
-    return <SequentialConditionCard condition={condition} depth={depth} />;
-  }
-
-  // Handle compound conditions - fully unpack
-  if (condition.type === 'compound' && condition.children && condition.children.length > 0) {
-    return <CompoundConditionCard condition={condition} depth={depth} groupByCategory={depth === 0} />;
-  }
-
-  // Handle conditions that have children but aren't sequential/compound
-  // (e.g., a json condition nested inside sequential)
-  const hasNestedChildren = condition.children && condition.children.length > 0;
-
-  const icon = getIcon(condition.type);
-  const typeClass = getTypeClass(condition.type, styles);
-
-  // Filter out "Assigns to" field from display if we're showing variableName separately
-  const displayFields = isSequentialStep && condition.variableName
-    ? (condition.fields || []).filter(f => f.label !== 'Assigns to')
-    : (condition.fields || []);
-
-  // Show header for all conditions, including transaction limits when in sequential steps
-  const showHeader = !isTransactionLimit || isSequentialStep;
-
-  return (
-    <div className={styles.conditionBlock}>
-      {/* Header */}
-      {showHeader && (
-        <div className={`${styles.conditionHeader} ${typeClass}`}>
-          {/* Variable assignment badge inline with header for sequential steps */}
-          {isSequentialStep && condition.variableName && (
-            <>
-              <span className={styles.headerLabel}>Assigns to:</span>
-              <span className={styles.headerVarBadge}>:{condition.variableName}</span>
-            </>
-          )}
-          <span className={styles.headerLabel}>Source:</span>
-          <span className={styles.conditionIcon}>{icon}</span>
-          <span className={styles.conditionTypeName}>{condition.label}</span>
-        </div>
-      )}
-
-      {/* Fields Section */}
-      {displayFields.length > 0 && (
-        <div className={styles.conditionSection}>
-          {/* Section titles based on type */}
-          {condition.type === 'ecdsa' && (
-            <div className={styles.sectionTitle}>SIGNATURE VERIFICATION</div>
-          )}
-          {condition.type === 'jwt' && (
-            <div className={styles.sectionTitle}>JWT Requirements</div>
-          )}
-          {condition.type === 'time' && displayFields.some(f => f.label === 'Start' || f.label === 'End') && (
-            <div className={styles.sectionTitle}>TIMEFRAME</div>
-          )}
-          {condition.type === 'context' && (
-            <div className={styles.sectionTitle}>Context Variables</div>
-          )}
-          {condition.type === 'contract' && (
-            <div className={styles.sectionTitle}>Contract Details</div>
-          )}
-          {(condition.type === 'json' || condition.type === 'rpc') && (
-            <div className={styles.sectionTitle}>API Details</div>
-          )}
-
-          {/* Render fields */}
-          {displayFields.map((field, idx) => (
-            <ConditionField key={idx} field={field} isTransactionLimit={isTransactionLimit} />
-          ))}
-        </div>
-      )}
-
-      {/* Return Value Test */}
-      {condition.test && (
-        <div className={styles.conditionSection}>
-          {!isTransactionLimit && <div className={styles.sectionTitle}>EXPECTED RESULT</div>}
-          <div className={styles.testExpression}>
-            <span className={styles.testLabel}>{condition.test.label}</span>
-            <span className={styles.testOperator}>{condition.test.comparator}</span>
-            <span className={styles.testValue}>{condition.test.value}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Nested children for non-compound/sequential types */}
-      {hasNestedChildren && (
-        <div className={styles.nestedChildren}>
-          {condition.children.map((child, idx) => (
-            <div key={idx} className={styles.nestedChild}>
-              <ConditionCard condition={child} depth={depth + 1} />
-            </div>
-          ))}
+            );
+          })}
+          <div className={styles.closeBrace}><span className={styles.opBrace}>{'}'}</span></div>
         </div>
       )}
     </div>
   );
 }
 
-/**
- * Render a context variable reference with icon + name + description
- * @param {string} varName - The variable name
- * @param {boolean} showDescription - Whether to show the description
- * @param {Object} sourceInfo - Source info from the data layer (from earlier sequential step)
- */
-function ContextVarDisplay({ varName, showDescription = false, sourceInfo = null }) {
-  // Get icon based on variable name for visual hint
-  const getVarIcon = (name) => {
-    const nameLower = (name || '').toLowerCase();
-    if (nameLower.includes('recipient') || nameLower.includes('to') || nameLower.includes('target')) {
-      return '→';
-    }
-    if (nameLower.includes('amount') || nameLower.includes('value') || nameLower.includes('max')) {
-      return '#';
-    }
-    if (nameLower.includes('token')) {
-      return 'T';
-    }
-    if (nameLower.includes('sender') || nameLower.includes('from')) {
-      return '@';
-    }
-    return '←';
-  };
-
-  const icon = getVarIcon(varName);
-
-  // Use sourceInfo.description from data layer if available, otherwise fallback
-  const description = sourceInfo?.description || 'from earlier step';
+function CompoundBlock({ cond, depth = 0 }) {
+  const [open, setOpen] = useState(true);
+  const op = (cond.operator || 'and').toLowerCase();
+  const operands = cond.operands || [];
 
   return (
-    <span className={styles.contextVarRef}>
-      <span className={styles.contextVarIcon}>{icon}</span>
-      <span className={styles.contextVarName}>{varName}</span>
-      {showDescription && (
-        <span className={styles.contextVarSource}>({description})</span>
-      )}
-    </span>
-  );
-}
-
-/**
- * Render a value, handling context variables
- */
-function ValueDisplay({ value, contextVar, type, fullAddress, sourceInfo }) {
-  if (contextVar) {
-    return <ContextVarDisplay varName={contextVar} showDescription={true} sourceInfo={sourceInfo} />;
-  }
-
-  if (type === 'address') {
-    return (
-      <span className={styles.addressLink} title={fullAddress || value}>
-        {value}
-      </span>
-    );
-  }
-
-  if (type === 'amount') {
-    return <span className={styles.amountValue}>{value}</span>;
-  }
-
-  return <span className={styles.fieldValue}>{value}</span>;
-}
-
-/**
- * Render a single field
- */
-function ConditionField({ field, isTransactionLimit }) {
-  // Context variable type - display with icon
-  if (field.type === 'contextVar' || field.contextVar) {
-    return (
-      <div className={styles.conditionField}>
-        <span className={styles.fieldLabel}>{field.label}:</span>
-        {field.operator && <span className={styles.fieldOperator}>{field.operator}</span>}
-        <ContextVarDisplay varName={field.contextVar || field.value} showDescription={true} sourceInfo={field.sourceInfo} />
+    <div className={styles.block}>
+      <div className={styles.blockHeader} onClick={() => setOpen((o) => !o)}>
+        <span className={styles.keyword} style={{ color: depth === 0 ? '#888' : typeColor('compound') }}>
+          {op}
+        </span>
+        <span className={styles.opBrace}>{open ? '{' : '{ '}</span>
+        {!open && <span className={styles.collapsedPreview}>{operands.length} conditions</span>}
+        {!open && <span className={styles.opBrace}>}</span>}
+        <span className={styles.chevron}>{open ? '▾' : '▸'}</span>
       </div>
-    );
-  }
-
-  // Badge type fields
-  if (field.type === 'badge') {
-    // Special styling for Signing Context
-    if (field.label === 'Signing Context') {
-      return (
-        <div className={styles.signingContextField}>
-          <span className={styles.signingContextLabel}>{field.label}:</span>
-          <span className={styles.signingContextBadge}>{field.value}</span>
-        </div>
-      );
-    }
-    return (
-      <div className={styles.conditionField}>
-        <span className={styles.fieldLabel}>{field.label}:</span>
-        <span className={styles.curveBadge}>{field.value}</span>
-      </div>
-    );
-  }
-
-  // Public key type
-  if (field.type === 'publicKey') {
-    return (
-      <div className={styles.conditionField}>
-        <span className={styles.fieldLabel}>{field.label}:</span>
-        <span className={styles.publicKey}>{field.value}</span>
-      </div>
-    );
-  }
-
-  // Address type
-  if (field.type === 'address') {
-    return (
-      <div className={styles.conditionField}>
-        <span className={styles.fieldLabel}>{field.label}:</span>
-        {field.operator && <span className={styles.fieldOperator}>{field.operator}</span>}
-        <span className={styles.addressLink}>{field.value}</span>
-      </div>
-    );
-  }
-
-  // Function type
-  if (field.type === 'function') {
-    const match = field.value.match(/^(\w+)\((.*)\)$/);
-    if (match) {
-      return (
-        <div className={styles.conditionField}>
-          <span className={styles.fieldLabel}>{field.label}:</span>
-          <span className={styles.functionSignature}>
-            <span className={styles.functionName}>{match[1]}</span>
-            <span className={styles.functionParams}>({match[2]})</span>
-          </span>
-        </div>
-      );
-    }
-  }
-
-  // Timestamp type
-  if (field.type === 'timestamp') {
-    return (
-      <div className={styles.conditionField}>
-        <span className={styles.fieldLabel}>{field.label}:</span>
-        <span className={styles.timeValue}>{field.value}</span>
-      </div>
-    );
-  }
-
-  // Nested type (for inner call validations)
-  if (field.type === 'nested' && field.children) {
-    return (
-      <div className={styles.nestedValidation}>
-        <div className={styles.conditionField}>
-          <span className={styles.fieldLabel}>{field.label}:</span>
-          <span className={styles.curveBadge}>{field.value}</span>
-        </div>
-        <div className={styles.nestedChildren}>
-          {field.children.map((child, idx) => (
-            <ConditionField key={idx} field={child} isTransactionLimit={true} />
+      {open && (
+        <div className={styles.blockBody}>
+          {operands.map((operand, i) => (
+            <CondNode key={i} cond={operand} depth={depth + 1} />
           ))}
+          <div className={styles.closeBrace}><span className={styles.opBrace}>{'}'}</span></div>
         </div>
-      </div>
-    );
-  }
-
-  // Default text field
-  return (
-    <div className={styles.conditionField}>
-      <span className={styles.fieldLabel}>{field.label}:</span>
-      {field.operator && <span className={styles.fieldOperator}>{field.operator}</span>}
-      <span className={styles.fieldValue}>{field.value}</span>
+      )}
     </div>
   );
 }
 
-/**
- * Main component - interprets and renders condition data
- */
+function LeafNode({ cond }) {
+  const t = cond.conditionType || '';
+  return (
+    <div className={styles.leafLine}>
+      <span className={styles.typeBadge} style={{ color: typeColor(t) }}>{typeLabel(t)}</span>
+      <span className={styles.leafText}>{leafLine(cond)}</span>
+    </div>
+  );
+}
+
+function CondNode({ cond, depth = 0 }) {
+  if (!cond) return null;
+  const t = cond.conditionType || '';
+  if (t === 'compound') return <CompoundBlock cond={cond} depth={depth} />;
+  if (t === 'sequential') return <SeqBlock cond={cond} />;
+  return <LeafNode cond={cond} />;
+}
+
+// ── Human-readable summarizer ─────────────────────────────────────────────────
+function summarizeSeq(cond) {
+  const steps = cond.conditionVariables || [];
+  const varNames = steps.map((s) => (s.varName || '').toLowerCase());
+  const types = steps.map((s) => s.condition?.conditionType || '');
+
+  if (types.includes('signing-abi-attribute')) {
+    const amtStep = steps.find((s) => {
+      const v = (s.varName || '').toLowerCase();
+      return v.includes('amount') || v.includes('usdc') || v.includes('value');
+    });
+    const rvt = amtStep?.condition?.returnValueTest;
+    const amtStr = rvt ? ` ≥ ${rvt.value}` : '';
+    const hasRecipient = steps.some((s) => {
+      const v = (s.varName || '').toLowerCase();
+      return v.includes('recipient') || v.includes('receiver');
+    });
+    return {
+      title: 'Transaction limits enforced',
+      detail: `Whitelisted function call${amtStr ? ', amount' + amtStr : ''}${hasRecipient ? ', verified recipient' : ''}`,
+    };
+  }
+
+  if (
+    types.includes('time') &&
+    varNames.some((v) => v.includes('account') || v.includes('sender') || v.includes('discord') || v.includes('age'))
+  ) {
+    return {
+      title: 'Signatory identity verified',
+      detail: 'Discord account age check, sender address authenticated',
+    };
+  }
+
+  if (types.includes('time')) {
+    return { title: 'Time-bounded access', detail: 'Valid within a defined time window' };
+  }
+
+  return { title: `${steps.length}-step verification`, detail: 'Sequential data checks' };
+}
+
+function summarizeClause(cond) {
+  if (!cond) return { title: '?', detail: '' };
+  const t = cond.conditionType || '';
+
+  if (t === 'compound') {
+    const op = (cond.operator || 'and').toLowerCase();
+    const operands = cond.operands || [];
+    if (op === 'or') {
+      const allEcdsa = operands.length > 0 && operands.every((o) => o.conditionType === 'ecdsa');
+      if (allEcdsa) {
+        const msg = (operands[0]?.message || '').toLowerCase();
+        const src = msg.includes('discord') ? 'Discord' : '';
+        return {
+          title: `${src ? src + ' s' : 'S'}ignatories — any ${operands.length} of ${operands.length}`,
+          detail: `Valid signature from any one of ${operands.length} authorized keys`,
+        };
+      }
+      const parts = operands.map((o) => summarizeClause(o).title);
+      return { title: `Any of ${operands.length} conditions`, detail: parts.join(' or ') };
+    }
+    // AND at top level — shouldn't usually be called directly
+    const parts = operands.map((o) => summarizeClause(o).title);
+    return { title: 'All conditions must pass', detail: parts.join(', ') };
+  }
+
+  if (t === 'sequential') return summarizeSeq(cond);
+
+  if (t === 'ecdsa') {
+    const msg = (cond.message || '').toLowerCase();
+    const src = msg.includes('discord') ? 'Discord ' : '';
+    return { title: `${src}ECDSA signature`, detail: short(cond.verifyingKey) };
+  }
+
+  if (t === 'json' || t === 'json-rpc') {
+    const q = cond.query || cond.endpoint || '';
+    if (q.includes('user.id')) return { title: 'Discord member check', detail: 'Membership status verified via API' };
+    return { title: 'Data query', detail: q.slice(0, 40) };
+  }
+
+  if (t === 'time') return { title: 'Time window', detail: 'Access bounded by time constraints' };
+
+  if (t === 'signing-attribute') {
+    const attr = cond.attributeName || '';
+    return { title: `Signing check: ${attr}`, detail: `${attr} ${cond.returnValueTest?.comparator || '=='} ${cond.returnValueTest?.value || ''}` };
+  }
+
+  if (t === 'signing-abi-attribute') {
+    const fn = Object.keys(cond.abiValidation?.allowedAbiCalls || {})[0] || '';
+    return { title: 'Transaction whitelist', detail: fn };
+  }
+
+  if (t === 'jwt') return { title: 'JWT token required', detail: cond.parameterPath || '' };
+  if (t === 'contract') return { title: 'On-chain check', detail: short(cond.contractAddress) };
+
+  return { title: t, detail: '' };
+}
+
+// ── Two-column clause row ─────────────────────────────────────────────────────
+function ClauseRow({ cond, index, accent }) {
+  const [hovered, setHovered] = useState(false);
+  const { title, detail } = summarizeClause(cond);
+
+  return (
+    <div
+      className={`${styles.clauseRow} ${hovered ? styles.clauseRowHovered : ''}`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Left: explanation */}
+      <div className={styles.explainCol}>
+        <span className={styles.clauseDot} style={{ background: accent }} />
+        <div className={styles.explainContent}>
+          <div className={styles.explainTitle}>{title}</div>
+          {detail && <div className={styles.explainDetail}>{detail}</div>}
+        </div>
+      </div>
+
+      {/* Right: pseudocode */}
+      <div className={styles.codeCol}>
+        <CondNode cond={cond} depth={0} />
+      </div>
+    </div>
+  );
+}
+
+// ── Main export ───────────────────────────────────────────────────────────────
 export default function ConditionRenderer({ conditionData }) {
   if (!conditionData) return null;
+  const condition = conditionData.condition || conditionData;
+  const t = condition.conditionType || '';
 
-  const interpreted = interpretCondition(conditionData);
-
-  if (!interpreted) {
-    return <div className={styles.noData}>Unable to interpret condition</div>;
+  // Top-level AND: each operand gets its own paired row
+  if (t === 'compound' && (condition.operator || 'and').toLowerCase() === 'and') {
+    const operands = condition.operands || [];
+    return (
+      <div className={styles.root}>
+        {operands.map((operand, i) => (
+          <ClauseRow
+            key={i}
+            cond={operand}
+            index={i}
+            accent={accentColor(operand)}
+          />
+        ))}
+      </div>
+    );
   }
 
-  return <ConditionCard condition={interpreted} depth={0} />;
+  // Single clause
+  return (
+    <div className={styles.root}>
+      <ClauseRow cond={condition} index={0} accent={accentColor(condition)} />
+    </div>
+  );
 }
-
-// Also export the card component for more granular usage

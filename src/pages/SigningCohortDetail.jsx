@@ -143,7 +143,7 @@ const SigningCohortDetail = () => {
               <div className={styles.headerStat}>
                 <span className={styles.headerStatLabel}>Threshold</span>
                 <span className={styles.headerStatValue}>
-                  {cohort?.threshold} of {cohort?.signersCount}
+                  {cohort?.threshold ? `${cohort.threshold} of ${cohort.signersCount}` : `— of ${cohort?.signersCount}`}
                 </span>
               </div>
             </div>
@@ -192,7 +192,7 @@ const SigningCohortDetail = () => {
             className={`${styles.tab} ${activeTab === "signatures" ? styles.activeTab : ""}`}
             onClick={() => setActiveTab("signatures")}
           >
-            Signatures
+            Signatories
             {cohort?.signatures?.length > 0 && (
               <span className={styles.tabBadge}>{cohort.signatures.length}</span>
             )}
@@ -224,7 +224,7 @@ const SigningCohortDetail = () => {
                         Signature Threshold
                       </span>
                       <span className={styles.infoValue}>
-                        {cohort?.threshold}
+                        {cohort?.threshold || '—'}
                       </span>
                     </div>
                     <div className={styles.infoItem}>
@@ -632,7 +632,7 @@ const SigningCohortDetail = () => {
           {/* Signatures Tab */}
           {activeTab === "signatures" && (
             <div className={styles.card}>
-              <h2 className={styles.cardTitle}>Signatures ({cohort?.signatures?.length || 0})</h2>
+              <h2 className={styles.cardTitle}>Signatories ({cohort?.signatures?.length || 0})</h2>
               <div className={styles.cardContent}>
                 {cohort?.signatures?.length > 0 ? (
                   <div className={styles.tableContainer}>
