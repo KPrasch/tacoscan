@@ -6,10 +6,13 @@ import { CoordinatorAddress } from "../utils/addresses";
 import web3Cache from "../utils/web3Cache";
 import BatchProcessor from "../utils/batchProcessor";
 
+import { networkConfig, CURRENT_NETWORK } from '../utils/networkConfig';
+
 // Direct GraphQL fetch to bypass broken GraphQL Mesh stitching runtime
-const SUBGRAPH_POLYGON = import.meta.env.VITE_SUBGRAPH_POLYGON;
-const SUBGRAPH_ETHEREUM = import.meta.env.VITE_SUBGRAPH_ETHEREUM;
-const SUBGRAPH_BASE = import.meta.env.VITE_SUBGRAPH_BASE;
+const SUBGRAPH_POLYGON = networkConfig.subgraphPolygon;
+const SUBGRAPH_ETHEREUM = networkConfig.subgraphEthereum;
+const SUBGRAPH_BASE = networkConfig.subgraphBase;
+const SUBGRAPH_COHORTS = networkConfig.subgraphCohorts ?? networkConfig.subgraphBase;
 
 const gqlFetch = async (endpoint, query, variables = {}) => {
   const response = await fetch(endpoint, {
@@ -1691,12 +1694,12 @@ export const getProviderRewards = async (providerId) => {
 };
 
 export const getTimeout = async () => {
-  if (Const.DEFAULT_NETWORK === Const.NETWORK_TESTNET) return 0;
+  if (!networkConfig.coordinator) return null;
 
   // Use cache to prevent multiple calls
   return web3Cache.get('coordinator-timeout', async () => {
     const web3 = getWeb3Instance();
-    const coordinator = "0xE74259e3dafe30bAA8700238e324b47aC98FE755";
+    const coordinator = networkConfig.coordinator;
     const contractAbi = [
       {
         type: "function",

@@ -26,14 +26,32 @@ const SigningCohortDetail = () => {
           setError("Cohort not found");
         } else {
           // Transform to expected format
+          const resolvedSigners = cohortData.signers?.length
+            ? cohortData.signers
+            : (cohortData.participants || []);
+
+          const decodeConditions = (hex) => {
+            if (!hex || hex === '0x') return null;
+            try {
+              const raw = hex.startsWith('0x') ? hex.slice(2) : hex;
+              const bytes = new Uint8Array(raw.match(/.{1,2}/g).map(b => parseInt(b, 16)));
+              return JSON.parse(new TextDecoder().decode(bytes));
+            } catch {
+              return null;
+            }
+          };
+
+          const conditionsDecoded = decodeConditions(cohortData.conditions);
           const transformed = {
             id: cohortData.id,
-            signers: (cohortData.signers || cohortData.participants || []).map(addr => ({ provider: addr, address: addr })),
-            signersCount: (cohortData.signers || cohortData.participants || []).length,
-            threshold: cohortData.threshold || 0,
+            signers: resolvedSigners.map(addr => ({ provider: addr, address: addr })),
+            signersCount: resolvedSigners.length,
+            threshold: cohortData.multisig?.threshold || cohortData.threshold || 0,
             isActive: cohortData.status === 'DEPLOYED' || cohortData.status === 'CONDITIONS_SET',
             state: cohortData.status?.replace(/_/g, ' ') || 'Unknown',
-            conditions: cohortData.conditions ? { [cohortData.chainId]: cohortData.conditions } : {},
+            conditions: conditionsDecoded
+              ? { [cohortData.chainId]: { decoded: conditionsDecoded, raw: cohortData.conditions } }
+              : (cohortData.conditions ? { [cohortData.chainId]: cohortData.conditions } : {}),
             chains: cohortData.chainId ? [cohortData.chainId.toString()] : [],
             // V2 extended data
             authority: cohortData.authority,
