@@ -1,0 +1,203 @@
+/* TACo Style Guide - Light Theme Table Styles */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  background: var(--color-primary-bg, #FFFFFF);
+}
+
+.tableHead {
+  background-color: var(--color-secondary-bg, #F8F9FA);
+  border-bottom: 2px solid var(--color-border-default, #E5E7EB);
+}
+
+.tableBody {
+  background-color: var(--color-primary-bg, #FFFFFF);
+}
+
+/* Zebra striping */
+.tableRow {
+  border-bottom: 1px solid var(--color-border-default, #E5E7EB);
+  transition: background-color 0.2s ease;
+}
+
+.tableBody .tableRow:nth-child(even) {
+  background-color: var(--color-secondary-bg, #F8F9FA);
+}
+
+.tableRow.hover:hover {
+  background-color: var(--color-tertiary-bg, #F4F4F4);
+}
+
+.tableRow.selected {
+  border-left: 3px solid var(--color-primary-accent, #4ADE80);
+  background-color: rgba(74, 222, 128, 0.05);
+}
+
+.tableCell {
+  padding: 6px 10px;
+  color: var(--color-secondary-text, #5A5A5A);
+  font-size: 12px;
+  border-bottom: 1px solid var(--color-border-default, #E5E7EB);
+}
+
+.tableHead .tableCell {
+  font-weight: 700;
+  color: var(--color-primary-text, #0A0A0A);
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+}
+
+.alignLeft {
+  text-align: left;
+}
+
+.alignCenter {
+  text-align: center;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.paddingNone {
+  padding: 0;
+}
+
+.paddingNormal {
+  padding: 6px 10px;
+}
+
+.paddingCheckbox {
+  padding: 0 4px 0 16px;
+}
+
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border-default, #E5E7EB);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
+}
+
+.tablePagination {
+  background-color: var(--color-primary-bg, #FFFFFF);
+  border-top: 1px solid var(--color-border-default, #E5E7EB);
+}
+
+.paginationToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 6px 12px;
+  min-height: 36px;
+}
+
+.rowsPerPage {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 20px;
+  font-size: 12px;
+  color: var(--color-secondary-text, #5A5A5A);
+}
+
+.select {
+  padding: 4px 8px;
+  border: 1px solid var(--color-border-default, #E5E7EB);
+  border-radius: 0.5rem;
+  background-color: var(--color-primary-bg, #FFFFFF);
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--color-primary-text, #0A0A0A);
+  transition: all 0.2s ease;
+}
+
+.select:hover {
+  border-color: var(--color-primary-accent, #4ADE80);
+  background-color: var(--color-tertiary-bg, #F4F4F4);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--color-primary-accent, #4ADE80);
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2);
+}
+
+.displayedRows {
+  font-size: 12px;
+  color: var(--color-secondary-text, #5A5A5A);
+  margin-right: 20px;
+}
+
+.paginationActions {
+  display: flex;
+  gap: 8px;
+}
+
+.paginationButton {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border-default, #E5E7EB);
+  background: var(--color-primary-bg, #FFFFFF);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--color-secondary-text, #5A5A5A);
+  transition: all 0.2s ease;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background-color: var(--color-tertiary-bg, #F4F4F4);
+  border-color: var(--color-primary-accent, #4ADE80);
+  color: var(--color-primary-text, #0A0A0A);
+}
+
+.paginationButton:disabled {
+  color: var(--color-tertiary-text, #909090);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.tableSortLabel {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.tableSortLabel:hover {
+  color: var(--color-primary-accent, #4ADE80);
+}
+
+.tableSortLabel.active {
+  color: var(--color-primary-text, #0A0A0A);
+  font-weight: 700;
+}
+
+.sortIcon {
+  margin-left: 4px;
+  font-size: 18px;
+  opacity: 0.3;
+  transition: opacity 0.2s ease;
+  color: var(--color-tertiary-text, #909090);
+}
+
+.tableSortLabel:hover .sortIcon {
+  opacity: 0.7;
+}
+
+.tableSortLabel.active .sortIcon {
+  opacity: 1;
+  color: var(--color-primary-accent, #4ADE80);
+}

@@ -1,11 +1,12 @@
 import * as Const from "./Cons";
+import { networkConfig } from "./networkConfig";
 
 const getEtherScanLink = () => {
-    return Const.DEFAULT_NETWORK === Const.NETWORK_MAINNET ? "https://etherscan.io" : "https://goerli.etherscan.io"
+    return networkConfig.etherscan;
 }
 
 const getPolygonScanLink = () => {
-    return "https://polygonscan.com"
+    return networkConfig.polygonscan;
 }
 
 export const getEtherAddressLink = () => {
@@ -30,11 +31,9 @@ export const getEtherBlockLink = () => {
 }
 
 export const getDomain = () => {
-    if (Const.DEFAULT_NETWORK == Const.NETWORK_MAINNET) {
-        return "https://tacoscan.com"
-    } else {
-        return "https://testnet.tacoscan.com"
-    }
+    // Use relative path for internal navigation
+    // This ensures we stay on the same domain (localhost in dev, production URL in prod)
+    return ""
 }
 
 export const getBlockStreamInfo = () => {

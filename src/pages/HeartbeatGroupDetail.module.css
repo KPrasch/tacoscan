@@ -1,0 +1,324 @@
+.container {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding: 16px 20px 40px;
+}
+
+.loadingState,
+.errorState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  font-size: 16px;
+  font-family: var(--font-sans);
+  color: var(--text-secondary);
+}
+
+.errorState {
+  color: #DC2626;
+}
+
+.header {
+  max-width: 1600px;
+  margin: 0 auto 16px;
+}
+
+.backButton {
+  background: var(--bg-surface);
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 6px;
+}
+
+.backButton:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--text-tertiary);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+  font-family: var(--font-sans);
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+}
+
+.statsGrid {
+  max-width: 1600px;
+  margin: 0 auto 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.statCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.statCard:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+}
+
+.statLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1;
+  font-family: var(--font-mono);
+}
+
+.statSubtext {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  font-family: var(--font-sans);
+}
+
+.section {
+  max-width: 1600px;
+  margin: 0 auto 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+  font-family: var(--font-sans);
+}
+
+.timeline {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: var(--bg-primary);
+  border-radius: 6px;
+}
+
+.timelineItem {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.timelineItem strong {
+  color: var(--text-primary);
+  margin-right: 8px;
+}
+
+.violatorsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  background: #F8F9FA;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-color);
+  align-items: center;
+  transition: background-color 0.2s ease;
+  background: var(--bg-surface);
+}
+
+.tableRow:nth-child(even) {
+  background-color: var(--bg-tertiary);
+}
+
+.tableRow:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.nodeAddress {
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 14px;
+}
+
+.link {
+  color: var(--status-active);
+  text-decoration: none;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.link:hover {
+  color: var(--accent-green);
+  text-decoration: none;
+}
+
+.failedCount {
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.violationRate {
+  font-weight: 600;
+}
+
+.details {
+  cursor: pointer;
+}
+
+.details summary {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.details summary:hover {
+  background: var(--border-color);
+}
+
+.failedRitualsList {
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+}
+
+.failedRitual {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.ritualStatus {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.ritualsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.ritualCard {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  background: #FAFBFC;
+  transition: all 0.2s ease;
+}
+
+.ritualCard:hover {
+  background: var(--bg-surface);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.ritualHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ritualId {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--status-data);
+  text-decoration: none;
+}
+
+.ritualId:hover {
+  text-decoration: underline;
+}
+
+.ritualStatus {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.ritualStatus.success {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.ritualStatus.failed {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.ritualStatus.pending {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.ritualDetails {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

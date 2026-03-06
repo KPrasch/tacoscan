@@ -1,0 +1,38 @@
+/* TACo Official Fonts */
+
+/* ABC Diatype - Display and UI Font */
+@font-face {
+  font-family: 'ABC Diatype';
+  src: url('/fonts/Diatype/ABCDiatype-Bold.woff2') format('woff2'),
+       url('/fonts/Diatype/ABCDiatype-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ABC Diatype';
+  src: url('/fonts/Diatype/ABCDiatype-BoldItalic.woff2') format('woff2'),
+       url('/fonts/Diatype/ABCDiatype-BoldItalic.woff') format('woff');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* OCR-X - Monospace Font for Technical Content */
+@font-face {
+  font-family: 'OCR-X';
+  src: url('/fonts/OCR-X/Web/OCR-X-Regular.woff2') format('woff2'),
+       url('/fonts/OCR-X/Web/OCR-X-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Font variables — colors are defined in App.css */
+:root {
+  --font-display: 'ABC Diatype', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-mono: 'OCR-X', 'Space Mono', 'Monaco', 'Courier New', monospace;
+}
+
+/* Typography handled in App.css */

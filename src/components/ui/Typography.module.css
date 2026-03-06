@@ -1,0 +1,139 @@
+.typography {
+  font-family: var(--font-sans);
+  margin: 0;
+}
+
+.h1 {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  color: #0A0A0A;
+}
+
+.h2 {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  color: #0A0A0A;
+}
+
+.h3 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #0A0A0A;
+}
+
+.h4 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.25px;
+  color: #0A0A0A;
+}
+
+.h5 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #0A0A0A;
+}
+
+.h6 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.15px;
+  color: #0A0A0A;
+}
+
+.subtitle1 {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.15px;
+}
+
+.subtitle2 {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.1px;
+}
+
+.body1 {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.15px;
+}
+
+.body2 {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0.15px;
+}
+
+.caption {
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.4px;
+}
+
+.overline {
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 2;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.alignLeft {
+  text-align: left;
+}
+
+.alignCenter {
+  text-align: center;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.alignJustify {
+  text-align: justify;
+}
+
+.alignInherit {
+  text-align: inherit;
+}
+
+.colorPrimary {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.colorSecondary {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.colorTextSecondary {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.colorError {
+  color: #f44336;
+}
+
+.colorInherit {
+  color: inherit;
+}

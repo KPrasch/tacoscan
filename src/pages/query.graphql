@@ -1,225 +1,497 @@
-query GetRitualsQueryByUser($authority:Bytes,$id:ID,$txHash:Bytes){
-    rituals(
-        first:1000
-        where:{
-            or:[
-                {authority:$authority},
-                {id:$id},
-                {transactions_:{txHash:$txHash}}
-            ]
+# ═══════════════════════════════════════════════════════════════════════════════
+# TACo v2 Subgraph Queries — Native field names, no legacy mapping
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── Rituals (Polygon) ─────────────────────────────────────────────────────────
+
+query GetRitualsQueryByUser($authority: Bytes, $id: ID, $txHash: Bytes, $skip: Int = 0) {
+  rituals(
+    first: 1000
+    skip: $skip
+    where: {
+      and: [
+        {
+          or: [
+            { authority: $authority }
+            { id: $id }
+            { transactions_: { transactionHash: $txHash } }
+          ]
         }
-    ) {
-        id
-        initiator
-        initTimestamp
-        endTimestamp
-        dkgSize
-        dkgStatus
-        authority
-        accessController
-        participants
-        postedAggregations
-        postedTranscripts
-        publicKey
-        threshold
-        transactions(orderBy:timestamp,orderDirection:desc) {
-            description
-            from
-            id
-            timestamp
-            to
-            txHash
-        }
+        { id_not_in: ["1", "2", "3", "4", "5", "6"] }
+      ]
     }
-    ritualCounter(id:"Counter"){
-        total
-        unsuccessful
-        successful
-        notEnded
+    orderBy: id
+    orderDirection: asc
+  ) {
+    id
+    authority
+    participants
+    status
+    startedAt
+    endedAt
+    transcriptCount
+    aggregationCount
+    publicKey {
+      word0
+      word1
     }
+    transactions(orderBy: timestamp, orderDirection: desc) {
+      eventType
+      participant
+      timestamp
+      transactionHash
+      gasUsed
+      transcriptDigest
+      aggregatedTranscriptDigest
+      previousAuthority
+      newAuthority
+    }
+  }
+  ritualCounter(id: "global") {
+    total: totalRituals
+    unsuccessful: failedRituals
+    successful: successfulRituals
+    notEnded: pendingRituals
+  }
 }
 
-query GetRitualsQueryByStakingProvider($id:Bytes!){
-    rituals(
-        first:1000
-        where: { participants_contains: [$id]}
-    ) {
-        id
-        initiator
-        initTimestamp
-        endTimestamp
-        dkgSize
-        dkgStatus
-        authority
-        accessController
-        participants
-        postedAggregations
-        postedTranscripts
-        publicKey
-        threshold
-        transactions(orderBy:timestamp,orderDirection:desc) {
-            description
-            from
-            id
-            timestamp
-            to
-            txHash
-        }
+query GetRitualsQueryByStakingProvider($id: Bytes!, $skip: Int = 0) {
+  rituals(
+    first: 1000
+    skip: $skip
+    where: {
+      and: [
+        { participants_contains: [$id] }
+        { id_not_in: ["1", "2", "3", "4", "5", "6"] }
+      ]
     }
+    orderBy: id
+    orderDirection: asc
+  ) {
+    id
+    authority
+    participants
+    status
+    startedAt
+    endedAt
+    transcriptCount
+    aggregationCount
+    publicKey {
+      word0
+      word1
+    }
+    transactions(orderBy: timestamp, orderDirection: desc) {
+      eventType
+      participant
+      timestamp
+      transactionHash
+    }
+  }
 }
 
-query GetAllRitualsQuery{
-    rituals(first:1000) {
-        id
-        initiator
-        initTimestamp
-        endTimestamp
-        authority
-        accessController
-        dkgSize
-        dkgStatus
-        participants
-        postedAggregations
-        postedTranscripts
-        publicKey
-        threshold
-        transactions(orderBy:timestamp,orderDirection:desc) {
-            description
-            from
-            id
-            timestamp
-            to
-            txHash
-        }
+query GetAllRitualsQuery($skip: Int = 0) {
+  rituals(
+    first: 1000
+    skip: $skip
+    where: { id_not_in: ["1", "2", "3", "4", "5", "6"] }
+    orderBy: id
+    orderDirection: asc
+  ) {
+    id
+    authority
+    participants
+    status
+    startedAt
+    endedAt
+    transcriptCount
+    aggregationCount
+    publicKey {
+      word0
+      word1
     }
-    ritualCounter(id:"Counter") {
-        total
-        unsuccessful
-        successful
-        notEnded
+    transactions(orderBy: timestamp, orderDirection: desc) {
+      eventType
+      participant
+      timestamp
+      transactionHash
     }
+  }
+  ritualCounter(id: "global") {
+    total: totalRituals
+    unsuccessful: failedRituals
+    successful: successfulRituals
+    notEnded: pendingRituals
+  }
 }
+
+# ── Stakers (Ethereum) ───────────────────────────────────────────────────────
 
 query GetAllStakersQuery {
-  appAuthorizations(
-    first: 1000
-    orderBy: stake__stakedAmount
-    orderDirection: desc
-    where: {appName: "TACo"}
-  ) {
-        amount
-        amountDeauthorizing
-        appAddress
-        appName
-        id
-        stake {
-            authorizer
-            beneficiary
-            id
-            owner {
-                id
-            }
-            stakedAmount
-            stakeHistory(first: 10, orderBy: timestamp, orderDirection: asc) {
-                blockNumber
-                eventAmount
-                eventType
-                id
-                stakedAmount
-                timestamp
-            }
-        }
-        tacoOperator {
-            bondedTimestamp
-            bondedTimestampFirstOperator
-            confirmed
-            id
-            operator
-        }
-    }
+  stakingProviders(first: 1000, orderBy: authorized, orderDirection: desc) {
+    id
+    operator
+    authorized
+    deauthorizing
+    startTimestamp
+  }
 }
 
-query SearchStakers($id: ID!,$address: Bytes) {
-    appAuthorizations(where:{
-        or: [
-            {id:$id},
-            {tacoOperator_: {operator: $address}}
-        ]
-    })
-    {
-        amount
-        amountDeauthorizing
-        appAddress
-        appName
-        id
-        stake {
-            authorizer
-            beneficiary
-            id
-            stakedAmount
-            stakeHistory(first: 10, orderBy: timestamp, orderDirection: asc) {
-                blockNumber
-                eventAmount
-                eventType
-                id
-                stakedAmount
-                timestamp
-            }
-        }
-        tacoOperator {
-            bondedTimestamp
-            bondedTimestampFirstOperator
-            confirmed
-            id
-            operator
-        }
-    }
+query SearchStakers($id: ID!, $address: Bytes) {
+  stakingProviders(where: { or: [{ id: $id }, { operator: $address }] }) {
+    id
+    operator
+    authorized
+    deauthorizing
+    startTimestamp
+  }
 }
 
 query StakerDetail($id: ID!) {
-    appAuthorization(id:$id){
-        id
-        amount
-        amountDeauthorizing
-        appAddress
-        appName
-        stake {
-            owner {
-                id
-            }
-            authorizer
-            beneficiary
-            id
-            stakedAmount
-            stakeHistory(first: 10, orderDirection: desc, orderBy: timestamp) {
-                blockNumber
-                eventAmount
-                eventType
-                id
-                stakedAmount
-                timestamp
-            }
-        }
-        tacoOperator {
-            bondedTimestamp
-            bondedTimestampFirstOperator
-            confirmed
-            id
-            operator
-        }
+  stakingProvider(id: $id) {
+    id
+    operator
+    authorized
+    deauthorizing
+    startTimestamp
+    authorizationEvents(first: 50, orderBy: timestamp, orderDirection: desc) {
+      id
+      eventType
+      fromAmount
+      toAmount
+      penalty
+      investigator
+      reward
+      operator
+      timestamp
+      blockNumber
+      transactionHash
     }
-    appAuthHistories(
-        first: 10
-        where: {appAuthorization_:{id:$id}}
-        orderBy: timestamp
-        orderDirection: asc
-    ) {
-        id
-        amount
-        blockNumber
-        eventAmount
-        eventType
-        stakingProvider
-        timestamp
-    }
+  }
+}
+
+# ── Network Events: Ethereum ─────────────────────────────────────────────────
+
+query EthereumEvents {
+  authorizationEvents(first: 500, orderBy: timestamp, orderDirection: desc) {
+    id
+    eventType
+    fromAmount
+    toAmount
+    penalty
+    investigator
+    reward
+    deauthorizing
+    endDeauthorization
+    operator
+    stakingProvider { id }
+    transactionHash
+    blockNumber
+    timestamp
+  }
+  rewardEvents(first: 200, orderBy: timestamp, orderDirection: desc) {
+    id
+    eventType
+    amount
+    sender
+    beneficiary
+    endCommitment
+    penaltyPercent
+    endPenalty
+    contract
+    distributor
+    stakingProvider { id }
+    transactionHash
+    blockNumber
+    timestamp
+  }
+  governanceEvents(first: 100, orderBy: timestamp, orderDirection: desc) {
+    id
+    eventType
+    contract
+    domain
+    oldValue
+    newValue
+    oldValueInt
+    newValueInt
+    oldValueAddress
+    newValueAddress
+    transactionHash
+    blockNumber
+    timestamp
+  }
+  bridgeMessages(first: 100, orderBy: timestamp, orderDirection: desc) {
+    id
+    domain
+    messageType
+    stakingProvider
+    transactionHash
+    blockNumber
+    timestamp
+  }
+  infractions(first: 100, orderBy: timestamp, orderDirection: desc) {
+    id
+    domain
+    infractionType
+    infractionTypeName
+    stakingProvider { id }
+    ritual { id }
+    timestamp
+  }
+}
+
+# ── Network Events: Polygon ──────────────────────────────────────────────────
+
+query PolygonEvents {
+  ritualTransactions(first: 500, orderBy: timestamp, orderDirection: desc) {
+    id
+    eventType
+    participant
+    transcriptDigest
+    aggregatedTranscriptDigest
+    previousAuthority
+    newAuthority
+    ritual { id }
+    transactionHash
+    blockNumber
+    timestamp
+    gasUsed
+  }
+  handovers(first: 100, orderBy: createdAt, orderDirection: desc) {
+    id
+    departingParticipant
+    incomingParticipant
+    status
+    ritual { id }
+    requestedAt
+    transcriptPostedAt
+    blindedSharePostedAt
+    canceledAt
+    finalizedAt
+    createdAt
+    updatedAt
+  }
+  subscriptionPayments(first: 200, orderBy: timestamp, orderDirection: desc) {
+    id
+    domain
+    policyId
+    subscriber
+    amount
+    period
+    slots
+    paymentType
+    policy { id sponsor owner }
+    transactionHash
+    blockNumber
+    timestamp
+  }
+  policies(first: 100, orderBy: timestamp, orderDirection: desc) {
+    id
+    domain
+    sponsor
+    owner
+    size
+    startTimestamp
+    endTimestamp
+    cost
+    transactionHash
+    blockNumber
+    timestamp
+  }
+  ritualAccessControls(first: 100, orderBy: timestamp, orderDirection: desc) {
+    id
+    domain
+    ritualId
+    address
+    isAuthorized
+    transactionHash
+    blockNumber
+    timestamp
+  }
+  reimbursementWithdrawals(first: 100, orderBy: timestamp, orderDirection: desc) {
+    id
+    domain
+    recipient
+    amount
+    transactionHash
+    blockNumber
+    timestamp
+  }
+  reimbursementFailures(first: 100, orderBy: timestamp, orderDirection: desc) {
+    id
+    domain
+    recipient
+    amount
+    transactionHash
+    blockNumber
+    timestamp
+  }
+  governanceEvents(first: 100, orderBy: timestamp, orderDirection: desc) {
+    id
+    eventType
+    contract
+    domain
+    oldValue
+    newValue
+    oldValueInt
+    newValueInt
+    oldValueAddress
+    newValueAddress
+    transactionHash
+    blockNumber
+    timestamp
+  }
+  infractions(first: 100, orderBy: timestamp, orderDirection: desc) {
+    id
+    domain
+    infractionType
+    infractionTypeName
+    stakingProvider { id }
+    ritual { id }
+    timestamp
+  }
+}
+
+# ── Network Events: Base ─────────────────────────────────────────────────────
+
+query BaseEvents {
+  signingCohorts(first: 100, orderBy: createdAt, orderDirection: desc) {
+    id
+    domain
+    chainId
+    authority
+    participants
+    status
+    isDeployed
+    deployedAt
+    multisigAddress
+    signers
+    threshold
+    createdAt
+    updatedAt
+  }
+  signingCohortSignatures(first: 200, orderBy: timestamp, orderDirection: desc) {
+    id
+    provider
+    signer
+    cohort { id }
+    transactionHash
+    blockNumber
+    timestamp
+  }
+  multisigClones(first: 100, orderBy: createdAt, orderDirection: desc) {
+    id
+    domain
+    cohortId
+    factory
+    signers
+    threshold
+    isCleared
+    executionCount
+    totalValue
+    lastExecutedAt
+    createdAt
+    updatedAt
+  }
+  multisigExecutions(first: 200, orderBy: timestamp, orderDirection: desc) {
+    id
+    sender
+    nonce
+    destination
+    value
+    multisig { id }
+    transactionHash
+    blockNumber
+    timestamp
+    gasUsed
+  }
+  multisigSignerEvents(first: 100, orderBy: timestamp, orderDirection: desc) {
+    id
+    eventType
+    signer
+    newSigner
+    multisig { id }
+    transactionHash
+    blockNumber
+    timestamp
+  }
+  opExecutions(first: 100, orderBy: timestamp, orderDirection: desc) {
+    id
+    domain
+    target
+    result
+    transactionHash
+    blockNumber
+    timestamp
+    gasUsed
+  }
+  contractAuthorizations(first: 50, orderBy: createdAt, orderDirection: desc) {
+    id
+    domain
+    contract
+    isAuthorized
+    createdAt
+    updatedAt
+  }
+  governanceEvents(first: 100, orderBy: timestamp, orderDirection: desc) {
+    id
+    eventType
+    contract
+    domain
+    oldValue
+    newValue
+    oldValueInt
+    newValueInt
+    oldValueAddress
+    newValueAddress
+    transactionHash
+    blockNumber
+    timestamp
+  }
+}
+
+# ── Stats ─────────────────────────────────────────────────────────────────────
+
+query GetDomainStats($id: ID!) {
+  domainStats(id: $id) {
+    id
+    totalRituals
+    successfulRituals
+    failedRituals
+    activeRituals
+    totalStakingProviders
+    activeStakingProviders
+    totalAuthorized
+    totalSlashed
+    totalRewardEvents
+    totalRewardsDistributed
+    totalRewardsWithdrawn
+    totalSigningCohorts
+    deployedCohorts
+    totalMultisigs
+    totalExecutions
+    totalBridgeMessages
+    totalOpExecutions
+    totalInfractions
+    totalRitualAccessControls
+    totalPolicies
+    totalSubscriptionPayments
+    totalSubscriptionRevenue
+    totalContractAuthorizations
+    totalReimbursements
+    totalReimbursementFailures
+    totalGovernanceEvents
+  }
+}
+
+query GetRitualCounter {
+  ritualCounter(id: "global") {
+    totalRituals
+    successfulRituals
+    failedRituals
+    pendingRituals
+    totalTranscripts
+    totalAggregations
+    totalHandovers
+    lastRitualId
+  }
 }

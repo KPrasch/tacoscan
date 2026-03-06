@@ -1,0 +1,568 @@
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 16px 20px;
+  min-height: 100vh;
+  background: #FAFBFC;
+}
+
+.header {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+  font-family: var(--font-heading);
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.networkTabs {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.networkTab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 14px;
+  background: var(--bg-surface);
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 180px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.networkTab:hover {
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.networkTab.active {
+  background: var(--bg-surface);
+  border-color: currentColor;
+  box-shadow: var(--shadow-lg);
+}
+
+.networkName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.chainId {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.searchBox {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 16px;
+  padding-right: 40px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--accent-green-hover);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.searchInput::placeholder {
+  color: var(--text-tertiary);
+}
+
+.clearButton {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+
+.clearButton:hover {
+  color: var(--text-primary);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.statCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.explorerLink {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent-green-hover);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.explorerLink:hover {
+  color: var(--status-active);
+  text-decoration: underline;
+}
+
+.contractsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.contractCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.contractCard:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.contractHeader {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.contractHeader:hover {
+  background: var(--bg-primary);
+}
+
+.contractMain {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  gap: 16px;
+}
+
+.contractInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.contractName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.contractMeta {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.contractType {
+  padding: 4px 12px;
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--accent-green-hover);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.contractChain {
+  padding: 4px 12px;
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366F1;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.contractActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.viewButton {
+  padding: 6px 12px;
+  background: var(--bg-surface);
+  border: 1px solid #059669;
+  border-radius: 6px;
+  color: var(--accent-green-hover);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.viewButton:hover {
+  background: #059669;
+  color: #FFFFFF;
+}
+
+.expandButton {
+  width: 28px;
+  height: 28px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.expandButton:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.contractAddress {
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-primary);
+  border-top: 1px solid #F3F4F6;
+  min-width: 0;
+}
+
+.addressLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.addressValue {
+  flex: 1;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  padding: 8px 12px;
+  border-radius: 6px;
+  word-break: keep-all;
+  overflow-x: auto;
+  white-space: nowrap;
+  border: 1px solid var(--border-color);
+}
+
+.copyButton {
+  padding: 6px 10px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.copyButton:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.contractDetails {
+  padding: 12px 14px;
+  background: var(--bg-primary);
+}
+
+.detailRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.detailLabel {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  min-width: 120px;
+}
+
+.detailValue {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.blockLink {
+  font-size: 14px;
+  color: var(--accent-green-hover);
+  text-decoration: none;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  transition: color 0.2s ease;
+}
+
+.blockLink:hover {
+  color: var(--status-active);
+  text-decoration: underline;
+}
+
+.abiSection {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #374151;
+}
+
+.abiHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.abiLabel {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.downloadButton {
+  padding: 8px 16px;
+  background: #059669;
+  border: none;
+  border-radius: 6px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.downloadButton:hover {
+  background: var(--status-active);
+}
+
+.abiPreview {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.methodsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.methodItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-primary);
+  border-radius: 6px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  border: 1px solid var(--border-color);
+  transition: background 0.2s ease;
+}
+
+.methodItem:hover {
+  background: var(--bg-tertiary);
+}
+
+.methodInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.methodName {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.methodType {
+  font-size: 12px;
+  padding: 2px 8px;
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--accent-green-hover);
+  border-radius: 4px;
+}
+
+.copyFunctionBtn {
+  padding: 4px 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.copyFunctionBtn:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+  border-color: var(--text-tertiary);
+}
+
+.moreIndicator {
+  padding: 12px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-style: italic;
+}
+
+.noResults {
+  padding: 24px 12px;
+  text-align: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  grid-column: 1 / -1;
+}
+
+.noResults p {
+  color: var(--text-secondary);
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Scrollbar styling */
+.abiPreview::-webkit-scrollbar {
+  width: 8px;
+}
+
+.abiPreview::-webkit-scrollbar-track {
+  background: #1F2937;
+  border-radius: 4px;
+}
+
+.abiPreview::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 4px;
+}
+
+.abiPreview::-webkit-scrollbar-thumb:hover {
+  background: #4B5563;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .contractsList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 24px 16px;
+  }
+
+  .networkTabs {
+    flex-direction: column;
+  }
+
+  .networkTab {
+    width: 100%;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .contractsList {
+    grid-template-columns: 1fr;
+  }
+
+  .contractAddress {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .addressValue {
+    width: 100%;
+  }
+}

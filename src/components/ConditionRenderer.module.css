@@ -1,0 +1,194 @@
+/* ConditionRenderer — two-column interactive layout */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── Clause rows (explain | code) ─────────────────────────────────────────── */
+.clauseRow {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 0;
+  border-radius: 6px;
+  transition: background 0.12s;
+  align-items: start;
+}
+
+.clauseRowHovered {
+  background: var(--color-bg-hover, rgba(0, 0, 0, 0.035));
+}
+
+/* Left: explanation */
+.explainCol {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px 8px 8px;
+  border-right: 1px solid var(--color-border, rgba(0, 0, 0, 0.07));
+}
+
+.clauseDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+  opacity: 0.75;
+}
+
+.explainContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.explainTitle {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text, #1a1a1a);
+  line-height: 1.4;
+}
+
+.explainDetail {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  color: var(--color-text-muted, #888);
+  line-height: 1.4;
+}
+
+/* Right: pseudocode */
+.codeCol {
+  padding: 6px 8px 6px 12px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--color-text, #1a1a1a);
+  min-width: 0;
+}
+
+/* ── Pseudocode block components ──────────────────────────────────────────── */
+.block {
+  margin: 1px 0;
+}
+
+.blockHeader {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 4px;
+  cursor: pointer;
+  border-radius: 3px;
+  user-select: none;
+  transition: background 0.1s;
+}
+
+.blockHeader:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.keyword {
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+}
+
+.opBrace {
+  color: var(--color-text-muted, #aaa);
+  font-weight: 400;
+}
+
+.collapsedPreview {
+  color: var(--color-text-muted, #bbb);
+  font-size: 10.5px;
+  flex: 1;
+}
+
+.chevron {
+  color: var(--color-text-muted, #ccc);
+  font-size: 9px;
+  flex-shrink: 0;
+}
+
+.blockBody {
+  padding-left: 14px;
+  border-left: 1px solid var(--color-border, rgba(0, 0, 0, 0.07));
+  margin-left: 8px;
+}
+
+.closeBrace {
+  padding: 0 4px;
+}
+
+/* ── Sequential steps ─────────────────────────────────────────────────────── */
+.seqStep {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.seqStep:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.stepNum {
+  color: var(--color-text-muted, #ccc);
+  font-size: 10px;
+  min-width: 18px;
+  text-align: right;
+  padding-right: 8px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.varName {
+  color: #5b9bd5;
+  min-width: 150px;
+  flex-shrink: 0;
+  font-size: 11px;
+  padding-right: 8px;
+}
+
+.stepSummary {
+  font-size: 11px;
+  opacity: 0.88;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Leaf nodes ───────────────────────────────────────────────────────────── */
+.leafLine {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.leafLine:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.typeBadge {
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 52px;
+  flex-shrink: 0;
+  opacity: 0.8;
+  letter-spacing: 0.1px;
+}
+
+.leafText {
+  font-size: 11px;
+  color: var(--color-text, #222);
+  opacity: 0.82;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

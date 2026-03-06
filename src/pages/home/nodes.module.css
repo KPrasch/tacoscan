@@ -1,0 +1,219 @@
+.container {
+  background: var(--bg-primary);
+  min-height: 100vh;
+  padding-bottom: 24px;
+}
+
+.inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 16px 20px;
+}
+
+.unit {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+.tableWrap {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.table thead {
+  background: var(--bg-primary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.th {
+  padding: 6px 10px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.sortable {
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.sortable:hover { color: var(--accent-green-hover); }
+
+.row {
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.15s;
+  cursor: pointer;
+}
+
+.row:hover { background: var(--bg-primary); }
+.row:last-child { border-bottom: none; }
+
+.row td {
+  padding: 8px 10px;
+  color: var(--text-primary);
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+/* ── Cell variants ───────────────────────────────────────────────────────── */
+.cellAddr {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.addrLink {
+  color: var(--accent-green-hover);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.addrLink:hover {
+  text-decoration: underline;
+}
+
+.addrMono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.cellNum {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.cellMuted {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+
+.cellCenter {
+  text-align: center;
+}
+
+.confirmedYes {
+  color: var(--accent-green-hover);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.confirmedNo {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.muted {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+/* ── No data ─────────────────────────────────────────────────────────────── */
+.nodata {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+/* ── Pagination ──────────────────────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 8px 0;
+}
+
+.pageBtn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.pageBtn:hover:not(:disabled) {
+  color: var(--accent-green-hover);
+  border-color: var(--accent-green-hover);
+}
+
+.pageBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pageInfo {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+}
+
+.pageSelect {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+/* ── Data Stakers ────────────────────────────────────────────────────────── */
+.dataStakerSection {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.dataStakerToggle {
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 5px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.dataStakerToggle:hover {
+  color: var(--accent-green-hover);
+  border-color: var(--accent-green-hover);
+}

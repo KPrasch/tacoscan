@@ -1,0 +1,45 @@
+.link {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  font-family: var(--font-sans);
+}
+
+.underlineAlways {
+  text-decoration: underline;
+}
+
+.underlineHover {
+  text-decoration: none;
+}
+
+.underlineHover:hover {
+  text-decoration: underline;
+}
+
+.underlineNone {
+  text-decoration: none;
+}
+
+.primary {
+  color: var(--text-primary);
+}
+
+.primary:hover {
+  color: var(--text-secondary);
+}
+
+.secondary {
+  color: #ef4444;
+}
+
+.secondary:hover {
+  color: #ef4444;
+}
+
+.inherit {
+  color: inherit;
+}
+
+.inherit:hover {
+  opacity: 0.8;
+}
