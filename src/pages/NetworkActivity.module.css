@@ -21,17 +21,7 @@
 }
 
 /* Page Header */
-.pageHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, #0A0A0A 0%, #E5E7EB 100%);
-  border-radius: 12px;
-  color: #FFFFFF;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
+.pageHeader { /* removed — using PageHeader component */ }
 
 .headerContent {
   flex: 1;
@@ -309,13 +299,17 @@
 }
 
 .eventType {
-  background: var(--bg-tertiary);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-primary);
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--border-color);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
   white-space: nowrap;
+  font-family: var(--font-mono);
 }
 
 .method {

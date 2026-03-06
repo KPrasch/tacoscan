@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getRewardDistributions, formatString, formatWeiDecimal } from "./data";
 import styles from "./Rewards.module.css";
+import PageHeader from "../components/PageHeader";
+import { ListSkeleton } from "../components/Skeleton";
 
 const REWARDS_CONTRACT = "0xA08AadA7c59E4A1D4A858fcfA299673d2f6De0c3";
 
@@ -73,38 +75,21 @@ const Rewards = () => {
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paged = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  if (loading) return <div className={styles.networkActivity}><div className={styles.loading}>Loading reward distributions...</div></div>;
+  if (loading) return <ListSkeleton cols={5} rows={12} />;
 
   return (
     <div className={styles.networkActivity}>
       <div className={styles.container}>
-        <div className={styles.pageHeader}>
-          <div className={styles.headerContent}>
-            <h1 className={styles.pageTitle}>Rewards</h1>
-            <p className={styles.pageSubtitle}>
-              Monthly TACo reward distributions — Merkle tree based payouts to stakers.
-              Contract: <a href={`https://etherscan.io/address/${REWARDS_CONTRACT}`} target="_blank" rel="noopener noreferrer" style={{ color: "#3B82F6" }}>{formatString(REWARDS_CONTRACT)}</a>
-            </p>
-          </div>
-          <div className={styles.headerStats}>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Total Distributed</span>
-              <span className={styles.statValue}>{formatTokenAmount(stats.totalDistributed)} T</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Latest Month</span>
-              <span className={styles.statValue}>{formatTokenAmount(stats.latestDistribution || "0")} T</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Stakers</span>
-              <span className={styles.statValue}>{stats.totalStakers}</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Distributions</span>
-              <span className={styles.statValue}>{stats.distributions}</span>
-            </div>
-          </div>
-        </div>
+        <PageHeader
+          title="Rewards"
+          subtitle={<>Monthly TACo reward distributions — Merkle tree based payouts to stakers. Contract: <a href={`https://etherscan.io/address/${REWARDS_CONTRACT}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-green)' }}>{formatString(REWARDS_CONTRACT)}</a></>}
+          stats={[
+            { label: 'Total Distributed', value: `${formatTokenAmount(stats.totalDistributed)} T` },
+            { label: 'Latest Month', value: `${formatTokenAmount(stats.latestDistribution || '0')} T` },
+            { label: 'Stakers', value: stats.totalStakers },
+            { label: 'Distributions', value: stats.distributions },
+          ]}
+        />
 
         {/* Distribution selector */}
         <div className={styles.filtersSection}>

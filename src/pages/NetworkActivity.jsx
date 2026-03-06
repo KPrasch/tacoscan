@@ -8,6 +8,8 @@ import {
   formatDate,
 } from "./data";
 import styles from "./NetworkActivity.module.css";
+import PageHeader from "../components/PageHeader";
+import { ListSkeleton } from "../components/Skeleton";
 
 // ── Category metadata ──────────────────────────────────────────────────────
 const CATEGORY_META = {
@@ -65,18 +67,23 @@ const TABS = [
   { id: "handover",       label: "Handover",         categories: ["handover"] },
 ];
 
+const TAG_STYLE = {
+  display: "inline-block",
+  padding: "1px 5px",
+  borderRadius: "3px",
+  border: "1px solid",
+  fontSize: "10px",
+  fontWeight: 700,
+  letterSpacing: "0.4px",
+  textTransform: "uppercase",
+  whiteSpace: "nowrap",
+  fontFamily: "var(--font-mono)",
+  opacity: 0.9,
+};
+
 // ── Chain badge component ──────────────────────────────────────────────────
 const ChainBadge = ({ chain }) => (
-  <span
-    style={{
-      background: CHAIN_COLORS[chain] || "#6B7280",
-      color: "#fff",
-      padding: "2px 6px",
-      borderRadius: "4px",
-      fontSize: "10px",
-      fontWeight: 700,
-    }}
-  >
+  <span style={{ ...TAG_STYLE, color: CHAIN_COLORS[chain] || "#6B7280", borderColor: CHAIN_COLORS[chain] || "#6B7280" }}>
     {CHAIN_LABELS[chain] || chain}
   </span>
 );
@@ -85,17 +92,7 @@ const ChainBadge = ({ chain }) => (
 const CategoryBadge = ({ category }) => {
   const meta = CATEGORY_META[category] || { label: category, color: "var(--text-secondary)" };
   return (
-    <span
-      style={{
-        background: `${meta.color}18`,
-        color: meta.color,
-        padding: "3px 7px",
-        borderRadius: "4px",
-        fontSize: "11px",
-        fontWeight: 600,
-        whiteSpace: "nowrap",
-      }}
-    >
+    <span style={{ ...TAG_STYLE, color: meta.color, borderColor: meta.color }}>
       {meta.label}
     </span>
   );
@@ -404,11 +401,7 @@ const NetworkActivity = () => {
 
   if (loading) {
     return (
-      <div className={styles.networkActivity}>
-        <div className={styles.container}>
-          <div className={styles.loading}>Loading protocol data from all chains...</div>
-        </div>
-      </div>
+      <ListSkeleton cols={6} rows={12} />
     );
   }
 
@@ -417,29 +410,15 @@ const NetworkActivity = () => {
   return (
     <div className={styles.networkActivity}>
       <div className={styles.container}>
-        {/* Header */}
-        <div className={styles.pageHeader}>
-          <div className={styles.headerContent}>
-            <h1 className={styles.pageTitle}>Protocol</h1>
-            <p className={styles.pageSubtitle}>
-              TACo protocol events across Ethereum, Polygon &amp; Base — bridge messages, governance, reimbursements &amp; subscriptions
-            </p>
-          </div>
-          <div className={styles.headerStats}>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Total Events</span>
-              <span className={styles.statValue}>{events.length.toLocaleString()}</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>24h Activity</span>
-              <span className={styles.statValue}>{stats24h}</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Chains</span>
-              <span className={styles.statValue}>3</span>
-            </div>
-          </div>
-        </div>
+        <PageHeader
+          title="Protocol"
+          subtitle="TACo protocol events across Ethereum, Polygon &amp; Base — bridge messages, governance, reimbursements &amp; subscriptions"
+          stats={[
+            { label: 'Total Events', value: events.length.toLocaleString() },
+            { label: '24h Activity', value: stats24h },
+            { label: 'Chains', value: 3 },
+          ]}
+        />
 
         {/* Tabs */}
         <div className={styles.tabNav}>

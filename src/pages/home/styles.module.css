@@ -11,3 +11,168 @@
     margin-top: 10px;
     overflow: hidden;
 }
+
+/* ── Ritual table ────────────────────────────────────────────────────────── */
+.tableContainer {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.ritualTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.ritualTable thead {
+    background: var(--bg-primary);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.ritualTable th {
+    padding: 6px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
+
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s;
+    white-space: nowrap;
+}
+
+.sortable:hover { color: var(--accent-green-hover); }
+
+.clickableRow {
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.15s;
+}
+
+.clickableRow:hover { background: var(--bg-primary); }
+.clickableRow:last-child { border-bottom: none; }
+
+.ritualTable td {
+    padding: 8px 10px;
+    color: var(--text-primary);
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+/* Cell variants */
+.ritualIdCell {
+    font-weight: 700;
+    color: var(--accent-green-hover);
+    font-size: 13px;
+    width: 60px;
+    white-space: nowrap;
+}
+
+.addrCell {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.numCell {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+.dimCell {
+    color: var(--text-tertiary);
+    font-size: 11px;
+    white-space: nowrap;
+    font-family: var(--font-mono);
+}
+
+.progressFull {
+    color: var(--accent-green-hover);
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.progressPartial {
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.tableEmpty {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    font-size: 13px;
+}
+
+/* Status badges */
+.statusBadge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    white-space: nowrap;
+    font-family: var(--font-mono);
+}
+
+.status_successful {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--accent-green-hover);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.status_active {
+    background: rgba(74, 222, 128, 0.12);
+    color: var(--status-active);
+    border-color: rgba(74, 222, 128, 0.35);
+}
+
+.status_awaiting {
+    background: rgba(91, 154, 213, 0.12);
+    color: #5b9bd5;
+    border-color: rgba(91, 154, 213, 0.35);
+}
+
+.status_expired {
+    background: rgba(212, 145, 90, 0.1);
+    color: #d4915a;
+    border-color: rgba(212, 145, 90, 0.3);
+}
+
+.status_timeout {
+    background: rgba(220, 38, 38, 0.08);
+    color: #dc2626;
+    border-color: rgba(220, 38, 38, 0.25);
+}
+
+.hbBadge {
+    display: inline-block;
+    background: rgba(107, 114, 128, 0.08);
+    color: var(--text-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-left: 6px;
+    vertical-align: middle;
+}

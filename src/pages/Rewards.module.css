@@ -21,17 +21,7 @@
 }
 
 /* Page Header */
-.pageHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, #0A0A0A 0%, #E5E7EB 100%);
-  border-radius: 12px;
-  color: #FFFFFF;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
+.pageHeader { /* removed — using PageHeader component */ }
 
 .headerContent {
   flex: 1;

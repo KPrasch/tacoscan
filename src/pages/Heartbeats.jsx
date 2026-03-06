@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getRituals, detectHeartbeatGroups, formatRitualsData, formatString, formatTimeToText, getTimeout, getLiveRitualIds } from "./data";
 import styles from "./Heartbeats.module.css";
+import PageHeader from "../components/PageHeader";
+import { ListSkeleton } from "../components/Skeleton";
 
 const Heartbeats = () => {
   const navigate = useNavigate();
@@ -94,7 +96,7 @@ const Heartbeats = () => {
     return '#059669';
   };
 
-  if (loading) return <div className={styles.networkActivity}><div className={styles.loading}>Loading heartbeat data...</div></div>;
+  if (loading) return <ListSkeleton cols={4} rows={8} />;
 
   // Group heatmap into weeks (columns)
   const weeks = [];
@@ -105,33 +107,16 @@ const Heartbeats = () => {
   return (
     <div className={styles.networkActivity}>
       <div className={styles.container}>
-        <div className={styles.pageHeader}>
-          <div className={styles.headerContent}>
-            <h1 className={styles.pageTitle}>Heartbeats</h1>
-            <p className={styles.pageSubtitle}>
-              Weekly liveness checks — small DKG rituals (≤3 participants) that verify node availability.
-              Distinct from full DKG key generation ceremonies.
-            </p>
-          </div>
-          <div className={styles.headerStats}>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Weekly Groups</span>
-              <span className={styles.statValue}>{stats.totalGroups}</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Total Rituals</span>
-              <span className={styles.statValue}>{stats.totalRituals}</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Success Rate</span>
-              <span className={styles.statValue}>{stats.successRate}%</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Participants</span>
-              <span className={styles.statValue}>{stats.uniqueParticipants}</span>
-            </div>
-          </div>
-        </div>
+        <PageHeader
+          title="Heartbeats"
+          subtitle="Weekly liveness checks — small DKG rituals (≤3 participants) that verify node availability. Distinct from full DKG key generation ceremonies."
+          stats={[
+            { label: 'Weekly Groups', value: stats.totalGroups },
+            { label: 'Total Rituals', value: stats.totalRituals },
+            { label: 'Success Rate', value: `${stats.successRate}%` },
+            { label: 'Participants', value: stats.uniqueParticipants },
+          ]}
+        />
 
         {/* Heartbeat Heatmap */}
         <div className={styles.heatmapSection}>
@@ -185,7 +170,7 @@ const Heartbeats = () => {
                 {groups.map((group, idx) => (
                   <tr key={idx} style={{ cursor: "pointer" }} onClick={() => navigate(`/heartbeat-group/${new Date(group.mondayMidnight).toISOString().split('T')[0]}`)}>
                     <td>
-                      <span className={styles.eventType} style={{ background: "rgba(34, 197, 94, 0.15)", color: "#10B981" }}>
+                      <span className={styles.eventType} style={{ color: "#10B981", borderColor: "#10B981" }}>
                         Week {group.weekNumber}
                       </span>
                     </td>

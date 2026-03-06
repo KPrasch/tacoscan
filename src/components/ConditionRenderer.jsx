@@ -181,25 +181,58 @@ function CondNode({ cond, depth = 0 }) {
 }
 
 // ── Human-readable summarizer ─────────────────────────────────────────────────
+
+// Extract token symbol from a variable name like "amountUSDC", "amountETH", "amountSend"
+function extractToken(varName) {
+  const upper = varName.toUpperCase();
+  const known = ['USDC', 'USDT', 'ETH', 'DAI', 'WETH', 'WBTC', 'BTC'];
+  for (const t of known) if (upper.includes(t)) return t;
+  return null;
+}
+
+// Get minimum amount from a json-type step's returnValueTest
+function extractAmount(step) {
+  const rvt = step?.condition?.returnValueTest;
+  if (!rvt) return null;
+  const comp = rvt.comparator;
+  if (comp === '>=' || comp === '>' || comp === '==') return `${comp} ${rvt.value}`;
+  return null;
+}
+
+// Classify recipient derivation method from a sequential block
+function recipientPath(steps) {
+  const hasContract = steps.some((s) => s.condition?.conditionType === 'contract');
+  const hasSalt = steps.some((s) => (s.varName || '').toLowerCase().includes('salt'));
+  if (hasContract || hasSalt) return 'contract-derived';
+  return 'direct';
+}
+
 function summarizeSeq(cond) {
   const steps = cond.conditionVariables || [];
   const varNames = steps.map((s) => (s.varName || '').toLowerCase());
   const types = steps.map((s) => s.condition?.conditionType || '');
 
   if (types.includes('signing-abi-attribute')) {
+    // Find amount step
     const amtStep = steps.find((s) => {
       const v = (s.varName || '').toLowerCase();
-      return v.includes('amount') || v.includes('usdc') || v.includes('value');
+      return v.includes('amount') || v.includes('value');
     });
-    const rvt = amtStep?.condition?.returnValueTest;
-    const amtStr = rvt ? ` ≥ ${rvt.value}` : '';
+    const token = amtStep ? extractToken(amtStep.varName || '') : null;
+    const amt = amtStep ? extractAmount(amtStep) : null;
+    const path = recipientPath(steps);
     const hasRecipient = steps.some((s) => {
       const v = (s.varName || '').toLowerCase();
-      return v.includes('recipient') || v.includes('receiver');
+      return v.includes('recipient') || v.includes('receiver') || v.includes('to');
     });
+
+    const tokenStr = token ? `${token} transfer` : 'Token transfer';
+    const amtStr = amt ? ` ${amt}` : '';
+    const pathStr = hasRecipient ? `, ${path} recipient` : '';
+
     return {
-      title: 'Transaction limits enforced',
-      detail: `Whitelisted function call${amtStr ? ', amount' + amtStr : ''}${hasRecipient ? ', verified recipient' : ''}`,
+      title: `${tokenStr}${amtStr}`,
+      detail: `Whitelisted execute call${pathStr}`,
     };
   }
 
@@ -228,6 +261,7 @@ function summarizeClause(cond) {
     const op = (cond.operator || 'and').toLowerCase();
     const operands = cond.operands || [];
     if (op === 'or') {
+      // All ECDSA
       const allEcdsa = operands.length > 0 && operands.every((o) => o.conditionType === 'ecdsa');
       if (allEcdsa) {
         const msg = (operands[0]?.message || '').toLowerCase();
@@ -237,10 +271,34 @@ function summarizeClause(cond) {
           detail: `Valid signature from any one of ${operands.length} authorized keys`,
         };
       }
+      // All sequential tx-limit blocks — describe the shared token + diverging paths
+      const allSeqTx = operands.every((o) => {
+        const steps = o.conditionVariables || [];
+        return o.conditionType === 'sequential' &&
+          steps.some((s) => s.condition?.conditionType === 'signing-abi-attribute');
+      });
+      if (allSeqTx) {
+        // Find token from first operand
+        const firstSteps = operands[0].conditionVariables || [];
+        const amtStep = firstSteps.find((s) => {
+          const v = (s.varName || '').toLowerCase();
+          return v.includes('amount') || v.includes('value');
+        });
+        const token = amtStep ? extractToken(amtStep.varName || '') : null;
+        const amt = amtStep ? extractAmount(amtStep) : null;
+        const paths = operands.map((o) => recipientPath(o.conditionVariables || []));
+        const uniquePaths = [...new Set(paths)];
+        const tokenStr = token ? `${token} transfer` : 'Token transfer';
+        const amtStr = amt ? ` ${amt}` : '';
+        return {
+          title: `${tokenStr}${amtStr}`,
+          detail: `${uniquePaths.join(' or ')} recipient — any valid path`,
+        };
+      }
       const parts = operands.map((o) => summarizeClause(o).title);
       return { title: `Any of ${operands.length} conditions`, detail: parts.join(' or ') };
     }
-    // AND at top level — shouldn't usually be called directly
+    // AND
     const parts = operands.map((o) => summarizeClause(o).title);
     return { title: 'All conditions must pass', detail: parts.join(', ') };
   }

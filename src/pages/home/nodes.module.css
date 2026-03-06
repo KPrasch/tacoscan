@@ -1,227 +1,202 @@
 .container {
   background: var(--bg-primary);
   min-height: 100vh;
-  color: var(--text-primary);
+  padding-bottom: 24px;
 }
 
 .inner {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 20px 16px 60px;
-}
-
-/* Header */
-.headerBar {
-  margin-bottom: 16px;
-}
-
-.title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 12px 0;
-  font-family: var(--font-display, 'ABC Diatype', sans-serif);
-}
-
-.statsRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 8px 12px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 3px;
-  font-size: 13px;
-}
-
-.stat {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-}
-
-.statLabel {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  color: var(--text-secondary);
-  font-weight: 600;
-}
-
-.statValue {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-  font-family: var(--font-display);
-}
-
-.statDivider {
-  width: 1px;
-  height: 16px;
-  background: var(--border-color);
-  opacity: 0.5;
+  padding: 16px 20px;
 }
 
 .unit {
-  font-size: 0.7rem;
+  font-size: 10px;
   color: var(--text-secondary);
   font-weight: 400;
 }
 
-/* Table */
+/* ── Table ───────────────────────────────────────────────────────────────── */
 .tableWrap {
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
-  background: var(--bg-secondary);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.table thead {
+  background: var(--bg-primary);
+  border-bottom: 2px solid var(--border-color);
 }
 
 .th {
-  padding: 4px 8px;
+  padding: 6px 10px;
   text-align: left;
-  font-size: 11px;
   font-weight: 600;
+  color: var(--text-primary);
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-  color: var(--text-secondary);
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+  font-size: 11px;
+  letter-spacing: 0.5px;
   white-space: nowrap;
   user-select: none;
-  height: 28px;
-  vertical-align: middle;
 }
 
-.th:hover {
-  color: var(--text-primary);
+.sortable {
+  cursor: pointer;
+  transition: color 0.15s;
 }
+
+.sortable:hover { color: var(--accent-green-hover); }
 
 .row {
-  border-bottom: 1px solid var(--border-light);
-  transition: background 0.15s;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.15s;
+  cursor: pointer;
 }
 
-.row:hover {
-  background: var(--bg-secondary);
-}
+.row:hover { background: var(--bg-primary); }
+.row:last-child { border-bottom: none; }
 
 .row td {
-  padding: 4px 8px;
-  vertical-align: middle;
-  font-size: 13px;
+  padding: 8px 10px;
   color: var(--text-primary);
-  height: 32px;
+  font-size: 12px;
+  vertical-align: middle;
 }
 
+/* ── Cell variants ───────────────────────────────────────────────────────── */
 .cellAddr {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 12px;
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.row:hover .cellAddr button {
-  opacity: 0.6 !important;
-}
-
-.cellAddr button:hover {
-  opacity: 1 !important;
-}
-
 .addrLink {
-  color: var(--accent-green);
+  color: var(--accent-green-hover);
   text-decoration: none;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .addrLink:hover {
-  color: var(--accent-green-hover);
   text-decoration: underline;
+}
+
+.addrMono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
 .cellNum {
   font-family: var(--font-mono);
-  text-align: right;
+  font-size: 12px;
+  font-weight: 600;
   white-space: nowrap;
-  font-size: 13px;
+  text-align: right;
 }
 
 .cellMuted {
   color: var(--text-tertiary);
-  font-size: 12px;
+  font-size: 11px;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+
+.cellCenter {
+  text-align: center;
+}
+
+.confirmedYes {
+  color: var(--accent-green-hover);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.confirmedNo {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
 }
 
 .muted {
   color: var(--text-tertiary);
+  font-size: 11px;
 }
 
-/* Badge styles moved to global App.css for consistency */
+/* ── No data ─────────────────────────────────────────────────────────────── */
+.nodata {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
 
-/* Pagination */
+/* ── Pagination ──────────────────────────────────────────────────────────── */
 .pagination {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin-top: 12px;
+  margin-top: 8px;
   padding: 8px 0;
 }
 
 .pageBtn {
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  color: var(--text-primary);
+  color: var(--text-secondary);
   padding: 4px 12px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 12px;
+  font-family: var(--font-mono);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: color 0.15s, border-color 0.15s;
 }
 
 .pageBtn:hover:not(:disabled) {
-  background: var(--bg-primary);
+  color: var(--accent-green-hover);
+  border-color: var(--accent-green-hover);
 }
 
 .pageBtn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: default;
 }
 
 .pageInfo {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
 }
 
 .pageSelect {
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  color: var(--text-primary);
+  color: var(--text-secondary);
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 12px;
+  font-family: var(--font-mono);
 }
 
-/* No data */
-.nodata {
-  padding: 16px 0;
-  text-align: center;
-  color: var(--text-tertiary);
-  font-size: 0.875rem;
-}
-
-/* Data Stakers Section */
+/* ── Data Stakers ────────────────────────────────────────────────────────── */
 .dataStakerSection {
-  margin-top: 32px;
+  margin-top: 24px;
   padding-top: 16px;
   border-top: 1px solid var(--border-color);
 }
@@ -230,16 +205,15 @@
   background: none;
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  padding: 6px 14px;
+  padding: 5px 14px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 12px;
+  font-family: var(--font-mono);
   cursor: pointer;
-  transition: all 0.15s;
-  font-family: var(--font-display, 'ABC Diatype', sans-serif);
+  transition: color 0.15s, border-color 0.15s;
 }
 
 .dataStakerToggle:hover {
-  color: var(--text-primary);
-  border-color: var(--text-tertiary);
-  background: var(--bg-primary);
+  color: var(--accent-green-hover);
+  border-color: var(--accent-green-hover);
 }

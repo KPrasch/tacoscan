@@ -1600,7 +1600,7 @@ export const getSigningCohortsFromSubgraph = async () => {
             id provider signer signature transactionHash timestamp
           }
           multisig {
-            id executionCount totalValue lastExecutedAt isCleared
+            id threshold signers executionCount totalValue lastExecutedAt isCleared
           }
         }
       }
@@ -1812,6 +1812,42 @@ export const getAllInfractions = async () => {
   } catch (e) {
     console.warn('Error fetching infractions:', e);
     return [];
+  }
+};
+
+// ─── Recent Bridge Activity (for dashboard) ────────────────────────────────
+export const getRecentBridgeActivity = async () => {
+  const BRIDGE_QUERY = `query {
+    bridgeMessages(first: 15, orderBy: timestamp, orderDirection: desc) {
+      id domain messageType stakingProvider transactionHash blockNumber timestamp
+    }
+  }`;
+  const OPS_QUERY = `query {
+    opExecutions(first: 15, orderBy: timestamp, orderDirection: desc) {
+      id domain target result transactionHash blockNumber timestamp gasUsed
+    }
+    contractAuthorizations(first: 10, orderBy: createdAt, orderDirection: desc) {
+      id domain contract isAuthorized createdAt
+    }
+  }`;
+  try {
+    const [ethData, polyData, baseData] = await Promise.all([
+      gqlFetch(SUBGRAPH_ETHEREUM, BRIDGE_QUERY).catch(() => ({})),
+      gqlFetch(SUBGRAPH_POLYGON, BRIDGE_QUERY).catch(() => ({})),
+      gqlFetch(SUBGRAPH_BASE, OPS_QUERY).catch(() => ({})),
+    ]);
+    const messages = [
+      ...(ethData.bridgeMessages || []).map(m => ({ ...m, chain: 'ethereum' })),
+      ...(polyData.bridgeMessages || []).map(m => ({ ...m, chain: 'polygon' })),
+    ].sort((a, b) => parseInt(b.timestamp) - parseInt(a.timestamp)).slice(0, 15);
+    return {
+      bridgeMessages: messages,
+      opExecutions: baseData.opExecutions || [],
+      contractAuthorizations: baseData.contractAuthorizations || [],
+    };
+  } catch (e) {
+    console.warn('Error fetching bridge activity:', e);
+    return { bridgeMessages: [], opExecutions: [], contractAuthorizations: [] };
   }
 };
 

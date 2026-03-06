@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getAllInfractions, formatString, formatTimeToText } from "./data";
 import styles from "./Infractions.module.css";
+import PageHeader from "../components/PageHeader";
+import { ListSkeleton } from "../components/Skeleton";
 
 const CHAIN_COLORS = { ethereum: "#627EEA", polygon: "#8247E5" };
 
@@ -62,33 +64,23 @@ const Infractions = () => {
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paged = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  if (loading) return <div className={styles.networkActivity}><div className={styles.loading}>Loading infractions...</div></div>;
+  if (loading) return <ListSkeleton cols={6} rows={12} />;
 
   return (
     <div className={styles.networkActivity}>
       <div className={styles.container}>
-        <div className={styles.pageHeader}>
-          <div className={styles.headerContent}>
-            <h1 className={styles.pageTitle}>Infractions</h1>
-            <p className={styles.pageSubtitle}>Network infractions — missed transcripts, aggregations, and penalties</p>
-          </div>
-          <div className={styles.headerStats}>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Total Infractions</span>
-              <span className={styles.statValue}>{stats.total.toLocaleString()}</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Repeat Offenders</span>
-              <span className={styles.statValue}>{stats.repeatOffenders}</span>
-            </div>
-            {Object.entries(stats.typeBreakdown).slice(0, 3).map(([type, count]) => (
-              <div key={type} className={styles.statItem}>
-                <span className={styles.statLabel}>{type.replace(/_/g, " ")}</span>
-                <span className={styles.statValue}>{count}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <PageHeader
+          title="Infractions"
+          subtitle="Network infractions — missed transcripts, aggregations, and penalties"
+          stats={[
+            { label: 'Total', value: stats.total.toLocaleString() },
+            { label: 'Repeat Offenders', value: stats.repeatOffenders },
+            ...Object.entries(stats.typeBreakdown).slice(0, 3).map(([type, count]) => ({
+              label: type.replace(/_/g, ' '),
+              value: count,
+            })),
+          ]}
+        />
 
         {stats.topOffenders.length > 0 && (
           <div className={styles.topEarners}>
@@ -148,12 +140,12 @@ const Infractions = () => {
                 {paged.map((ev, idx) => (
                   <tr key={ev.id || idx}>
                     <td>
-                      <span className={styles.eventType} style={{ background: `${CHAIN_COLORS[ev.chain] || "#6B7280"}20`, color: CHAIN_COLORS[ev.chain] || "#6B7280" }}>
+                      <span className={styles.eventType} style={{ color: CHAIN_COLORS[ev.chain] || "#6B7280", borderColor: CHAIN_COLORS[ev.chain] || "#6B7280" }}>
                         {ev.chain?.toUpperCase()}
                       </span>
                     </td>
                     <td>
-                      <span className={styles.eventType} style={{ background: "#DC262620", color: "#DC2626" }}>
+                      <span className={styles.eventType} style={{ color: "#DC2626", borderColor: "#DC2626" }}>
                         {(ev.infractionTypeName || `Type ${ev.infractionType}`).replace(/_/g, " ")}
                       </span>
                     </td>

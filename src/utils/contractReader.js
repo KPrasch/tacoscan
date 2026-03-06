@@ -3,6 +3,7 @@ import mainnetArtifacts from "../artifacts/mainnet.json";
 import lynxArtifacts from "../artifacts/lynx.json";
 import tapirArtifacts from "../artifacts/tapir.json";
 import { getCurrentNetwork } from "./dataSource";
+import { networkConfig } from "./networkConfig";
 import { conditions } from "@nucypher/taco";
 import { fromHexString } from "@nucypher/shared";
 import BatchProcessor from "./batchProcessor";
@@ -158,18 +159,12 @@ const getRpcUrl = (network) => {
   switch (network) {
     case "lynx":
     case "tapir":
-      // Both Lynx and Tapir use Sepolia (chain ID 11155111)
-      return (
-        import.meta.env.VITE_RPC_ETH_MAINNET ||
-        "https://eth-sepolia.g.alchemy.com/v2/demo"
-      );
+      return networkConfig.rpcEth;
     case "polygon":
-      return import.meta.env.VITE_RPC_ETH_POLYGON || "https://polygon-rpc.com";
+      return networkConfig.rpcPolygon;
     case "mainnet":
     default:
-      return (
-        import.meta.env.VITE_RPC_ETH_MAINNET || "https://cloudflare-eth.com"
-      );
+      return networkConfig.rpcEth;
   }
 };
 
@@ -468,8 +463,7 @@ export const getAllRituals = async (network = "mainnet") => {
     }
 
     // Rituals are always on Polygon/Polygon Amoy, use Polygon RPC
-    const rpcUrl =
-      import.meta.env.VITE_RPC_ETH_POLYGON || "https://polygon-rpc.com";
+    const rpcUrl = networkConfig.rpcPolygon;
     const web3 = new Web3(rpcUrl);
     const contract = new web3.eth.Contract(
       coordinator.abi,

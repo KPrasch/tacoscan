@@ -1,26 +1,30 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import * as Data from "../data";
 import styles from "./nodes.module.css";
 import CopyButton from "../../components/CopyButton";
-import Loader from "../../components/loader";
-import { Tooltip } from "../../components/ui";
+import { SkeletonRows } from "../../components/Skeleton";
+import PageHeader from "../../components/PageHeader";
 
 const STATUS_BADGE_CLASSES = {
   Active: "badgeActive",
-  Released: "badgeReleased", 
+  Released: "badgeReleased",
   Slashed: "badgeSlashed",
   Penalized: "badgePenalized",
   Data: "badgeData",
 };
 
-const SortIcon = ({ active, direction }) => (
-  <span style={{ marginLeft: 4, opacity: active ? 1 : 0.3, fontSize: "0.65rem" }}>
-    {active && direction === "asc" ? "▲" : "▼"}
-  </span>
-);
+const StatusBadge = ({ status, isBeta }) => {
+  if (isBeta) return <span className={`badge ${STATUS_BADGE_CLASSES.Data}`}>DATA</span>;
+  const badgeClass = STATUS_BADGE_CLASSES[status] || STATUS_BADGE_CLASSES.Active;
+  return <span className={`badge ${badgeClass}`}>{status || 'Active'}</span>;
+};
+
+const sortInd = (sortKey, key, sortDir) =>
+  sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : "";
 
 const NodesPage = ({ network = "polygon", isSearch = false, searchInput = "" } = {}) => {
+  const navigate = useNavigate();
   const [allNodes, setAllNodes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState(null);
@@ -103,27 +107,29 @@ const NodesPage = ({ network = "polygon", isSearch = false, searchInput = "" } =
     { key: "bondedAt", label: "Bonded", sortable: true },
   ];
 
-  const StatusBadge = ({ status, isBeta }) => {
-    if (isBeta) return <span className={`badge ${STATUS_BADGE_CLASSES.Data}`}>DATA</span>;
-    const badgeClass = STATUS_BADGE_CLASSES[status] || STATUS_BADGE_CLASSES.Released;
-    return <span className={`badge ${badgeClass}`}>{status}</span>;
-  };
-
   const renderRow = (node, idx) => (
-    <tr key={node.id + idx} className={styles.row}>
+    <tr
+      key={node.id + idx}
+      className={styles.row}
+      onClick={() => navigate(`/node/${node.id}`)}
+    >
       <td className={styles.cellAddr}>
-        <RouterLink to={`/node/${node.id}`} className={styles.addrLink}>
+        <RouterLink
+          to={`/node/${node.id}`}
+          className={styles.addrLink}
+          onClick={(e) => e.stopPropagation()}
+        >
           {node.id ? `${node.id.slice(0, 8)}…${node.id.slice(-6)}` : "—"}
         </RouterLink>
-        <CopyButton onClick={() => copyToClipBoard(node.id)} />
+        <CopyButton onClick={(e) => { e.stopPropagation(); copyToClipBoard(node.id); }} />
       </td>
       <td className={styles.cellAddr}>
         {node.registeredOperatorAddress ? (
           <>
-            <RouterLink to={`/node/${node.id}`} className={styles.addrLink}>
+            <span className={styles.addrMono}>
               {`${node.registeredOperatorAddress.slice(0, 8)}…${node.registeredOperatorAddress.slice(-6)}`}
-            </RouterLink>
-            <CopyButton onClick={() => copyToClipBoard(node.registeredOperatorAddress)} />
+            </span>
+            <CopyButton onClick={(e) => { e.stopPropagation(); copyToClipBoard(node.registeredOperatorAddress); }} />
           </>
         ) : <span className={styles.muted}>—</span>}
       </td>
@@ -131,11 +137,10 @@ const NodesPage = ({ network = "polygon", isSearch = false, searchInput = "" } =
       <td>
         <StatusBadge status={node.nodeStatus} isBeta={node.isBetaStaker} />
       </td>
-      <td style={{ textAlign: "center", fontSize: "11px", color: "var(--text-secondary)" }}>
-        {node.isOperatorConfirmed ? 
-          <span style={{ color: "var(--status-active)", fontWeight: "600" }}>YES</span> : 
-          <span style={{ color: "var(--status-slashed)", fontWeight: "600" }}>NO</span>
-        }
+      <td className={styles.cellCenter}>
+        {node.isOperatorConfirmed
+          ? <span className={styles.confirmedYes}>Yes</span>
+          : <span className={styles.confirmedNo}>No</span>}
       </td>
       <td className={styles.cellMuted}>{node.bondedAt ? Data.formatTimeToText(node.bondedAt) : "—"}</td>
     </tr>
@@ -144,66 +149,44 @@ const NodesPage = ({ network = "polygon", isSearch = false, searchInput = "" } =
   return (
     <div className={styles.container}>
       <div className={styles.inner}>
-        {/* Header Stats Bar */}
-        <div className={styles.headerBar}>
-          <h1 className={styles.title}>Nodes</h1>
-          <div className={styles.statsRow}>
-            <div className={styles.stat}>
-              <span className={styles.statLabel}>Total</span>
-              <span className={styles.statValue}>{isLoading ? "…" : regularNodes.length}</span>
-            </div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}>
-              <span className={styles.statLabel}>Active</span>
-              <span className={styles.statValue} style={{ color: "#22c55e" }}>{isLoading ? "…" : activeCount}</span>
-            </div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}>
-              <span className={styles.statLabel}>Released</span>
-              <span className={styles.statValue} style={{ color: "#6b7280" }}>{isLoading ? "…" : releasedCount}</span>
-            </div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}>
-              <span className={styles.statLabel}>Confirmed</span>
-              <span className={styles.statValue}>{isLoading ? "…" : stats?.numBondedOperators || 0}</span>
-            </div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}>
-              <span className={styles.statLabel}>Authorized</span>
-              <span className={styles.statValue}>{isLoading ? "…" : Data.formatWeiDecimalNoSurplus(stats?.totalAuthorizedAmount || 0)} <span className={styles.unit}>T</span></span>
-            </div>
-          </div>
+        <PageHeader
+          title="Nodes"
+          subtitle="Staking providers authorized on the TACo network"
+          stats={[
+            { label: 'Total',      value: isLoading ? '…' : regularNodes.length },
+            { label: 'Active',     value: isLoading ? '…' : activeCount },
+            { label: 'Released',   value: isLoading ? '…' : releasedCount },
+            { label: 'Confirmed',  value: isLoading ? '…' : (stats?.numBondedOperators || 0) },
+            { label: 'Authorized', value: isLoading ? '…' : `${Data.formatWeiDecimalNoSurplus(stats?.totalAuthorizedAmount || 0)} T` },
+          ]}
+        />
+
+        {/* Main Table */}
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                {columns.map((col) => (
+                  <th
+                    key={col.key}
+                    className={`${styles.th}${col.sortable ? ' ' + styles.sortable : ''}`}
+                    onClick={col.sortable && !isLoading ? () => handleSort(col.key) : undefined}
+                  >
+                    {col.label}{col.sortable && !isLoading && sortInd(sortKey, col.key, sortDir)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? <SkeletonRows rows={12} cols={6} /> : paged.map(renderRow)}
+            </tbody>
+          </table>
+
+          {!isLoading && sorted.length === 0 && <div className={styles.nodata}>No nodes found</div>}
         </div>
 
-        {isLoading ? (
-          <Loader />
-        ) : (
+        {!isLoading && (
           <>
-            {/* Main Table */}
-            <div className={styles.tableWrap}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    {columns.map((col) => (
-                      <th
-                        key={col.key}
-                        className={styles.th}
-                        onClick={col.sortable ? () => handleSort(col.key) : undefined}
-                        style={{ cursor: col.sortable ? "pointer" : "default" }}
-                      >
-                        {col.label}
-                        {col.sortable && <SortIcon active={sortKey === col.key} direction={sortDir} />}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {paged.map(renderRow)}
-                </tbody>
-              </table>
-
-              {sorted.length === 0 && <div className={styles.nodata}>No nodes found</div>}
-            </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
