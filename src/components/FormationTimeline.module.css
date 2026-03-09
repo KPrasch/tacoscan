@@ -1,0 +1,87 @@
+/* Formation Timeline — dense, Etherscan-style */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+}
+
+.timelineRow {
+  display: grid;
+  grid-template-columns: 8px 1fr auto auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+}
+
+.timelineRow:last-child {
+  border-bottom: none;
+}
+
+.timelineRow:hover {
+  background: var(--bg-secondary);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dotGreen { background: var(--status-active); }
+.dotBlue { background: var(--status-data); }
+.dotPurple { background: #8B5CF6; }
+.dotGray { background: var(--text-tertiary); }
+
+.eventName {
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.txLink {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-green);
+  text-decoration: none;
+}
+
+.txLink:hover {
+  text-decoration: underline;
+}
+
+.addressText {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.eventTime {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .timelineRow {
+    grid-template-columns: 8px 1fr;
+    gap: 4px;
+  }
+  
+  .eventTime {
+    grid-column: 2;
+    text-align: left;
+    font-size: 11px;
+  }
+}

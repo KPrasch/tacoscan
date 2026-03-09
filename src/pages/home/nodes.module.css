@@ -1,0 +1,360 @@
+.container {
+  background: var(--bg-primary);
+  min-height: 100vh;
+  padding-bottom: 24px;
+}
+
+.inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 16px 20px;
+}
+
+.unit {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* ── Controls row ──────────────────────────────────────────────────────── */
+.controlsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.controlsLeft {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.controlsRight {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* ── Status pills ──────────────────────────────────────────────────────── */
+.statusDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 5px;
+  flex-shrink: 0;
+}
+
+.statusActive,
+.statusInactive,
+.statusExiting,
+.statusReleased,
+.statusSlashed,
+.statusPenalized {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  border: 1px solid;
+}
+
+.statusActive {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.statusInactive {
+  background: rgba(107, 114, 128, 0.08);
+  color: var(--text-tertiary);
+  border-color: var(--border-color);
+}
+
+.statusReleased {
+  background: rgba(107, 114, 128, 0.08);
+  color: var(--text-tertiary);
+  border-color: var(--border-color);
+}
+
+.statusSlashed {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.25);
+}
+
+.statusPenalized {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.25);
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+.tableWrap {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.table thead {
+  background: var(--bg-primary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.th {
+  padding: 6px 10px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.sortable {
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.sortable:hover { color: var(--accent-green-hover); }
+
+.row {
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.15s;
+  cursor: pointer;
+}
+
+.row:hover { background: var(--bg-primary); }
+.row:last-child { border-bottom: none; }
+
+.row td {
+  padding: 8px 10px;
+  color: var(--text-primary);
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+/* ── Cell variants ───────────────────────────────────────────────────────── */
+.cellAddr {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.addrLink {
+  color: var(--accent-green-hover);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.addrLink:hover {
+  text-decoration: underline;
+}
+
+.addrMono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.cellNum {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.cellMuted {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+
+.cellCenter {
+  text-align: center;
+}
+
+.muted {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+/* ── Grid view ──────────────────────────────────────────────────────────── */
+.nodeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+.nodeCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.nodeCard:hover {
+  border-color: var(--accent-green);
+  background: var(--bg-primary);
+}
+
+.cardHeader {
+  margin-bottom: 8px;
+}
+
+.cardAddr {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.cardAddr .addrLink {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cardOperator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cardLabel {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+}
+
+.cardOperator .addrMono {
+  font-size: 11px;
+}
+
+.cardSkeleton {
+  min-height: 80px;
+}
+
+.skeletonLine {
+  height: 10px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  margin-bottom: 8px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+/* ── No data ─────────────────────────────────────────────────────────────── */
+.nodata {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+/* ── Pagination ──────────────────────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 8px 0;
+}
+
+.pageBtn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.pageBtn:hover:not(:disabled) {
+  color: var(--accent-green-hover);
+  border-color: var(--accent-green-hover);
+}
+
+.pageBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pageInfo {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+}
+
+.pageSelect {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+/* ── Data Stakers ────────────────────────────────────────────────────────── */
+.dataStakerSection {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.dataStakerToggle {
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 5px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.dataStakerToggle:hover {
+  color: var(--accent-green-hover);
+  border-color: var(--accent-green-hover);
+}

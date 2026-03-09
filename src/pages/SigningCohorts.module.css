@@ -1,0 +1,286 @@
+.signingCohorts {
+  background: var(--bg-primary);
+  min-height: 100vh;
+  padding-bottom: 24px;
+}
+
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 16px 20px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+/* ── Table ──────────────────────────────────────────────────────────────────── */
+.tableContainer {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.table thead {
+  background: var(--bg-primary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.table th {
+  padding: 6px 10px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.sortable:hover {
+  color: var(--accent-green-hover);
+}
+
+.clickableRow {
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.15s;
+}
+
+.clickableRow:hover {
+  background: var(--bg-primary);
+}
+
+.clickableRow:last-child {
+  border-bottom: none;
+}
+
+.clickableRow.hasConditions {
+  border-left: 2px solid transparent;
+}
+
+.clickableRow.hasConditions:hover {
+  border-left-color: var(--accent-green-hover);
+}
+
+.table td {
+  padding: 8px 10px;
+  color: var(--text-primary);
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+/* ── Cells ──────────────────────────────────────────────────────────────────── */
+.idCell {
+  font-weight: 700;
+  color: var(--accent-green-hover);
+  font-size: 13px;
+  width: 36px;
+  white-space: nowrap;
+}
+
+/* Policy column */
+.policyCell {
+  min-width: 260px;
+}
+
+.policyContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.typeTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.typeTag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+  opacity: 0.85;
+  text-transform: uppercase;
+}
+
+.complexityHint {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.policySummary {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 380px;
+  line-height: 1.4;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.noConditions {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* Nodes column */
+.nodesCell {
+  white-space: nowrap;
+}
+
+.nodeCount {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-right: 6px;
+}
+
+.chainIcons {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.chainArrow {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin: 0 2px;
+  line-height: 1;
+}
+
+.chainBadge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 1px 4px;
+}
+
+/* Threshold */
+.thresholdCell {
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  color: var(--text-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* State badges */
+.stateCell {
+  white-space: nowrap;
+}
+
+.stateBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.state_conditions_set {
+  background: rgba(91, 154, 213, 0.12);
+  color: #5b9bd5;
+  border-color: rgba(91, 154, 213, 0.35);
+}
+
+.state_deployed {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--accent-green-hover);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.state_initialized {
+  background: rgba(212, 145, 90, 0.1);
+  color: #d4915a;
+  border-color: rgba(212, 145, 90, 0.3);
+}
+
+/* Executions */
+.numericCell {
+  text-align: center;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.cloneBadge {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--accent-green-hover);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.3px;
+}
+
+.zeroValue {
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+/* Age */
+.ageCell {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .container {
+    padding: 10px;
+  }
+
+  .title {
+    font-size: 1.4rem;
+  }
+
+  .stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .tableContainer {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 640px;
+  }
+}

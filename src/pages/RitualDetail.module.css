@@ -1,0 +1,523 @@
+/* RitualDetail — compact high-density layout (matches SigningCohortDetail) */
+
+.page {
+  background: var(--bg-primary);
+  min-height: 100vh;
+  padding-bottom: 32px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px 20px;
+}
+
+.loading {
+  padding: 48px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.errorBox {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+/* ── Header row ──────────────────────────────────────────────────────────── */
+.headerRow {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.breadLink {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.breadLink:hover { color: var(--accent-green-hover); }
+
+.sep { color: var(--text-tertiary); }
+
+.breadCurrent {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.headerMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+/* ── State pills ─────────────────────────────────────────────────────────── */
+.statePill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  font-family: var(--font-mono);
+}
+
+.state_successful {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--accent-green-hover);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.state_active {
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--status-active);
+  border-color: rgba(74, 222, 128, 0.35);
+}
+
+.state_awaiting {
+  background: rgba(91, 154, 213, 0.12);
+  color: #5b9bd5;
+  border-color: rgba(91, 154, 213, 0.35);
+}
+
+.state_expired {
+  background: rgba(212, 145, 90, 0.1);
+  color: #d4915a;
+  border-color: rgba(212, 145, 90, 0.3);
+}
+
+.state_timeout {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.25);
+}
+
+.pillHeartbeat {
+  background: rgba(107, 114, 128, 0.08);
+  color: var(--text-tertiary);
+  border-color: var(--border-color);
+}
+
+.metaDot { color: var(--text-tertiary); }
+
+.metaItem {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.metaAge {
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+/* ── Two-column info grid ────────────────────────────────────────────────── */
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+  align-items: stretch;
+}
+
+.infoCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+/* ── Participants (full-width) ───────────────────────────────────────── */
+.participantsSection {
+  margin-bottom: 14px;
+  max-height: 420px;
+  overflow: auto;
+}
+
+/* ── Access control records (inside auth card) ──────────────────────── */
+.acRecords {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+}
+
+.acRecordsLabel {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+
+.infoCardTitle {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: var(--bg-surface);
+  z-index: 2;
+  padding-top: 2px;
+  padding-bottom: 4px;
+}
+
+.infoCardCount {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 0 5px;
+}
+
+/* ── KV rows ─────────────────────────────────────────────────────────────── */
+.kv {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 11px;
+}
+
+.kv:last-child { border-bottom: none; }
+
+.kvLabel {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  min-width: 88px;
+  flex-shrink: 0;
+}
+
+.kvValue {
+  color: var(--text-primary);
+  font-size: 11px;
+  word-break: break-all;
+  flex: 1;
+}
+
+.kvMono {
+  font-family: var(--font-mono);
+}
+
+/* ── Subscription section (promoted) ─────────────────────────────────────── */
+.subscriptionSection {
+  margin-bottom: 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px 12px;
+  overflow: hidden;
+}
+
+.subscriptionSection > div {
+  padding: 0;
+}
+
+/* ── Bottom grid (Formation + Handovers) ────────────────────────────── */
+.bottomGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.emptyTab {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-style: italic;
+}
+
+/* Formation progress bars */
+.formationProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 6px;
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progressLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.progressTrack {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--accent-green-hover);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.progressCount {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* Milestone events */
+.milestoneList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.milestoneRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 11px;
+}
+
+.milestoneRow:last-child { border-bottom: none; }
+
+.milestoneDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-green-hover);
+  flex-shrink: 0;
+}
+
+.milestoneEvent {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex: 1;
+}
+
+.formationSpan {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  padding-top: 4px;
+  border-top: 1px solid var(--border-color);
+  margin-top: 4px;
+}
+
+/* Handover cards */
+.handoverList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.handoverRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.handoverRow:last-child { border-bottom: none; }
+
+.handoverPassoff {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.handoverArrow {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+}
+
+.handoverMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .bottomGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────────── */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.table thead {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+  padding: 5px 8px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-tertiary);
+  position: sticky;
+  top: 0;
+  background: var(--bg-surface);
+  z-index: 1;
+}
+
+.table td {
+  padding: 4px 8px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: var(--bg-primary); }
+
+.idxCell {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  width: 28px;
+}
+
+.monoCell {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.ageCell {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.dimCell {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+/* ── Links ───────────────────────────────────────────────────────────────── */
+.addrLink {
+  color: var(--accent-green-hover);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.addrLink:hover { text-decoration: underline; }
+
+/* ── Result badges ───────────────────────────────────────────────────────── */
+.resultBadge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.resultOk {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--accent-green-hover);
+}
+
+.resultFail {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+}
+
+.resultPending {
+  background: var(--bg-tertiary);
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.footer {
+  margin-top: 14px;
+}
+
+.backBtn {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.backBtn:hover {
+  color: var(--accent-green-hover);
+  border-color: var(--accent-green-hover);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+}
