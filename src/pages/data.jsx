@@ -1,50 +1,155 @@
-import * as client from "../../.graphclient";
 import * as Const from "../utils/Cons";
 import moment from "moment";
 import Web3 from "web3";
+import { CoordinatorABI } from "../utils/abi";
+import { CoordinatorAddress } from "../utils/addresses";
+import web3Cache from "../utils/web3Cache";
+import BatchProcessor from "../utils/batchProcessor";
 
-const tacoAddr = "0x347cc7ede7e5517bd47d20620b2cf1b406edcf07"
+import { networkConfig, CURRENT_NETWORK } from '../utils/networkConfig';
+
+// Direct GraphQL fetch to bypass broken GraphQL Mesh stitching runtime
+const SUBGRAPH_POLYGON = networkConfig.subgraphPolygon;
+const SUBGRAPH_ETHEREUM = networkConfig.subgraphEthereum;
+const SUBGRAPH_BASE = networkConfig.subgraphBase;
+const SUBGRAPH_COHORTS = networkConfig.subgraphCohorts ?? networkConfig.subgraphBase;
+
+const gqlFetch = async (endpoint, query, variables = {}) => {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables }),
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const json = await response.json();
+  if (json.errors) throw new Error(`GraphQL: ${JSON.stringify(json.errors)}`);
+  return json.data;
+};
+
+// GraphQL query fragments (matching query.graphql)
+const RITUAL_FIELDS = `
+  id
+  domain
+  authority
+  participants
+  status
+  successful
+  startedAt
+  endedAt
+  transcriptCount
+  aggregationCount
+  publicKey { word0 word1 }
+  createdAt
+  updatedAt
+  transactions(orderBy: timestamp, orderDirection: desc) {
+    eventType
+    participant
+    timestamp
+    transactionHash
+    gasUsed
+    transcriptDigest
+    aggregatedTranscriptDigest
+    previousAuthority
+    newAuthority
+  }
+  handovers {
+    id
+    departingParticipant
+    incomingParticipant
+    status
+    requestedAt
+    transcriptPostedAt
+    blindedSharePostedAt
+    canceledAt
+    finalizedAt
+  }
+`;
+
+const RITUAL_COUNTER_FIELDS = `
+  ritualCounter(id: "global") {
+    total: totalRituals
+    unsuccessful: failedRituals
+    successful: successfulRituals
+    notEnded: pendingRituals
+  }
+`;
+
+// Beta stakers list - cached in memory
+let betaStakers = null;
+
+// Global Web3 instance for reuse
+let web3Instance = null;
+
+// Load beta stakers from file
+export const loadBetaStakers = async () => {
+  if (betaStakers !== null) return betaStakers;
+
+  try {
+    const response = await fetch('/beta_stakers.txt');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const text = await response.text();
+    betaStakers = new Set(
+      text.split('\n')
+        .map(addr => addr.trim().toLowerCase())
+        .filter(addr => addr.length > 0)
+    );
+    console.log(`Loaded ${betaStakers.size} beta stakers`);
+    return betaStakers;
+  } catch (error) {
+    console.warn('Could not load beta stakers list:', error);
+    betaStakers = new Set();
+    return betaStakers;
+  }
+};
+
+// Check if an address is a beta staker
+export const isBetaStaker = async (address) => {
+  const stakers = await loadBetaStakers();
+  return stakers.has(address.toLowerCase());
+};
+
+const tacoAddr = "0x347cc7ede7e5517bd47d20620b2cf1b406edcf07".toLowerCase()
 export const ritual_columns = [
   {
-    header: "Id",
+    header: "ID",
     accessor: "id",
     numeric: true,
   },
   {
-    header: "Updated",
+    header: "UPDATED",
     accessor: "updateTime",
     numeric: false,
   },
   {
-    header: "Authority",
+    header: "AUTHORITY",
     accessor: "authority",
     numeric: false,
   },
   {
-    header: "Participants",
+    header: "PARTICIPANTS",
     accessor: "totalParticipants",
     numeric: true,
   },
   {
-    header: "Transcripts",
+    header: "TRANSCRIPTS",
     accessor: "totalPostedTranscripts",
     numeric: true,
   },
   {
-    header: "Aggregations",
+    header: "AGGREGATIONS",
     accessor: "totalPostedAggregations",
     numeric: true,
   },
   {
-    header: "Current State",
+    header: "CURRENT STATE",
     accessor: "status",
     numeric: false,
   },
 ];
 
-export const staker_columns = [
+export const node_columns = [
   {
-    header: "Staking Provider",
+    header: "Node Provider",
     accessor: "id",
     numeric: false,
   },
@@ -73,28 +178,10 @@ export const staker_columns = [
     accessor: "bondedAt",
     numeric: true,
   },
-];
-
-const COUNT_FORMATS = [
   {
-    // 0 - 999
-    letter: "",
-    limit: 1e3,
-  },
-  {
-    // 1,000 - 999,999
-    letter: "K",
-    limit: 1e6,
-  },
-  {
-    // 1,000,000 - 999,999,999
-    letter: "M",
-    limit: 1e9,
-  },
-  {
-    // 1,000,000,000 - 999,999,999,999
-    letter: "B",
-    limit: 1e12,
+    header: "Status",
+    accessor: "nodeStatus",
+    numeric: false,
   },
 ];
 
@@ -111,28 +198,23 @@ export const formatString = (data) => {
   return fistSymbol + " ... " + endSymbol;
 };
 
-export const formatStringEnd = (data) => {
-  if (data == null) {
-    return "...";
-  }
-  if (data.length < 10) {
-    return data;
-  }
-
-  const fistSymbol = data.slice(0, 10);
-  return fistSymbol + " ... ";
-};
-
-export const formatSatoshi = (data) => {
-  return (data / Const.SATOSHI_BITCOIN).toFixed(7);
-};
-
-export const formatGwei = (value) => {
-  return parseFloat(value / Const.DECIMAL_ETH).toFixed(7);
-};
-
 export const formatGweiFixedZero = (value) => {
-  return parseFloat(value / Const.DECIMAL_ETH).toFixed(0);
+  // Handle null/undefined
+  if (!value) return "0";
+
+  // Convert to string if not already
+  const valueStr = value.toString();
+
+  // For very large numbers, use BigInt for accurate division
+  try {
+    const valueBigInt = BigInt(valueStr);
+    const decimalBigInt = BigInt(Const.DECIMAL_ETH);
+    const result = valueBigInt / decimalBigInt;
+    return result.toString();
+  } catch (e) {
+    // Fallback for non-integer values
+    return parseFloat(value / Const.DECIMAL_ETH).toFixed(0);
+  }
 };
 
 export const formatWeiDecimal = (value) => {
@@ -140,21 +222,24 @@ export const formatWeiDecimal = (value) => {
 };
 
 export const formatWeiDecimalNoSurplus = (value) => {
-  return new Intl.NumberFormat().format(
-    parseFloat(value / Const.DECIMAL_ETH).toFixed(0)
-  );
-};
+  // Handle null/undefined
+  if (!value) return "0";
 
-export const formatNumberToDecimal = (value) => {
-  return new Intl.NumberFormat().format(value);
-};
+  // Convert to string if not already
+  const valueStr = value.toString();
 
-export const formatNumber = (value) => {
-  let newValue = value / Const.DECIMAL_ETH;
-  const format = COUNT_FORMATS.find((format) => newValue < format.limit);
-  newValue = (1000 * newValue) / format.limit;
-  newValue = Math.round(newValue * 10) / 10;
-  return newValue + format.letter;
+  // For very large numbers, use BigInt for accurate division
+  try {
+    const valueBigInt = BigInt(valueStr);
+    const decimalBigInt = BigInt(Const.DECIMAL_ETH);
+    const result = valueBigInt / decimalBigInt;
+    return new Intl.NumberFormat().format(result.toString());
+  } catch (e) {
+    // Fallback for non-integer values
+    return new Intl.NumberFormat().format(
+      parseFloat(value / Const.DECIMAL_ETH).toFixed(0)
+    );
+  }
 };
 
 export function formatTimeToText(timestamp) {
@@ -208,7 +293,7 @@ export function formatTimeToText(timestamp) {
   }
 }
 
-export function formatTimestampToText(date) {
+function formatTimestampToText(date) {
   const month = date.months();
   let day = date.days();
   const hours = date.hours();
@@ -227,44 +312,14 @@ export function formatTimestampToText(date) {
   }
 }
 
-export function formatEntryDate(date) {
-  const month = date.months();
-  let day = date.days();
-  const hours = date.hours();
-  const minutes = date.minutes();
-  const seconds = date.seconds();
-  if (month > 0) {
-    day = day + month * 30;
-  }
-  if (day > 0) {
-    return `${day < 10 ? "0" + day : day}d ${
-      hours < 10 ? "0" + hours : hours
-    }h`;
-  } else if (hours > 0) {
-    return `${hours < 10 ? "0" + hours : hours}h ${
-      minutes < 10 ? "0" + minutes : minutes
-    }m`;
-  } else if (minutes > 0) {
-    return `${minutes < 10 ? "0" + minutes : minutes}m`;
-  } else if (seconds > 0) {
-    return `${seconds < 10 ? "0" + seconds : seconds}s`;
-  }
-}
-
-export function formatDate(date) {
-  return new Date(date).toLocaleString("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 export const calculateTimeMoment = (timestamp) => {
   return formatTimestampToText(
     moment.duration(moment(new Date().getTime()).diff(moment(timestamp)))
   );
+};
+
+export const formatDate = (timestamp) => {
+  return moment(timestamp).format('MMM DD, YYYY [at] HH:mm:ss [UTC]');
 };
 
 // const calculateTreasuryFee = (treasuryFee) => (1 / treasuryFee) * 100;
@@ -285,88 +340,267 @@ function convertFromLittleEndian(hex) {
   }
 }
 
-export function convertToLittleEndian(txHash) {
-  try {
-    if (txHash === undefined) {
-      return "";
+export const detectHeartbeatGroups = (rituals, timeout) => {
+  const heartbeats = rituals.filter(r => r.isHeartbeat);
+  if (heartbeats.length === 0) return [];
+
+  // March 17, 2025 is the first heartbeat group - don't go farther back
+  const cutoffDate = new Date('2025-03-17T00:00:00Z').getTime();
+
+  // Heartbeats run on Mondays around midnight UTC
+  // All DKG heartbeats have the duration of the DKG_TIMEOUT set on the coordinator
+  const groups = [];
+  const dkgTimeoutMs = parseFloat(timeout || 0) * 1000; // Convert timeout to milliseconds
+  // Use DKG timeout as the window for grouping, or fallback to 4 hours if not available
+  const groupingWindow = dkgTimeoutMs || (4 * 60 * 60 * 1000);
+
+  // Sort heartbeats by timestamp and filter out those before cutoff
+  const sortedHeartbeats = [...heartbeats]
+    .filter(hb => hb.initTimeStamp >= cutoffDate)
+    .sort((a, b) => a.initTimeStamp - b.initTimeStamp);
+
+  sortedHeartbeats.forEach(hb => {
+    let addedToGroup = false;
+
+    // Find the Monday midnight UTC for this ritual
+    const hbDate = new Date(hb.initTimeStamp);
+    const dayOfWeek = hbDate.getUTCDay();
+    const hoursFromMidnight = hbDate.getUTCHours();
+
+    // Check if this is near a Monday (day 1) midnight UTC
+    // Consider Sunday late night (day 0, hour 22-24) and Monday early morning (day 1, hour 0-6)
+    const isNearMondayMidnight =
+      (dayOfWeek === 0 && hoursFromMidnight >= 22) || // Sunday 22:00 - 24:00 UTC
+      (dayOfWeek === 1 && hoursFromMidnight <= 6) ||  // Monday 00:00 - 06:00 UTC
+      (dayOfWeek === 2 && hoursFromMidnight <= 2);    // Tuesday 00:00 - 02:00 UTC (for late runs)
+
+    // Find the nearest Monday midnight for grouping
+    let mondayMidnight = new Date(hb.initTimeStamp);
+    if (dayOfWeek === 0 && hoursFromMidnight >= 22) {
+      // Sunday night - next day is Monday
+      mondayMidnight.setUTCDate(mondayMidnight.getUTCDate() + 1);
+    } else if (dayOfWeek === 2 && hoursFromMidnight <= 2) {
+      // Tuesday early morning - previous day was Monday
+      mondayMidnight.setUTCDate(mondayMidnight.getUTCDate() - 1);
+    } else if (dayOfWeek !== 1) {
+      // Find the previous Monday
+      const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      mondayMidnight.setUTCDate(mondayMidnight.getUTCDate() - daysToSubtract);
     }
-    txHash = txHash.replace("0x", "");
-    const chunks = txHash.match(/.{2}/g).reverse();
-    const littleEndianHex = chunks.join("");
-    return "0x" + littleEndianHex;
-  } catch (e) {
-    console.log(e);
-  }
-  return "";
-}
+    mondayMidnight.setUTCHours(0, 0, 0, 0);
 
-export const formatRitualsData = (rawData, timeout) => {
-  const timeoutMs = parseFloat(timeout) * 1000;
+    // Look for an existing group near this Monday
+    for (let group of groups) {
+      // Check if this ritual belongs to an existing Monday batch
+      const groupMondayTime = group.mondayMidnight.getTime();
+      const timeDiff = Math.abs(mondayMidnight.getTime() - groupMondayTime);
 
-  const formattedData = rawData.map((item) => {
-    const currentTimestampMs = Date.now();
-    const initTimeStampMs = item.initTimestamp * 1000;
-    const timeoutStamp = initTimeStampMs + timeoutMs;
-    const transactionsLength = item.transactions.length;
+      // If it's the same Monday batch (within a day)
+      // Also check if rituals are within the DKG timeout window of each other
+      if (timeDiff < 24 * 60 * 60 * 1000) {
+        // Check if this ritual is within the DKG timeout window of the first ritual in the group
+        const firstRitualTime = group.rituals[0].initTimeStamp;
+        const ritualTimeDiff = Math.abs(hb.initTimeStamp - firstRitualTime);
 
-    if (item.dkgStatus === "DKG_AWAITING_AGGREGATIONS" || item.dkgStatus === "DKG_AWAITING_TRANSCRIPTS") {
-      const isTimedOut = timeoutStamp < currentTimestampMs;
-      if (isTimedOut) {
-        item.dkgStatus = "TIME_OUT";
-        item.transactions.unshift({
-          timestamp: timeoutStamp / 1000,
-          description: "Time Out"
-        });
+        // Group rituals that start within the DKG timeout window
+        if (ritualTimeDiff <= groupingWindow) {
+          group.rituals.push(hb);
+          addedToGroup = true;
+          break;
+        }
       }
     }
 
-    const participantsLower = item.participants.map((participant) => participant.toLowerCase());
-    const postedTranscriptsLower = item.postedTranscripts.map((transcript) => transcript.toLowerCase());
-    const postedAggregationsLower = item.postedAggregations.map((aggregation) => aggregation.toLowerCase());
+    if (!addedToGroup) {
+      groups.push({
+        rituals: [hb],
+        timestamp: hb.initTimeStamp,
+        mondayMidnight: mondayMidnight,
+        weekNumber: null // Will calculate after all groups are formed
+      });
+    }
+  });
 
-    const pendingTranscripts = participantsLower.filter(
-      (participant) => !postedTranscriptsLower.includes(participant)
-    );
+  // Sort groups by Monday date (most recent first)
+  groups.sort((a, b) => b.mondayMidnight.getTime() - a.mondayMidnight.getTime());
 
-    const pendingAggregations = participantsLower.filter(
-      (participant) => !postedAggregationsLower.includes(participant)
-    );
+  if (groups.length > 0) {
+    const mostRecentMonday = groups[0].mondayMidnight.getTime();
+    const oneWeek = 7 * 24 * 60 * 60 * 1000;
+
+    groups.forEach(group => {
+      // Calculate weeks since most recent batch
+      const weeksAgo = Math.round((mostRecentMonday - group.mondayMidnight.getTime()) / oneWeek);
+      group.weekNumber = weeksAgo;
+
+      // Sort rituals within group by ID
+      group.rituals.sort((a, b) => a.id - b.id);
+
+      // Calculate group statistics
+      const successful = group.rituals.filter(r =>
+        r.status === 'SUCCESSFUL' || r.status === 'ACTIVE'
+      ).length;
+      const failed = group.rituals.filter(r =>
+        r.status === 'TIME OUT' || r.status === 'FAILED'
+      ).length;
+      const pending = group.rituals.filter(r =>
+        r.status === 'PENDING' ||
+        r.status === 'AWAITING TRANSCRIPTS' ||
+        r.status === 'AWAITING AGGREGATIONS'
+      ).length;
+
+      group.stats = {
+        total: group.rituals.length,
+        successful,
+        failed,
+        pending,
+        successRate: group.rituals.length > 0
+          ? ((successful / group.rituals.length) * 100).toFixed(1)
+          : '0.0'
+      };
+
+      // Overall status is no longer needed since partial failures are expected
+
+      // Get unique participants across all rituals in the group
+      const allParticipants = new Set();
+      group.rituals.forEach(r => {
+        r.participants.forEach(p => allParticipants.add(p));
+      });
+      group.uniqueParticipants = Array.from(allParticipants);
+    });
+  }
+
+  return groups;
+};
+
+export const formatRitualsData = (rawData, timeout, liveRitualIds = new Set()) => {
+  if (rawData === undefined) {
+    return [];
+  }
+
+  const timeoutMs = parseFloat(timeout) * 1000;
+
+  return rawData
+    .map((ritual) => {
+      const currentTimestampMs = Date.now();
+      const initTimestamp = parseInt(ritual.startedAt || 0);
+      const endTimestamp = parseInt(ritual.endedAt || 0);
+      const rawStatus = ritual.status || "PENDING";
+      const normalizedStatus = rawStatus.toString().toUpperCase();
+
+      let status = normalizedStatus.replaceAll("_", " ");
+      if (normalizedStatus === "AWAITING_TRANSCRIPTS") status = "AWAITING TRANSCRIPTS";
+      if (normalizedStatus === "AWAITING_AGGREGATIONS") status = "AWAITING AGGREGATIONS";
+
+      const initTimeStampMs = initTimestamp * 1000;
+      const timeoutStamp = initTimeStampMs + timeoutMs;
+
+      if (
+        (normalizedStatus === "AWAITING_AGGREGATIONS" ||
+          normalizedStatus === "AWAITING_TRANSCRIPTS") &&
+        timeoutStamp < currentTimestampMs
+      ) {
+        status = "TIME OUT";
+      }
+
+      const transactions = (ritual.transactions || []).map((tx) => ({
+        description: tx.description || tx.eventType,
+        from: tx.from || tx.participant,
+        timestamp: parseInt(tx.timestamp),
+        txHash: tx.txHash || tx.transactionHash,
+        eventType: tx.eventType,
+        participant: tx.participant,
+      }));
+
+      const postedTranscripts = transactions
+        .filter((tx) => tx.eventType === "TRANSCRIPT_POSTED" && tx.participant)
+        .map((tx) => tx.participant);
+      const postedAggregations = transactions
+        .filter((tx) => tx.eventType === "AGGREGATION_POSTED" && tx.participant)
+        .map((tx) => tx.participant);
+
+      const publicKey = ritual.publicKey?.word0 && ritual.publicKey?.word1
+        ? `${ritual.publicKey.word0}${ritual.publicKey.word1.slice(2)}`
+        : ritual.publicKey || null;
+
+      const participants = ritual.participants || [];
+      const dkgSize = participants.length;
+      const threshold = ritual.threshold ?? null;
+      const latestTransaction = transactions[0];
+
+      // Heartbeat detection: size ≤3 = heartbeat DKG (all small rituals are heartbeats)
+      const isHeartbeat = participants.length <= 3;
+
+      return {
+        id: ritual.id,
+        status: status,
+        authority: ritual.authority,
+        aggregations: postedAggregations,
+        transcripts: postedTranscripts,
+        participants: participants,
+        publicKey: publicKey,
+        initTimeStamp: initTimestamp * 1000,
+        endTimeStamp: endTimestamp * 1000,
+        threshold: threshold,
+        dkgSize: dkgSize,
+        accessController: ritual.accessController || null,
+        feeModel: ritual.feeModel,
+        transactions: transactions,
+        updateTime: latestTransaction
+          ? latestTransaction.timestamp * 1000
+          : (endTimestamp || initTimestamp) * 1000,
+        totalParticipants: participants.length,
+        totalPostedAggregations: postedAggregations.length,
+        totalPostedTranscripts: postedTranscripts.length,
+        pendingTranscripts: participants.filter(
+          (participant) => !postedTranscripts.includes(participant)
+        ),
+        pendingAggregations: participants.filter(
+          (participant) => !postedAggregations.includes(participant)
+        ),
+        operatorAddresses: ritual.operatorAddresses || {},
+        isHeartbeat: isHeartbeat,
+        handovers: ritual.handovers || []
+      };
+    })
+    .sort((a, b) => b.id - a.id);
+};
+
+export const formatNodes = async (rawData) => {
+  // Handle null or undefined data
+  if (!rawData || !Array.isArray(rawData)) {
     return {
-      id: parseFloat(item.id),
-      status: item.dkgStatus.replaceAll("_", " "),
-      initiator: item.initiator,
-      authority: item.authority,
-      aggregations: item.postedAggregations,
-      transcripts: item.postedTranscripts,
-      participants: item.participants,
-      publicKey: item.publicKey,
-      initTimeStamp: item.initTimeStamp * 1000,
-      endTimeStamp: item.endTimestamp * 1000,
-      threshold: item.threshold,
-      dkgSize: item.dkgSize,
-      accessController: item.accessController,
-      transactions: item.transactions,
-      updateTime: item.transactions[transactionsLength - 1].timestamp * 1000,
-      totalParticipants: item.participants.length,
-      totalPostedAggregations: item.postedAggregations.length,
-      totalPostedTranscripts: item.postedTranscripts.length,
-      pendingTranscripts: pendingTranscripts,
-      pendingAggregations: pendingAggregations,
-  }});
+      nodes: [],
+      statsRecord: {
+        numBondedOperators: 0,
+        totalAuthorizedAmount: 0,
+        totalStaked: 0,
+      }
+    };
+  }
 
-  return formattedData.sort((a, b) => b.id - a.id);
-}
+  // Load beta stakers list
+  const betaStakersList = await loadBetaStakers();
 
-export const formatStakers = (rawData) => {
-  const stakers = rawData.map((item) => ({
-    id: item.id.split('-')[0],
-    registeredOperatorAddress: item.tacoOperator?.operator,
-    isOperatorConfirmed: item.tacoOperator?.confirmed,
-    isAuthorized: parseFloat(item.amount) > 0,
-    authorizedAmount: parseFloat(item.amount),
-    stakedAmount: parseFloat(item.stake?.stakedAmount),
-    bondedAt: item.tacoOperator?.bondedTimestamp * 1000,
-  }))
+  const nodes = rawData
+    .map((item) => ({
+      id: item.id.split('-')[0],
+      registeredOperatorAddress: item.tacoOperator?.operator,
+      isOperatorConfirmed: item.tacoOperator?.confirmed,
+      isAuthorized: parseFloat(item.amount) > 0,
+      authorizedAmount: parseFloat(item.amount) || 0,
+      stakedAmount: parseFloat(item.stake?.stakedAmount) || 0,
+      bondedAt: item.tacoOperator?.bondedTimestamp * 1000,
+      isBetaStaker: betaStakersList.has(item.id.split('-')[0].toLowerCase()),
+      isReleased: item.isReleased || false,
+      isSlashed: item.isSlashed || false,
+      isPenalized: item.isPenalized || false,
+      totalRewards: item.totalRewards || '0',
+      totalRewardsWithdrawn: item.totalRewardsWithdrawn || '0',
+      isChildSynced: item.isChildSynced,
+      endDeauthorization: item.endDeauthorization,
+      nodeStatus: item.isSlashed ? 'Slashed' : item.isPenalized ? 'Penalized' : item.isReleased ? 'Released' : 'Active',
+    }))
 
   const statsRecord = {
     numBondedOperators: 0,
@@ -374,18 +608,45 @@ export const formatStakers = (rawData) => {
     totalStaked: 0,
   };
 
-  stakers.forEach((staker) => {
-    if (staker.isOperatorConfirmed) {
+  // Exclude beta stakers from aggregate stats
+  nodes.forEach((node) => {
+    if (node.isBetaStaker) return;
+    if (node.isOperatorConfirmed) {
       statsRecord.numBondedOperators += 1;
     }
-    statsRecord.totalAuthorizedAmount += staker.authorizedAmount;
-    statsRecord.totalStaked += staker.stakedAmount;
+    statsRecord.totalAuthorizedAmount += node.authorizedAmount;
+    statsRecord.totalStaked += node.stakedAmount;
   });
 
-  return { stakers, statsRecord };
+  return { nodes, statsRecord };
 };
 
-export const formatStakerDetail = (rawData) => {
+export const formatNodeDetail = (rawData) => {
+  console.log("formatNodeDetail input:", rawData);
+
+  // Handle null or missing appAuthorization
+  if (!rawData || !rawData.appAuthorization) {
+    console.log("No appAuthorization found, returning empty data");
+    return {
+      id: null,
+      registeredOperatorAddress: null,
+      isOperatorConfirmed: false,
+      isAuthorized: false,
+      weiDecimalAuthorizedAmount: "0",
+      parsedAuthorizedAmount: 0,
+      weiDecimalDeauthorizingAmount: "0",
+      weiDecimalStakedAmount: "0",
+      parsedStakedAmount: 0,
+      bondedAt: null,
+      stakedAt: null,
+      owner: null,
+      authorizer: null,
+      beneficiary: null,
+      appAuthorization: null,
+      events: []
+    };
+  }
+
   const appAuthorization = rawData.appAuthorization;
 
   const getFirstStakedAt = (stakeHistory) => {
@@ -399,8 +660,8 @@ export const formatStakerDetail = (rawData) => {
     return null;
   };
 
-  const firstStakedAt = appAuthorization.stake?.stakeHistory 
-    ? getFirstStakedAt(appAuthorization.stake?.stakeHistory) * 1000 
+  const firstStakedAt = appAuthorization.stake?.stakeHistory
+    ? getFirstStakedAt(appAuthorization.stake?.stakeHistory) * 1000
     : null;
 
   const mergeAndSortEvents = (stakeHistory, appAuthHistories, tacoOperator) => {
@@ -421,18 +682,18 @@ export const formatStakerDetail = (rawData) => {
         parsedEventAmount: null,
       });
     }
-    
+
     combinedEvents.sort((a, b) => b.timestamp - a.timestamp);
     return combinedEvents;
   };
 
   const events = mergeAndSortEvents(
-    appAuthorization.stake?.stakeHistory || [], 
-    rawData.appAuthHistories || [], 
+    appAuthorization.stake?.stakeHistory || [],
+    rawData.appAuthHistories || [],
     appAuthorization.tacoOperator || {}
   );
 
-  return {
+  const result = {
     id: appAuthorization.id?.split('-')[0],
     registeredOperatorAddress: appAuthorization.tacoOperator?.operator,
     isOperatorConfirmed: appAuthorization.tacoOperator?.confirmed,
@@ -449,200 +710,1359 @@ export const formatStakerDetail = (rawData) => {
     beneficiary: appAuthorization.stake?.beneficiary,
     events: events,
   };
+
+  console.log("formatNodeDetail result:", result);
+  console.log("Authorized amount:", appAuthorization.amount, "->", result.weiDecimalAuthorizedAmount);
+  console.log("Staked amount:", appAuthorization.stake?.stakedAmount, "->", result.weiDecimalStakedAmount);
+
+  return result;
 };
 
 export const formatUserDetail = (user) => ({
   rituals: formatRitualsData(user.rituals)
 });
 
-export const getRituals = async (isSearch, searchInput) => {
-  const emptyData = JSON.parse(`[]`);
-  try {
-    let data;
-    if (!isSearch) {
-      data = await client.execute(client.GetAllRitualsQueryDocument, {});
-    } else {
-      const fundingTxHashHex = convertToLittleEndian(searchInput.toLowerCase());
-      data = await client.execute(client.GetRitualsQueryByUserDocument, {
-        authority: searchInput.toLowerCase(),
-        id: searchInput.toLowerCase(),
-        txHash: fundingTxHashHex,
-      });
+// Helper function to retry GraphQL queries with exponential backoff
+const retryQuery = async (queryFn, maxRetries = 3) => {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            const result = await queryFn();
+            if (result.errors) {
+                // Check if it's a network/fetch error vs a GraphQL schema error
+                const hasNetworkError = result.errors.some(error =>
+                    error.message.includes('Failed to fetch') ||
+                    error.message.includes('Network error') ||
+                    error.extensions?.code === 'NETWORK_ERROR'
+                );
+
+                if (hasNetworkError && attempt < maxRetries - 1) {
+                    console.warn(`Network error detected, retrying... (${attempt + 1}/${maxRetries})`);
+                    throw new Error(`Network error: ${result.errors[0].message}`);
+                } else {
+                    throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
+                }
+            }
+            return result;
+        } catch (error) {
+            console.warn(`Query attempt ${attempt + 1} failed:`, error.message);
+            if (attempt === maxRetries - 1) throw error;
+            // Exponential backoff: wait 1s, 2s, 4s
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+        }
     }
-    if (data.data !== undefined) {
-      return data.data;
-    }
-  } catch (e) {
-    console.log("error to fetch ritual data " + e);
-  }
-  return emptyData;
 };
 
-export const getRitualsByStakingProvider = async (searchInput) => {
-  const emptyData = JSON.parse(`[]`);
+// Helper function to get all rituals data with pagination via direct fetch
+const getAllRitualsWithPagination = async () => {
+    const allRituals = [];
+    let skip = 0;
+    const pageSize = 1000;
+    let hasMore = true;
+    let ritualCounter = null;
+    let pageCount = 0;
+    const maxConsecutiveFailures = 3;
+    let consecutiveFailures = 0;
+
+    console.log('🌮 Starting paginated ritual fetch (direct fetch to Polygon)...');
+
+    const query = `
+      query GetAllRituals($skip: Int = 0) {
+        rituals(
+          first: 1000
+          skip: $skip
+          where: { id_not_in: ["1", "2", "3", "4", "5", "6"] }
+          orderBy: id
+          orderDirection: asc
+        ) { ${RITUAL_FIELDS} }
+        ${RITUAL_COUNTER_FIELDS}
+      }
+    `;
+
+    while (hasMore && consecutiveFailures < maxConsecutiveFailures) {
+        pageCount++;
+        console.log(`📄 Fetching page ${pageCount} (skip: ${skip})`);
+
+        try {
+            const data = await gqlFetch(SUBGRAPH_POLYGON, query, { skip });
+            const rituals = data.rituals || [];
+            const pageRitualCounter = data.ritualCounter;
+
+            if (!ritualCounter && pageRitualCounter) {
+                ritualCounter = pageRitualCounter;
+                console.log(`📊 Expected total rituals: ${ritualCounter.total}`);
+            }
+
+            if (rituals.length > 0) {
+                const existingIds = new Set(allRituals.map(r => r.id));
+                const newRituals = rituals.filter(r => !existingIds.has(r.id));
+                allRituals.push(...newRituals);
+                console.log(`✅ Page ${pageCount}: +${newRituals.length} (total: ${allRituals.length})`);
+
+                if (newRituals.length === 0) { hasMore = false; }
+                else {
+                    skip += pageSize;
+                    consecutiveFailures = 0;
+                    hasMore = rituals.length === pageSize;
+                    if (ritualCounter?.total && allRituals.length >= parseInt(ritualCounter.total)) hasMore = false;
+                }
+                if (allRituals.length >= 5000) { hasMore = false; }
+            } else {
+                hasMore = false;
+            }
+
+            if (hasMore) await new Promise(r => setTimeout(r, 200));
+        } catch (error) {
+            consecutiveFailures++;
+            console.error(`❌ Page ${pageCount} failed (${consecutiveFailures}/${maxConsecutiveFailures}):`, error.message);
+            if (consecutiveFailures >= maxConsecutiveFailures) throw error;
+            await new Promise(r => setTimeout(r, 2000 * consecutiveFailures));
+        }
+    }
+
+    console.log(`🎉 Pagination complete! Total: ${allRituals.length}`);
+    return { rituals: allRituals, ritualCounter };
+};
+
+export const getRituals = async (isSearch, searchInput) => {
+    const emptyData = { rituals: [] };
+
+    try {
+        if (isSearch && searchInput) {
+            const isAddress = searchInput.startsWith('0x') && searchInput.length === 42;
+            const isTxHash = searchInput.startsWith('0x') && searchInput.length === 66;
+
+            const searchQuery = `
+              query SearchRituals($authority: Bytes, $id: ID, $txHash: Bytes, $skip: Int = 0) {
+                rituals(
+                  first: 1000, skip: $skip,
+                  where: { and: [
+                    { or: [
+                      { authority: $authority }
+                      { id: $id }
+                      { transactions_: { transactionHash: $txHash } }
+                    ] }
+                    { id_not_in: ["1", "2", "3", "4", "5", "6"] }
+                  ] }
+                  orderBy: id, orderDirection: asc
+                ) { ${RITUAL_FIELDS} }
+                ${RITUAL_COUNTER_FIELDS}
+              }
+            `;
+
+            const data = await gqlFetch(SUBGRAPH_POLYGON, searchQuery, {
+                authority: isAddress ? searchInput.toLowerCase() : null,
+                id: !isAddress ? searchInput : null,
+                txHash: isTxHash ? searchInput.toLowerCase() : null,
+                skip: 0,
+            });
+
+            if (data) return data;
+        } else {
+            const data = await getAllRitualsWithPagination();
+            if (data?.rituals) return data;
+        }
+    } catch (error) {
+        console.error('Error fetching rituals from subgraph:', error);
+        return {
+            rituals: [],
+            _errorMessage: `Error fetching ritual data from subgraph: ${error.message}`
+        };
+    }
+
+    return emptyData;
+};
+
+
+export const getNetworkEvents = async () => {
+  // Deprecated — use getAllNetworkEvents instead
+  return getAllNetworkEvents();
+};
+
+const buildAppAuthorization = (provider) => {
+  const providerId = provider.id.toLowerCase();
+  return {
+    id: providerId + '-' + tacoAddr,
+    amount: provider.authorized,
+    amountDeauthorizing: provider.deauthorizing,
+    endDeauthorization: provider.endDeauthorization,
+    appAddress: tacoAddr,
+    appName: "TACo",
+    isReleased: provider.isReleased,
+    isSlashed: provider.isSlashed,
+    isPenalized: provider.isPenalized,
+    totalRewards: provider.totalRewards,
+    totalRewardsWithdrawn: provider.totalRewardsWithdrawn,
+    isChildSynced: provider.isChildSynced,
+    stake: {
+      id: providerId,
+      stakedAmount: provider.authorized,
+      owner: { id: providerId },
+      authorizer: providerId,
+      beneficiary: providerId,
+      stakeHistory: []
+    },
+    tacoOperator: provider.operator ? {
+      id: provider.operator,
+      operator: provider.operator,
+      confirmed: provider._confirmed !== undefined ? provider._confirmed : !!provider.operator,
+      bondedTimestamp: provider._createdAt || provider.startTimestamp,
+      bondedTimestampFirstOperator: provider._createdAt || provider.startTimestamp
+    } : null
+  };
+};
+
+// ─── V2 Native Event Queries ───────────────────────────────────────────────
+// Fetches ALL event entity types from all three chain subgraphs.
+
+const ETHEREUM_EVENTS_QUERY = `
+  query EthereumEvents {
+    authorizationEvents(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id eventType fromAmount toAmount penalty investigator reward
+      deauthorizing endDeauthorization operator
+      stakingProvider { id }
+      transactionHash blockNumber timestamp
+    }
+    rewardEvents(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id eventType amount sender beneficiary
+      endCommitment penaltyPercent endPenalty contract distributor
+      stakingProvider { id }
+      transactionHash blockNumber timestamp
+    }
+    governanceEvents(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id eventType contract oldValue newValue
+      oldValueInt newValueInt oldValueAddress newValueAddress
+      domain transactionHash blockNumber timestamp
+    }
+    bridgeMessages(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id domain messageType stakingProvider
+      transactionHash blockNumber timestamp
+    }
+    infractions(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id domain infractionType infractionTypeName
+      stakingProvider { id }
+      ritual { id }
+      timestamp
+    }
+  }
+`;
+
+const RITUAL_TX_FIELDS = `id eventType participant transcriptDigest aggregatedTranscriptDigest
+      previousAuthority newAuthority ritual { id } transactionHash blockNumber timestamp gasUsed`;
+
+const POLYGON_EVENTS_QUERY = `
+  query PolygonEvents {
+    handovers(first: 1000, orderBy: createdAt, orderDirection: desc) {
+      id departingParticipant incomingParticipant status
+      ritual { id }
+      requestedAt transcriptPostedAt blindedSharePostedAt canceledAt finalizedAt
+      createdAt updatedAt
+    }
+    subscriptionPayments(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id domain policyId subscriber amount period slots paymentType
+      policy { id sponsor owner }
+      transactionHash blockNumber timestamp
+    }
+    policies(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id domain sponsor owner size startTimestamp endTimestamp cost
+      transactionHash blockNumber timestamp
+    }
+    ritualAccessControls(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id domain ritualId address isAuthorized
+      transactionHash blockNumber timestamp
+    }
+    reimbursementWithdrawals(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id domain recipient amount transactionHash blockNumber timestamp
+    }
+    reimbursementFailures(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id domain recipient amount transactionHash blockNumber timestamp
+    }
+    governanceEvents(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id eventType contract oldValue newValue
+      oldValueInt newValueInt oldValueAddress newValueAddress
+      domain transactionHash blockNumber timestamp
+    }
+    infractions(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id domain infractionType infractionTypeName
+      stakingProvider { id }
+      ritual { id }
+      timestamp
+    }
+    bridgeMessages(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id domain messageType stakingProvider
+      transactionHash blockNumber timestamp
+    }
+  }
+`;
+
+const BASE_EVENTS_QUERY = `
+  query BaseEvents {
+    signingCohorts(first: 1000, orderBy: createdAt, orderDirection: desc) {
+      id domain chainId authority participants status
+      isDeployed deployedAt multisigAddress signers threshold
+      createdAt updatedAt
+    }
+    signingCohortSignatures(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id provider signer
+      cohort { id }
+      transactionHash blockNumber timestamp
+    }
+    multisigClones(first: 1000, orderBy: createdAt, orderDirection: desc) {
+      id domain cohortId factory signers threshold
+      isCleared
+      createdAt updatedAt
+    }
+    multisigSignerEvents(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id eventType signer newSigner
+      multisig { id }
+      transactionHash blockNumber timestamp
+    }
+    opExecutions(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id domain target result
+      transactionHash blockNumber timestamp gasUsed
+    }
+    contractAuthorizations(first: 1000, orderBy: createdAt, orderDirection: desc) {
+      id domain contract isAuthorized createdAt updatedAt
+    }
+    governanceEvents(first: 1000, orderBy: timestamp, orderDirection: desc) {
+      id eventType contract oldValue newValue
+      oldValueInt newValueInt oldValueAddress newValueAddress
+      domain transactionHash blockNumber timestamp
+    }
+  }
+`;
+
+// Safely fetch from a chain — returns empty object on failure
+const safeFetch = async (endpoint, query, chainLabel, variables = {}) => {
+  if (!endpoint) return {};
   try {
-    let data;
-    data = await client.execute(client.GetRitualsQueryByStakingProviderDocument, {
-      id: searchInput.toLowerCase(),
+    return await gqlFetch(endpoint, query, variables);
+  } catch (err) {
+    console.warn(`⚠️ ${chainLabel} event fetch failed:`, err.message);
+    return {};
+  }
+};
+
+// Paginated fetch for entities exceeding 1000 limit
+const paginatedFetch = async (endpoint, entityName, fields, chainLabel, pageSize = 1000) => {
+  const all = [];
+  let skip = 0;
+  while (true) {
+    const query = `query { ${entityName}(first: ${pageSize}, skip: ${skip}, orderBy: timestamp, orderDirection: desc) { ${fields} } }`;
+    const data = await safeFetch(endpoint, query, chainLabel);
+    const batch = data?.[entityName] || [];
+    all.push(...batch);
+    if (batch.length < pageSize) break;
+    skip += pageSize;
+  }
+  return all;
+};
+
+export const getAllNetworkEvents = async () => {
+  try {
+    const [ethData, polyData, baseData, ritualTxs] = await Promise.all([
+      safeFetch(SUBGRAPH_ETHEREUM, ETHEREUM_EVENTS_QUERY, 'Ethereum'),
+      safeFetch(SUBGRAPH_POLYGON, POLYGON_EVENTS_QUERY, 'Polygon'),
+      safeFetch(SUBGRAPH_BASE, BASE_EVENTS_QUERY, 'Base'),
+      paginatedFetch(SUBGRAPH_POLYGON, 'ritualTransactions', RITUAL_TX_FIELDS, 'Polygon'),
+    ]);
+
+    const events = [];
+    const ts = (v) => parseInt(v) * 1000;
+
+    // ── Ethereum Events ──
+    (ethData.authorizationEvents || []).forEach(e => {
+      events.push({
+        chain: 'ethereum', category: 'authorization', type: e.eventType,
+        stakingProvider: e.stakingProvider?.id, amount: e.toAmount,
+        fromAmount: e.fromAmount, penalty: e.penalty, investigator: e.investigator,
+        reward: e.reward, operator: e.operator,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (ethData.rewardEvents || []).forEach(e => {
+      events.push({
+        chain: 'ethereum', category: 'reward', type: e.eventType,
+        stakingProvider: e.stakingProvider?.id, amount: e.amount,
+        sender: e.sender, beneficiary: e.beneficiary, contract: e.contract,
+        distributor: e.distributor,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (ethData.governanceEvents || []).forEach(e => {
+      events.push({
+        chain: 'ethereum', category: 'governance', type: e.eventType,
+        contract: e.contract, domain: e.domain,
+        oldValue: e.oldValue, newValue: e.newValue,
+        oldValueInt: e.oldValueInt, newValueInt: e.newValueInt,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (ethData.bridgeMessages || []).forEach(e => {
+      events.push({
+        chain: 'ethereum', category: 'bridge', type: 'BRIDGE_MESSAGE',
+        messageType: e.messageType, stakingProvider: e.stakingProvider,
+        domain: e.domain,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (ethData.infractions || []).forEach(e => {
+      events.push({
+        chain: 'ethereum', category: 'infraction', type: e.infractionTypeName,
+        stakingProvider: e.stakingProvider?.id, ritualId: e.ritual?.id,
+        domain: e.domain, timestamp: ts(e.timestamp),
+      });
     });
 
-    if (data.data !== undefined) {
-      return data.data;
-    }
-  } catch (e) {
-    console.log("error to fetch ritual data " + e);
+    // ── Polygon Events ──
+    (ritualTxs || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'ritual', type: e.eventType,
+        ritualId: e.ritual?.id, participant: e.participant,
+        previousAuthority: e.previousAuthority, newAuthority: e.newAuthority,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp), gasUsed: e.gasUsed,
+      });
+    });
+    (polyData.handovers || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'handover', type: `HANDOVER_${e.status}`,
+        ritualId: e.ritual?.id,
+        departingParticipant: e.departingParticipant,
+        incomingParticipant: e.incomingParticipant,
+        timestamp: ts(e.updatedAt),
+      });
+    });
+    (polyData.subscriptionPayments || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'subscription', type: e.paymentType,
+        subscriber: e.subscriber, amount: e.amount,
+        policyId: e.policyId, period: e.period, slots: e.slots,
+        sponsor: e.policy?.sponsor,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.policies || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'policy', type: 'POLICY_CREATED',
+        sponsor: e.sponsor, owner: e.owner, size: e.size, cost: e.cost,
+        startTimestamp: e.startTimestamp, endTimestamp: e.endTimestamp,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.ritualAccessControls || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'access_control',
+        type: e.isAuthorized ? 'ACCESS_GRANTED' : 'ACCESS_REVOKED',
+        ritualId: e.ritualId?.toString(), address: e.address,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.reimbursementWithdrawals || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'reimbursement', type: 'REIMBURSEMENT_WITHDRAWAL',
+        recipient: e.recipient, amount: e.amount,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.reimbursementFailures || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'reimbursement', type: 'REIMBURSEMENT_FAILURE',
+        recipient: e.recipient, amount: e.amount,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.governanceEvents || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'governance', type: e.eventType,
+        contract: e.contract, domain: e.domain,
+        oldValue: e.oldValue, newValue: e.newValue,
+        oldValueInt: e.oldValueInt, newValueInt: e.newValueInt,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.infractions || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'infraction', type: e.infractionTypeName,
+        stakingProvider: e.stakingProvider?.id, ritualId: e.ritual?.id,
+        domain: e.domain, timestamp: ts(e.timestamp),
+      });
+    });
+    (polyData.bridgeMessages || []).forEach(e => {
+      events.push({
+        chain: 'polygon', category: 'bridge', type: 'BRIDGE_MESSAGE',
+        messageType: e.messageType, stakingProvider: e.stakingProvider,
+        domain: e.domain,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+
+    // ── Base Events ──
+    (baseData.signingCohorts || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'signing', type: `COHORT_${e.status}`,
+        cohortId: e.id, authority: e.authority,
+        participantCount: e.participants?.length,
+        isDeployed: e.isDeployed, multisigAddress: e.multisigAddress,
+        threshold: e.threshold,
+        timestamp: ts(e.createdAt),
+      });
+    });
+    (baseData.signingCohortSignatures || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'signing', type: 'COHORT_SIGNATURE',
+        cohortId: e.cohort?.id, provider: e.provider, signer: e.signer,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (baseData.multisigClones || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'multisig', type: 'MULTISIG_CLONE',
+        multisigAddress: e.id, cohortId: e.cohortId, factory: e.factory,
+        signerCount: e.signers?.length, threshold: e.threshold,
+        domain: e.domain,
+        txHash: null, blockNumber: null,
+        timestamp: ts(e.createdAt),
+      });
+    });
+    (baseData.multisigSignerEvents || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'multisig', type: e.eventType,
+        multisigAddress: e.multisig?.id, signer: e.signer, newSigner: e.newSigner,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+    (baseData.opExecutions || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'op_execution', type: 'OP_EXECUTION',
+        target: e.target, result: e.result, domain: e.domain,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp), gasUsed: e.gasUsed,
+      });
+    });
+    (baseData.contractAuthorizations || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'contract_auth',
+        type: e.isAuthorized ? 'CONTRACT_AUTHORIZED' : 'CONTRACT_DEAUTHORIZED',
+        contract: e.contract, domain: e.domain,
+        timestamp: ts(e.createdAt),
+      });
+    });
+    (baseData.governanceEvents || []).forEach(e => {
+      events.push({
+        chain: 'base', category: 'governance', type: e.eventType,
+        contract: e.contract, domain: e.domain,
+        oldValue: e.oldValue, newValue: e.newValue,
+        oldValueInt: e.oldValueInt, newValueInt: e.newValueInt,
+        txHash: e.transactionHash, blockNumber: e.blockNumber,
+        timestamp: ts(e.timestamp),
+      });
+    });
+
+    return events.sort((a, b) => b.timestamp - a.timestamp);
+  } catch (error) {
+    console.error('Error fetching network events:', error);
+    return [];
   }
-  return emptyData;
 };
 
-export const getStakers = async (isSearch, searchInput) => {
-  const emptyData = JSON.parse(`[]`);
+export const getNodes = async (isSearch, searchInput) => {
+  const emptyData = { appAuthorizations: [] };
+
   try {
-    let data;
+    let stakingProviders;
     if (!isSearch) {
-      data = await client.execute(client.GetAllStakersQueryDocument, {});
+      const data = await gqlFetch(SUBGRAPH_POLYGON, `
+        query { stakingProviders(first: 1000, orderBy: authorized, orderDirection: desc) {
+          id operator authorized deauthorizing endDeauthorization startTimestamp
+          isReleased isSlashed isPenalized totalRewards totalRewardsWithdrawn
+          isChildSynced
+        } }
+      `);
+      stakingProviders = data.stakingProviders;
     } else {
-      data = await client.execute(client.SearchStakersDocument, {
-        id: `${searchInput.toLowerCase()}-${tacoAddr}`,
-        address: searchInput.toLowerCase(),
-      });
+      const search = searchInput.toLowerCase();
+      const data = await gqlFetch(SUBGRAPH_POLYGON, `
+        query SearchStakers($id: ID!, $address: Bytes) {
+          stakingProviders(where: { or: [{ id: $id }, { operator: $address }] }) {
+            id operator authorized deauthorizing startTimestamp
+          }
+        }
+      `, { id: search, address: search });
+      stakingProviders = data.stakingProviders;
     }
-    console.log("data: ", data)
-    return data.data;
+
+    if (stakingProviders) {
+      // Enrich with Ethereum data for confirmed/bonded status
+      try {
+        const ethData = await gqlFetch(SUBGRAPH_ETHEREUM, `
+          query { stakingProviders(first: 1000) { id operator createdAt } }
+        `);
+        const ethMap = new Map((ethData?.stakingProviders || []).map(p => [p.id.toLowerCase(), p]));
+        stakingProviders = stakingProviders.map(p => {
+          const eth = ethMap.get(p.id.toLowerCase());
+          if (eth) {
+            const isConfirmed = eth.operator && eth.operator !== '0x0000000000000000000000000000000000000000';
+            return { ...p, _confirmed: isConfirmed, _createdAt: eth.createdAt };
+          }
+          return { ...p, _confirmed: false, _createdAt: null };
+        });
+      } catch (e) {
+        console.warn('Failed to enrich with Ethereum data:', e);
+      }
+      return { appAuthorizations: stakingProviders.map(buildAppAuthorization) };
+    }
   } catch (e) {
     console.log("error to fetch stakers data " + e);
   }
   return emptyData;
 };
 
-export const getStakerDetail = async (staker) => {
-  const emptyData = JSON.parse(`[]`);  
+export const getNodeDetail = async (node) => {
   try {
-    const data = await client.execute(client.StakerDetailDocument, {
-      id: `${staker}-${tacoAddr}`
-    });
+    const nodeAddress = node.toLowerCase();
 
-    if (data.data !== undefined) {
-      return data.data;
+    const data = await gqlFetch(SUBGRAPH_POLYGON, `
+      query StakerDetail($id: ID!) {
+        stakingProvider(id: $id) {
+          id operator previousOperator authorized deauthorizing endDeauthorization startTimestamp
+          isReleased isSlashed isPenalized totalPenalty lastSlashInvestigator lastSlashReward
+          isChildSynced lastChildSyncAt
+          totalRewards totalRewardsWithdrawn
+          commitmentEndTimestamp penaltyPercent penaltyEndTimestamp
+          createdAt updatedAt
+          authorizationEvents(first: 50, orderBy: timestamp, orderDirection: desc) {
+            id eventType fromAmount toAmount penalty investigator reward
+            deauthorizing endDeauthorization operator
+            timestamp blockNumber transactionHash
+          }
+          rewards(first: 50, orderBy: timestamp, orderDirection: desc) {
+            id eventType amount sender beneficiary
+            endCommitment penaltyPercent endPenalty
+            transactionHash blockNumber timestamp
+          }
+          infractions(first: 20, orderBy: timestamp, orderDirection: desc) {
+            id infractionType infractionTypeName
+            ritual { id }
+            timestamp
+          }
+        }
+      }
+    `, { id: nodeAddress });
+
+    if (data?.stakingProvider) {
+      const provider = data.stakingProvider;
+      const appAuthorization = buildAppAuthorization(provider);
+      const appAuthHistories = (provider.authorizationEvents || []).map(event => ({
+        id: event.id,
+        amount: event.toAmount,
+        eventAmount: event.toAmount,
+        eventType: event.eventType,
+        fromAmount: event.fromAmount,
+        penalty: event.penalty,
+        investigator: event.investigator,
+        reward: event.reward,
+        operator: event.operator,
+        stakingProvider: provider.id,
+        timestamp: event.timestamp,
+        blockNumber: event.blockNumber,
+        txHash: event.transactionHash
+      }));
+
+      return {
+        appAuthorization,
+        appAuthHistories,
+        // V2 extended fields
+        rewardEvents: provider.rewards || [],
+        infractions: provider.infractions || [],
+        totalRewards: provider.totalRewards,
+        totalRewardsWithdrawn: provider.totalRewardsWithdrawn,
+        commitmentEndTimestamp: provider.commitmentEndTimestamp,
+        penaltyPercent: provider.penaltyPercent,
+        penaltyEndTimestamp: provider.penaltyEndTimestamp,
+        isReleased: provider.isReleased,
+        isSlashed: provider.isSlashed,
+        isPenalized: provider.isPenalized,
+        totalPenalty: provider.totalPenalty,
+        endDeauthorization: provider.endDeauthorization,
+        previousOperator: provider.previousOperator,
+        isChildSynced: provider.isChildSynced,
+      };
     }
   } catch (e) {
     console.log("error to fetch staking provider data " + e);
   }
-  return emptyData;
+
+  return { appAuthorization: null, appAuthHistories: [] };
 };
 
 export const getUserDetail = async (userAddress) => {
-  const emptyData = JSON.parse(`[]`);
   try {
-    let data;
-    data = await client.execute(client.GetRitualsQueryByUserDocument, {
-      authority: userAddress,
-    });
+    const data = await gqlFetch(SUBGRAPH_POLYGON, `
+      query GetUserRituals($authority: Bytes) {
+        rituals(
+          first: 1000,
+          where: { and: [
+            { authority: $authority }
+            { id_not_in: ["1", "2", "3", "4", "5", "6"] }
+          ] }
+          orderBy: id, orderDirection: asc
+        ) { ${RITUAL_FIELDS} }
+        ${RITUAL_COUNTER_FIELDS}
+      }
+    `, { authority: userAddress });
 
-    if (data.data !== undefined) {
-      return data.data;
-    }
+    if (data) return data;
   } catch (e) {
     console.log("error to fetch user data " + e);
   }
-  return emptyData;
+  return [];
 };
 
-export const getCurrentBlockNumber = async () => {
+const getWeb3Instance = () => {
+  if (!web3Instance) {
+    web3Instance = new Web3(Const.RPC_ETH_POLYGON);
+  }
+  return web3Instance;
+};
+
+// Fetch ritual on-chain data (threshold, accessController, feeModel) from Coordinator contract
+export const getRitualOnChainData = async (ritualId) => {
+  if (!ritualId || isNaN(ritualId)) return null;
   try {
-    const response = await fetch(
-      Const.DEFAULT_NETWORK === Const.NETWORK_MAINNET
-        ? Const.RPC_ETH_MAINNET
-        : Const.RPC_ETH_GOERLI,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "eth_blockNumber",
-          params: [],
-          id: 1,
-        }),
-      }
+    return await web3Cache.get(
+      `ritual-onchain-${ritualId}`,
+      async () => {
+        const web3 = getWeb3Instance();
+        const coordinatorContract = new web3.eth.Contract(
+          CoordinatorABI,
+          CoordinatorAddress
+        );
+        const ritualData = await coordinatorContract.methods.rituals(ritualId).call();
+        const t = ritualData.threshold != null ? parseInt(ritualData.threshold) : null;
+        return {
+          threshold: (t != null && !isNaN(t) && t > 0) ? t : null,
+          accessController: ritualData.accessController || null,
+          feeModel: ritualData.feeModel || null,
+          authority: ritualData.authority || null,
+        };
+      },
+      86400000 // 24h — thresholds and contract addresses don't change
     );
-    const dataJson = await response.json();
-    return parseInt(dataJson.result, 16);
-  } catch (e) {
-    return "ERROR";
+  } catch (error) {
+    console.error(`Failed to fetch on-chain data for ritual ${ritualId}:`, error);
+    return null;
   }
 };
 
-export const getBalanceOfAddress = async (address) => {
-  try {
-    if (address === Const.ADDRESS_ZERO) {
-      return 0;
+// Batch fetch on-chain data (threshold, feeModel, accessController) for multiple rituals
+export const getBatchRitualOnChainData = async (ritualIds) => {
+  const results = {};
+  const BATCH = 3;
+  for (let i = 0; i < ritualIds.length; i += BATCH) {
+    const chunk = ritualIds.slice(i, i + BATCH);
+    const settled = await Promise.allSettled(
+      chunk.map(async (id) => {
+        const data = await getRitualOnChainData(id);
+        if (!data) return null;
+        return { id, ...data };
+      })
+    );
+    for (const r of settled) {
+      if (r.status === 'fulfilled' && r.value) {
+        results[r.value.id] = r.value;
+      }
     }
-    let rpc = Const.MAINNET_API_BALANCE;
-    if (Const.DEFAULT_NETWORK === Const.NETWORK_TESTNET) {
-      rpc = Const.GOERLI_API_BALANCE;
+    // Small delay between batches to avoid RPC rate limits
+    if (i + BATCH < ritualIds.length) {
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+  }
+  // Enrich subscription fee models with slot data
+  const subFeeModels = Object.values(results)
+    .filter(r => r.feeModel && r.feeModel !== '0x0000000000000000000000000000000000000000')
+    .map(r => ({ id: r.id, feeModel: r.feeModel }));
+  if (subFeeModels.length > 0) {
+    const slotAbi = [
+      { type: 'function', name: 'maxNodes', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
+      { type: 'function', name: 'usedEncryptorSlots', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
+    ];
+    const web3 = getWeb3Instance();
+    for (let i = 0; i < subFeeModels.length; i += BATCH) {
+      const chunk = subFeeModels.slice(i, i + BATCH);
+      const settled2 = await Promise.allSettled(
+        chunk.map(async ({ id, feeModel }) => {
+          const c = new web3.eth.Contract(slotAbi, feeModel);
+          const [maxNodes, usedSlots] = await Promise.all([
+            c.methods.maxNodes().call().then(Number).catch(() => null),
+            c.methods.usedEncryptorSlots().call().then(Number).catch(() => null),
+          ]);
+          return { id, maxNodes, usedSlots };
+        })
+      );
+      for (const r of settled2) {
+        if (r.status === 'fulfilled' && r.value && results[r.value.id]) {
+          results[r.value.id].maxNodes = r.value.maxNodes;
+          results[r.value.id].usedSlots = r.value.usedSlots;
+        }
+      }
+    }
+  }
+  return results;
+};
+
+export const getRitualFeeModel = async (ritualId) => {
+  if (!ritualId || isNaN(ritualId)) {
+    console.error(`Invalid ritual ID: ${ritualId}`);
+    return null;
+  }
+
+  try {
+    // Use cache with longer TTL for fee models
+    return await web3Cache.get(
+      `ritual-feeModel-${ritualId}`,
+      async () => {
+        const web3 = getWeb3Instance();
+        const coordinatorContract = new web3.eth.Contract(
+          CoordinatorABI,
+          CoordinatorAddress
+        );
+        const ritualData = await coordinatorContract.methods.rituals(ritualId).call();
+        return ritualData.feeModel;
+      },
+      3600000 // Cache for 1 hour
+    );
+  } catch (error) {
+    console.error(`Failed to fetch feeModel for ritual ${ritualId}:`, error);
+    return null;
+  }
+};
+
+// ─── Domain Stats ──────────────────────────────────────────────────────────
+export const getDomainStats = async () => {
+  const results = {};
+  const query = `query { domainStats_collection(first: 10) {
+    id totalRituals successfulRituals failedRituals activeRituals
+    totalStakingProviders activeStakingProviders totalAuthorized totalSlashed
+    totalRewardEvents totalRewardsDistributed totalRewardsWithdrawn
+    totalSigningCohorts deployedCohorts totalMultisigs totalExecutions
+    totalBridgeMessages totalOpExecutions totalInfractions
+    totalRitualAccessControls totalPolicies totalSubscriptionPayments totalSubscriptionRevenue
+    totalContractAuthorizations totalReimbursements totalReimbursementFailures
+    totalGovernanceEvents createdAt updatedAt
+  } }`;
+
+  const [ethStats, polyStats, baseStats] = await Promise.all([
+    safeFetch(SUBGRAPH_ETHEREUM, query, 'Ethereum'),
+    safeFetch(SUBGRAPH_POLYGON, query, 'Polygon'),
+    safeFetch(SUBGRAPH_BASE, query, 'Base'),
+  ]);
+
+  (ethStats.domainStats_collection || []).forEach(s => { results[`eth-${s.id}`] = { ...s, chain: 'ethereum' }; });
+  (polyStats.domainStats_collection || []).forEach(s => { results[`poly-${s.id}`] = { ...s, chain: 'polygon' }; });
+  (baseStats.domainStats_collection || []).forEach(s => { results[`base-${s.id}`] = { ...s, chain: 'base' }; });
+
+  return results;
+};
+
+// ─── Ritual Access Controls for a specific ritual ──────────────────────────
+export const getRitualAccessControls = async (ritualId) => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_POLYGON, `
+      query GetRitualAccessControls($ritualId: Int!) {
+        ritualAccessControls(where: { ritualId: $ritualId }, first: 100) {
+          id address isAuthorized transactionHash timestamp
+        }
+      }
+    `, { ritualId: parseInt(ritualId) });
+    return data?.ritualAccessControls || [];
+  } catch (e) {
+    console.warn('Error fetching ritual access controls:', e);
+    return [];
+  }
+};
+
+// ─── Handovers for a specific ritual ───────────────────────────────────────
+export const getRitualHandovers = async (ritualId) => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_POLYGON, `
+      query GetHandovers($prefix: String!) {
+        handovers(where: { id_starts_with: $prefix }, first: 100, orderBy: createdAt, orderDirection: desc) {
+          id departingParticipant incomingParticipant status
+          requestedAt transcriptPostedAt blindedSharePostedAt canceledAt finalizedAt
+          ritual { id }
+        }
+      }
+    `, { prefix: ritualId.toString() });
+    return data?.handovers || [];
+  } catch (e) {
+    console.warn('Error fetching handovers:', e);
+    return [];
+  }
+};
+
+// ─── Infractions for a specific staking provider ───────────────────────────
+export const getProviderInfractions = async (providerId) => {
+  try {
+    const variables = { provider: providerId.toLowerCase() };
+    const [ethData, polyData] = await Promise.all([
+      safeFetch(SUBGRAPH_ETHEREUM, `
+        query GetInfractions($provider: String!) {
+          infractions(where: { stakingProvider: $provider }, first: 50, orderBy: timestamp, orderDirection: desc) {
+            id infractionType infractionTypeName ritual { id } timestamp
+          }
+        }
+      `, 'Ethereum', variables),
+      safeFetch(SUBGRAPH_POLYGON, `
+        query GetInfractions($provider: String!) {
+          infractions(where: { stakingProvider: $provider }, first: 50, orderBy: timestamp, orderDirection: desc) {
+            id infractionType infractionTypeName ritual { id } timestamp
+          }
+        }
+      `, 'Polygon', variables),
+    ]);
+    return [
+      ...(ethData.infractions || []).map(i => ({ ...i, chain: 'ethereum' })),
+      ...(polyData.infractions || []).map(i => ({ ...i, chain: 'polygon' })),
+    ].sort((a, b) => parseInt(b.timestamp) - parseInt(a.timestamp));
+  } catch (e) {
+    console.warn('Error fetching infractions:', e);
+    return [];
+  }
+};
+
+// ─── Governance Events ─────────────────────────────────────────────────────
+export const getGovernanceEvents = async () => {
+  try {
+    const query = `query { governanceEvents(first: 200, orderBy: timestamp, orderDirection: desc) {
+      id eventType contract oldValue newValue oldValueInt newValueInt
+      oldValueAddress newValueAddress domain transactionHash blockNumber timestamp
+    } }`;
+
+    const [ethData, polyData, baseData] = await Promise.all([
+      safeFetch(SUBGRAPH_ETHEREUM, query, 'Ethereum'),
+      safeFetch(SUBGRAPH_POLYGON, query, 'Polygon'),
+      safeFetch(SUBGRAPH_BASE, query, 'Base'),
+    ]);
+
+    return [
+      ...(ethData.governanceEvents || []).map(e => ({ ...e, chain: 'ethereum' })),
+      ...(polyData.governanceEvents || []).map(e => ({ ...e, chain: 'polygon' })),
+      ...(baseData.governanceEvents || []).map(e => ({ ...e, chain: 'base' })),
+    ].sort((a, b) => parseInt(b.timestamp) - parseInt(a.timestamp));
+  } catch (e) {
+    console.warn('Error fetching governance events:', e);
+    return [];
+  }
+};
+
+// ─── Signing Cohorts from Subgraph (v2 native) ────────────────────────────
+export const getSigningCohortsFromSubgraph = async () => {
+  try {
+    const [data, baseData] = await Promise.all([
+      gqlFetch(SUBGRAPH_ETHEREUM, `
+        query {
+          signingCohorts(first: 200, orderBy: createdAt, orderDirection: desc) {
+            id domain chainId authority participants status
+            isDeployed deployedAt conditions conditionsSetAt
+            multisigAddress signers threshold
+            createdAt updatedAt
+            signatures(first: 100) {
+              id provider signer signature transactionHash timestamp
+            }
+            multisig {
+              id threshold signers isCleared
+            }
+          }
+        }
+      `),
+      gqlFetch(SUBGRAPH_BASE, `
+        query {
+          multisigClones(first: 200) {
+            id cohortId threshold signers isCleared factory
+          }
+        }
+      `).catch(() => ({ multisigClones: [] })),
+    ]);
+
+    const cohorts = data?.signingCohorts || [];
+    const clones = baseData?.multisigClones || [];
+
+    // Build lookup: cohortId → clone
+    const cloneMap = {};
+    for (const clone of clones) {
+      if (clone.cohortId) cloneMap[clone.cohortId] = clone;
     }
 
-    const response = await fetch(rpc + address);
-    const data = await response.json();
-    return parseFloat(parseFloat(data.result) / 1000000000000000000).toFixed(2);
+    // Enrich cohorts with Base clone data (threshold, signers)
+    for (const cohort of cohorts) {
+      const clone = cloneMap[cohort.id];
+      if (clone) {
+        if (!cohort.multisig) cohort.multisig = {};
+        cohort.multisig.threshold = clone.threshold || cohort.multisig.threshold;
+        cohort.multisig.signers = clone.signers?.length ? clone.signers : cohort.multisig.signers;
+        cohort.multisig.isCleared = clone.isCleared;
+        cohort.multisig.id = clone.id;
+        if (!cohort.multisigAddress) cohort.multisigAddress = clone.id;
+      }
+    }
+
+    return cohorts;
   } catch (e) {
-    console.log("fetch balance error : " + e.toString());
+    console.warn('Error fetching signing cohorts from subgraph:', e);
+    return [];
   }
-  return 0;
+};
+
+// ─── Signing Cohort Detail from Subgraph ───────────────────────────────────
+export const getSigningCohortDetail = async (cohortId) => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_ETHEREUM, `
+      query GetCohort($id: ID!) {
+        signingCohort(id: $id) {
+          id domain chainId authority participants status
+          isDeployed deployedAt conditions conditionsSetAt
+          multisigAddress signers threshold
+          createdAt updatedAt
+          signatures(first: 200, orderBy: timestamp, orderDirection: desc) {
+            id provider signer signature transactionHash blockNumber timestamp
+          }
+          multisig {
+            id factory signers threshold isCleared
+            createdAt updatedAt
+          }
+        }
+      }
+    `, { id: cohortId });
+    const cohort = data?.signingCohort || null;
+
+    // Enrich with Base multisig clone data (Ethereum subgraph has the relation
+    // but the real clone lives on Base — matched by cohortId)
+    if (cohort) {
+      try {
+        const baseData = await gqlFetch(SUBGRAPH_BASE, `
+          query GetClone($cohortId: String!) {
+            multisigClones(where: { cohortId: $cohortId }, first: 1) {
+              id factory signers threshold isCleared
+              createdAt updatedAt
+              signerEvents(first: 50, orderBy: timestamp, orderDirection: desc) {
+                id eventType signer newSigner transactionHash timestamp
+              }
+            }
+          }
+        `, { cohortId: String(cohort.id) });
+        const clone = baseData?.multisigClones?.[0];
+        if (clone) {
+          cohort.multisig = {
+            ...cohort.multisig,
+            ...clone,
+            signers: clone.signers?.length ? clone.signers : cohort.multisig?.signers,
+            threshold: clone.threshold || cohort.multisig?.threshold,
+          };
+          if (!cohort.multisigAddress) {
+            cohort.multisigAddress = clone.id;
+          }
+        }
+      } catch (e) {
+        console.warn('Error enriching cohort with Base multisig data:', e);
+      }
+
+      // Fetch op executions tied to this cohort's domain on Base
+      if (cohort.domain) {
+        try {
+          const opsData = await gqlFetch(SUBGRAPH_BASE, `
+            query GetOps($domain: Int!) {
+              opExecutions(where: { domain: $domain }, first: 50, orderBy: timestamp, orderDirection: desc) {
+                id domain target result transactionHash blockNumber timestamp gasUsed
+              }
+            }
+          `, { domain: parseInt(cohort.domain || cohort.id) });
+          cohort.opExecutions = opsData?.opExecutions || [];
+        } catch (e) {
+          console.warn('Error fetching op executions for cohort:', e);
+          cohort.opExecutions = [];
+        }
+      }
+
+      // Fetch all cohorts to compute cross-cohort provider overlap
+      try {
+        const allData = await gqlFetch(SUBGRAPH_ETHEREUM, `
+          query {
+            signingCohorts(first: 200) {
+              id participants signers
+            }
+          }
+        `);
+        const allCohorts = allData?.signingCohorts || [];
+        const providerCohorts = {};
+        for (const c of allCohorts) {
+          const members = c.signers?.length ? c.signers : (c.participants || []);
+          for (const addr of members) {
+            const a = addr.toLowerCase();
+            if (!providerCohorts[a]) providerCohorts[a] = [];
+            providerCohorts[a].push(c.id);
+          }
+        }
+        cohort.providerCohortMap = providerCohorts;
+      } catch (e) {
+        console.warn('Error fetching cross-cohort overlap:', e);
+        cohort.providerCohortMap = {};
+      }
+    }
+
+    return cohort;
+  } catch (e) {
+    console.warn('Error fetching signing cohort detail:', e);
+    return null;
+  }
+};
+
+// ─── Policies from Subgraph ────────────────────────────────────────────────
+export const getPolicies = async () => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_POLYGON, `
+      query {
+        policies(first: 200, orderBy: timestamp, orderDirection: desc) {
+          id domain sponsor owner size startTimestamp endTimestamp cost
+          transactionHash blockNumber timestamp
+          payments(first: 50, orderBy: timestamp, orderDirection: desc) {
+            id subscriber amount period slots paymentType timestamp
+          }
+        }
+      }
+    `);
+    return data?.policies || [];
+  } catch (e) {
+    console.warn('Error fetching policies:', e);
+    return [];
+  }
+};
+
+// ─── Reward Events for a staking provider ──────────────────────────────────
+export const getProviderRewards = async (providerId) => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_ETHEREUM, `
+      query GetRewards($id: ID!) {
+        stakingProvider(id: $id) {
+          totalRewards
+          totalRewardsWithdrawn
+          commitmentEndTimestamp
+          penaltyPercent
+          penaltyEndTimestamp
+          rewards(first: 100, orderBy: timestamp, orderDirection: desc) {
+            id eventType amount sender beneficiary
+            endCommitment penaltyPercent endPenalty
+            transactionHash blockNumber timestamp
+          }
+        }
+      }
+    `, { id: providerId.toLowerCase() });
+    return data?.stakingProvider || null;
+  } catch (e) {
+    console.warn('Error fetching provider rewards:', e);
+    return null;
+  }
 };
 
 export const getTimeout = async () => {
-  if (Const.DEFAULT_NETWORK === Const.NETWORK_TESTNET) return 0;
+  if (!networkConfig.coordinator) return null;
 
-  const web3 = new Web3(Const.RPC_ETH_POLYGON);
-  const coordinator = "0xE74259e3dafe30bAA8700238e324b47aC98FE755";
-  const contractAbi = [
-    {
-      type: "function",
-      name: "timeout",
-      stateMutability: "view",
-      inputs: [],
-      outputs: [
-          {
-              name: "",
-              type: "uint32",
-              internalType: "uint32"
-          }
-      ]
-  },
-  ];
+  // Use cache to prevent multiple calls
+  return web3Cache.get('coordinator-timeout', async () => {
+    const web3 = getWeb3Instance();
+    const coordinator = networkConfig.coordinator;
+    const contractAbi = [
+      {
+        type: "function",
+        name: "timeout",
+        stateMutability: "view",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "uint32",
+                internalType: "uint32"
+            }
+        ]
+    },
+    ];
 
-  const contract = new web3.eth.Contract(contractAbi, coordinator);
-  const timeout = await contract.methods
-    .timeout()
-    .call();
-  return timeout;
+    const contract = new web3.eth.Contract(contractAbi, coordinator);
+    const timeout = await contract.methods
+      .timeout()
+      .call();
+    return timeout;
+  }, 300000); // Cache for 5 minutes
 };
 
-export const getTotalMerkleDropReward = async (address) => {
+// ─── All Reward Events (network-wide) ──────────────────────────────────────
+export const getAllRewardEvents = async () => {
   try {
-    if (Const.DEFAULT_NETWORK === Const.NETWORK_TESTNET) return 0;
-
-    let tags = await (
-      await fetch(
-        `https://api.github.com/repos/threshold-network/token-dashboard/tags`
-      )
-    ).json();
-    const latestTag = tags[0].name;
-    const rewardsJsonUrl = `https://raw.githubusercontent.com/threshold-network/token-dashboard/${latestTag}/src/merkle-drop/rewards.json`;
-    const data = await (await fetch(rewardsJsonUrl)).json();
-    if (data != undefined && data.claims != undefined) {
-      const key = Object.keys(data.claims).find(
-        (k) => k.toLowerCase() === address.toLowerCase()
-      );
-      const amount = data.claims[key].amount;
-      if (amount === undefined || amount === 0) return 0;
-      return parseFloat(formatGwei(amount)).toFixed(1);
-    }
+    const query = `query {
+      rewardEvents(first: 1000, orderBy: timestamp, orderDirection: desc) {
+        id
+        stakingProvider { id }
+        eventType
+        amount
+        sender
+        beneficiary
+        endCommitment
+        penaltyPercent
+        endPenalty
+        contract
+        distributor
+        transactionHash
+        blockNumber
+        timestamp
+      }
+    }`;
+    const data = await gqlFetch(SUBGRAPH_ETHEREUM, query);
+    return (data?.rewardEvents || []).map(e => ({
+      ...e,
+      stakingProvider: e.stakingProvider?.id || null,
+      timestamp: parseInt(e.timestamp) * 1000,
+      blockNumber: parseInt(e.blockNumber),
+      amount: e.amount || '0',
+    }));
   } catch (e) {
-    console.log("get merkle drop reward error " + e.toString());
+    console.warn('Error fetching reward events:', e);
+    return [];
   }
-  return 0;
+};
+
+// ─── Reward Distributions (from taco-rewards GitHub) ───────────────────────
+const DISTRIBUTION_DATES = ['2025-10-01', '2025-11-01', '2025-12-01', '2026-01-01', '2026-02-01'];
+const DISTRIBUTIONS_BASE_URL = 'https://raw.githubusercontent.com/nucypher/taco-rewards/main/distributions';
+
+export const getRewardDistributions = async () => {
+  try {
+    const results = await Promise.all(
+      DISTRIBUTION_DATES.map(async (date) => {
+        const resp = await fetch(`${DISTRIBUTIONS_BASE_URL}/${date}.json`);
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        return { date, ...data };
+      })
+    );
+    return results.filter(Boolean);
+  } catch (e) {
+    console.warn('Error fetching reward distributions:', e);
+    return [];
+  }
+};
+
+// ─── All Infractions (network-wide) ────────────────────────────────────────
+export const getAllInfractions = async () => {
+  try {
+    const query = `query {
+      infractions(first: 1000, orderBy: timestamp, orderDirection: desc) {
+        id
+        domain
+        ritual { id }
+        stakingProvider { id }
+        infractionType
+        infractionTypeName
+        timestamp
+      }
+    }`;
+    const [ethData, polyData] = await Promise.all([
+      safeFetch(SUBGRAPH_ETHEREUM, query, 'Ethereum'),
+      safeFetch(SUBGRAPH_POLYGON, query, 'Polygon'),
+    ]);
+    const format = (items, chain) => (items || []).map(i => ({
+      ...i,
+      chain,
+      stakingProvider: i.stakingProvider?.id || null,
+      ritualId: i.ritual?.id || null,
+      timestamp: parseInt(i.timestamp) * 1000,
+    }));
+    return [
+      ...format(ethData.infractions, 'ethereum'),
+      ...format(polyData.infractions, 'polygon'),
+    ].sort((a, b) => b.timestamp - a.timestamp);
+  } catch (e) {
+    console.warn('Error fetching infractions:', e);
+    return [];
+  }
+};
+
+// ─── Recent Bridge Activity (for dashboard) ────────────────────────────────
+export const getRecentBridgeActivity = async () => {
+  const BRIDGE_QUERY = `query {
+    bridgeMessages(first: 15, orderBy: timestamp, orderDirection: desc) {
+      id domain messageType stakingProvider transactionHash blockNumber timestamp
+    }
+  }`;
+  const OPS_QUERY = `query {
+    opExecutions(first: 15, orderBy: timestamp, orderDirection: desc) {
+      id domain target result transactionHash blockNumber timestamp gasUsed
+    }
+    contractAuthorizations(first: 10, orderBy: createdAt, orderDirection: desc) {
+      id domain contract isAuthorized createdAt
+    }
+  }`;
+  try {
+    const [ethData, polyData, baseData] = await Promise.all([
+      gqlFetch(SUBGRAPH_ETHEREUM, BRIDGE_QUERY).catch(() => ({})),
+      gqlFetch(SUBGRAPH_POLYGON, BRIDGE_QUERY).catch(() => ({})),
+      gqlFetch(SUBGRAPH_BASE, OPS_QUERY).catch(() => ({})),
+    ]);
+    const messages = [
+      ...(ethData.bridgeMessages || []).map(m => ({ ...m, chain: 'ethereum' })),
+      ...(polyData.bridgeMessages || []).map(m => ({ ...m, chain: 'polygon' })),
+    ].sort((a, b) => parseInt(b.timestamp) - parseInt(a.timestamp)).slice(0, 15);
+    return {
+      bridgeMessages: messages,
+      opExecutions: baseData.opExecutions || [],
+      contractAuthorizations: baseData.contractAuthorizations || [],
+    };
+  } catch (e) {
+    console.warn('Error fetching bridge activity:', e);
+    return { bridgeMessages: [], opExecutions: [], contractAuthorizations: [] };
+  }
+};
+
+// ─── Op Executions by Domain ───────────────────────────────────────────────
+export const getOpExecutionsByDomain = async (domain) => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_BASE, `
+      query GetOpExecutions($domain: Int!) {
+        opExecutions(where: { domain: $domain }, first: 200, orderBy: timestamp, orderDirection: desc) {
+          id domain target result
+          transactionHash blockNumber timestamp gasUsed
+        }
+      }
+    `, { domain: parseInt(domain) });
+    return data?.opExecutions || [];
+  } catch (e) {
+    console.warn('Error fetching op executions by domain:', e);
+    return [];
+  }
+};
+
+// Get all ritual IDs that have access controls set (= live/paid rituals, not heartbeats)
+export const getLiveRitualIds = async () => {
+  try {
+    const data = await gqlFetch(SUBGRAPH_POLYGON, `
+      query { ritualAccessControls(first: 1000) { ritualId } }
+    `);
+    const ids = new Set((data?.ritualAccessControls || []).map(r => String(r.ritualId)));
+    console.log(`🔑 Found ${ids.size} live ritual IDs with access controls`);
+    return ids;
+  } catch (e) {
+    console.warn('Error fetching live ritual IDs:', e);
+    return new Set();
+  }
 };
