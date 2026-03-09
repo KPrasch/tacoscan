@@ -1,27 +1,28 @@
 import React, { useMemo } from "react";
 import { useTable } from "react-table";
+import { Link as RouterLink } from "react-router-dom";
 import Loader from "../loader";
 import styles from "./styles.module.css";
-import { ReactComponent as Copy } from "../../assets/copy.svg";
-import Tooltip from "@mui/material/Tooltip";
+import CopyButton from "../CopyButton";
 import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Paper from "@mui/material/Paper";
-import Link from "@mui/material/Link";
 import * as Data from "../../pages/data";
 import * as Utils from "../../utils/utils";
-import CheckSharpIcon from "@mui/icons-material/CheckSharp";
-import CloseSharpIcon from "@mui/icons-material/CloseSharp";
+import {
+  Tooltip,
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  Paper,
+  Link
+} from "../ui";
 
-export const StakerTable = ({ columns, data, isLoading, network }) => {
+export const NodesTable = ({ columns, data, isLoading, network }) => {
   const columnData = useMemo(() => columns, [columns]);
   const rowData = useMemo(() => data, [data]);
 
@@ -147,31 +148,34 @@ export const StakerTable = ({ columns, data, isLoading, network }) => {
           className={open ? styles.rowSeleted : null}
         >
           <TableCell align="left">
-            <Link
-              underline="hover"
-              href={Utils.getDomain() + "?staker=" + row.id}
-              className={styles.link}
-            >
-              {Data.formatString(row.id)}
-            </Link>
-            <Tooltip title="Copied">
-              <Copy
-                style={{ cursor: "pointer" }}
-                onClick={(e) => copyToClipBoard(row.id)}
-              />
-            </Tooltip>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <RouterLink
+                to={`/node/${row.id}`}
+                className={styles.link}
+              >
+                {Data.formatString(row.id)}
+              </RouterLink>
+              {row.isBetaStaker && (
+                <span className="badge badgeData">
+                  DATA
+                </span>
+              )}
+              <Tooltip title="Copied">
+                <CopyButton
+                  onClick={(e) => copyToClipBoard(row.id)}
+                />
+              </Tooltip>
+            </div>
           </TableCell>
           <TableCell align="left">
-            <Link
-              underline="hover"
-              href={Utils.getDomain() + "?staker=" + row.id}
+            <RouterLink
+              to={`/node/${row.id}`}
               className={styles.link}
             >
               {Data.formatString(row.registeredOperatorAddress)}
-            </Link>
+            </RouterLink>
             <Tooltip title="Copied">
-              <Copy
-                style={{ cursor: "pointer" }}
+              <CopyButton
                 onClick={(e) => copyToClipBoard(row.registeredOperatorAddress)}
               />
             </Tooltip>
@@ -186,19 +190,28 @@ export const StakerTable = ({ columns, data, isLoading, network }) => {
               {Data.formatWeiDecimal(row.stakedAmount)}
             </span>
           </TableCell>
-          <TableCell align="left">
+          <TableCell align="left" style={{ textAlign: "center", fontSize: "11px", color: "var(--text-secondary)" }}>
             {row.isOperatorConfirmed === true ? (
               <Tooltip title={"operator address is registered"}>
-                <CheckSharpIcon style={{ color: "green" }} />
+                <span style={{ color: "var(--status-active)", fontWeight: "600" }}>YES</span>
               </Tooltip>
             ) : (
               <Tooltip title={"operator address is not registered"}>
-                <CloseSharpIcon style={{ color: "red" }} />
+                <span style={{ color: "var(--status-slashed)", fontWeight: "600" }}>NO</span>
               </Tooltip>
             )}
           </TableCell>
           <TableCell align="left">
             {row.bondedAt ? Data.formatTimeToText(row.bondedAt) : "-"}
+          </TableCell>
+          <TableCell align="left">
+            <span className={`badge ${
+              row.nodeStatus === 'Slashed' ? 'badgeSlashed' :
+              row.nodeStatus === 'Penalized' ? 'badgePenalized' :
+              row.nodeStatus === 'Released' ? 'badgeReleased' : 'badgeActive'
+            }`}>
+              {row.nodeStatus || 'Active'}
+            </span>
           </TableCell>
         </TableRow>
       </React.Fragment>
@@ -216,7 +229,7 @@ export const StakerTable = ({ columns, data, isLoading, network }) => {
               <TableContainer>
                 <Table
                   className={styles.table}
-                  sx={{ minWidth: 750 }}
+                  style={{ minWidth: 750 }}
                   aria-labelledby="tableTitle"
                   size={"small"}
                 >
@@ -241,7 +254,7 @@ export const StakerTable = ({ columns, data, isLoading, network }) => {
                           height: 35 * emptyRows,
                         }}
                       >
-                        <TableCell colSpan={6} />
+                        <TableCell colSpan={7} />
                       </TableRow>
                     )}
                   </TableBody>
@@ -274,4 +287,4 @@ export const StakerTable = ({ columns, data, isLoading, network }) => {
   );
 };
 
-export default StakerTable;
+export default NodesTable;

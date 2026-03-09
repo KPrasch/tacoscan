@@ -1,514 +1,364 @@
-::-webkit-scrollbar {
-    width: 0; /* Remove scrollbar space */
-    background: transparent; /* Optional: just make scrollbar invisible */
-}
-
-/* Optional: show position indicator in red */
-::-webkit-scrollbar-thumb {
-}
-
-.top_banner {
-    justify-content: center;
-    display: flex;
-    align-items: center;
-    position: relative;
-    -webkit-box-align: center;
-    width: 100%;
-    padding-inline-start: 1rem;
-    padding-top: 0.5rem;
-    background: #7C47EE;
-}
-
-.top_banner p, a {
-    color: white;
-    font-weight: bold;
-    padding-top: 5px;
-}
-
-.top_banner a {
-    text-decoration: underline !important;
-    text-decoration: none;
-}
-
-
 .table_content {
-    box-shadow: rgb(20 20 20 / 20%) 0px 4px 8px;
+    background: var(--color-primary-bg, #ffffff);
+    border: 1px solid var(--color-border-default, #e5e7eb);
+    box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.08));
     box-sizing: border-box;
     text-indent: initial;
     border-spacing: 2px;
-    border-color: grey;
     text-align: center;
-    background: rgb(255, 255, 255);
-    border-radius: 4px;
+    color: var(--color-primary-text, #0a0a0a);
+    border-radius: 0.75rem;
     margin-top: 10px;
-}
-
-.logo_header {
-    float: left;
-    width: fit-content;
-}
-
-.logo_header svg {
-    width: 250px;
-
-}
-
-@media (max-width: 940px) {
-    .logo_header svg {
-        width: 200px;
-    }
-
-}
-
-@media (max-width: 870px) {
-    .logo_header svg {
-        width: 150px;
-    }
-}
-
-.search {
-    margin-right: 20px;
-    width: 20%;
-    min-width: 200px;
-}
-
-.search_button {
-    position: absolute;
-    right: 4px;
-    top: 4px;
-    background-color: #c00;
-    border-radius: 50%;
-    border: 0;
-    color: #fff;
-    width: 35px;
-    height: 35px;
-    outline: 0;
-}
-
-.tab {
-    font-family: "Work Sans", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-.about {
-    margin-right: 20px;
-}
-
-.setting {
-    margin-top: 5px;
-}
-
-.network {
-    float: right;
-    margin-right: 50px;
-    height: 50px;
-}
-
-.network button {
-    top: 20%;
-    border-radius: 5px;
-    font-family: "Work Sans", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-.wallet {
-    float: right;
-    margin-right: 20px;
-    height: 50px;
-}
-
-.wallet button {
-    top: 20%;
-    border-radius: 15px;
-    font-family: "Work Sans", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-.wallet_address {
-    float: right;
-    margin-right: 5px;
-    display: grid;
-    place-items: center;
-    height: 50px;
-}
-
-.wallet_address span {
-    flex: 1 1 auto;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin: 0px 0.5rem 0px 0.25rem;
-    width: fit-content;
-    font-weight: 500;
 }
 
-.wallet_address button {
+/* ── Ritual table ────────────────────────────────────────────────────────── */
+.tableContainer {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.ritualTable {
+    width: 100%;
     border-collapse: collapse;
-    width: 100%;
-    background-color: #fff;
-    border-radius: 15px;
-    font-family: 'Work Sans', sans-serif;
-    -webkit-font-smoothing: antialiased;
+    font-family: var(--font-mono, 'Space Mono', monospace);
 }
 
-.wallet_token {
-    color: gray;
-    font-size: 0.9em;
+.ritualTable thead {
+    background: var(--bg-primary);
+    border-bottom: 2px solid var(--border-color);
 }
 
-.generate_token {
-    cursor: pointer;
-    font-size: 12px;
-    background-color: antiquewhite;
-    background-size: 20px 20px;
-    background-repeat: no-repeat;
-    background-position: 2px;
-    padding: 5px;
-    border-radius: 5px 5px 5px;
-    position: relative;
-}
-
-.about_content {
-    box-shadow: rgb(20 20 20 / 20%) 0px 4px 8px;
-    box-sizing: border-box;
-    text-indent: initial;
-    border-spacing: 2px;
-    border-color: grey;
-    padding: 50px;
+.ritualTable th {
+    padding: 6px 10px;
     text-align: left;
-    font-family: "Work Sans", sans-serif;
-}
-
-.about_content h3 {
-    font-weight: bold;
-}
-
-.ritual_header {
-    text-align: left;
-    padding-bottom: 10px;
-    margin-top: 20px;
-}
-
-.ritual_header h3 {
-    font-weight: bold;
-}
-
-.ritual_header span {
-    color: gray;
-    font-size: 1rem;
-}
-
-.link {
-    color: "#7850cd";
-    underline: none;
-    font-family: Helvetica Neue;
-}
-
-.div_bottom {
-    font-size: 0.875rem;
-    text-align: center;
-    margin-top: 100px;
-    width: 100%;
-}
-
-.div_bottom a {
-    color: blue;
-}
-
-
-.div_token {
-    /*display: grid;*/
-    /*place-items: center;*/
-    padding: 10px 16px;
-    display: flex;
-    flex-direction: column;
-    /*Remove when we need to add more data*/
-    align-items: center;
-}
-
-.div_token_info {
-    display: grid;
-    margin-bottom: 10px;
-    -webkit-box-align: start;
-    align-items: start;
-    gap: 10px;
-    grid-template-columns: 1fr;
-}
-
-@media only screen and (min-width: 960px) {
-    .div_token_info {
-        margin-bottom: 30px;
-        gap: 30px;
-        grid-template-columns: repeat(auto-fit, 380px);
-    }
-
-    .div_token_info_stats_item_data {
-        padding-left: 0px;
-    }
-
-    .div_token_info_supply {
-        grid-template-columns: repeat(auto-fit, 280px);
-        flex-direction: column;
-        align-items: flex-start;
-    }
-}
-
-.div_token_info_row {
-    display: flex;
-    flex-direction: row;
-    -webkit-box-align: center;
-    align-items: center;
-    padding: 20px;
-    background: rgb(255, 255, 255);
-    box-shadow: rgb(0 0 0 / 15%) 0px 1px 0px;
-    transition: background 0.5s ease 0s, box-shadow 0.5s ease 0s;
-    border-radius: 20px;
-}
-
-.div_token_info_logo {
-    display: flex;
-    -webkit-box-pack: center;
-    justify-content: center;
-    -webkit-box-align: center;
-    align-items: center;
-    width: 55px;
-    height: 55px;
-    border-radius: 12px;
-    background-color: rgb(10, 8, 6);
-    margin-right: 16px;
-}
-
-.div_token_info_supply {
-    display: flex;
-    flex: 1 1 0%;
-    -webkit-box-align: center;
-    align-items: center;
-    text-align: left;
-}
-
-.div_token_info_supply_data {
-    flex: 1 1 0%;
-    font-size: 30px;
-    letter-spacing: -1px;
-    color: rgb(0, 0, 0);
-}
-
-.div_token_info_supply_value {
-    display: inline;
-    margin-right: 4px;
-}
-
-.div_token_info_supply_sub_title {
-    display: inline;
-    font-size: 18px;
-}
-
-.div_token_info_supply_title {
-    flex: 1 1 0%;
-    font-weight: 500;
-    font-size: 14px;
-    color: rgb(140, 140, 140);
+    font-weight: 600;
+    color: var(--text-primary);
     text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
 }
 
-.div_token_info_column {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 20px;
-    background: rgb(255, 255, 255);
-    box-shadow: rgb(0 0 0 / 15%) 0px 1px 0px;
-    transition: background 0.5s ease 0s, box-shadow 0.5s ease 0s;
-    border-radius: 20px;
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s;
+    white-space: nowrap;
 }
 
-.div_token_info_stats_title {
-    font-size: 20px;
-    color: rgb(0, 0, 0);
-    font-weight: bold;
+.sortable:hover { color: var(--accent-green-hover); }
+
+.clickableRow {
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.15s;
 }
 
-.div_token_info_stats_sub_title {
-    font-size: 15px;
-    color: rgb(0, 0, 0);
-    margin-top: 10px;
-    font-weight: bold;
+.clickableRow:hover { background: var(--bg-primary); }
+.clickableRow:last-child { border-bottom: none; }
+
+.ritualTable td {
+    padding: 8px 10px;
+    color: var(--text-primary);
+    font-size: 12px;
+    vertical-align: middle;
 }
 
-.div_token_info_stats_item {
-    display: flex;
-    width: 100%;
-    height: 40px;
-    -webkit-box-align: center;
-    align-items: center;
-    border-bottom: 1px solid rgb(236, 236, 236);
+/* Cell variants */
+.ritualIdCell {
+    font-weight: 700;
+    color: var(--accent-green-hover);
+    font-size: 13px;
+    width: 60px;
+    white-space: nowrap;
 }
 
-.div_token_info_stats_item_title {
-    flex: 1 1 0%;
-    font-weight: 500;
-    font-size: 14px;
-    color: rgb(140, 140, 140);
-    padding-top: 1px;
+.addrCell {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+    min-height: 38px;
 }
 
-.div_token_info_stats_item_data {
-    flex: 1 1 0%;
-    font-weight: 500;
-    font-size: 18px;
-    color: rgb(0, 0, 0);
+/* Loading overlay for table — fades content instead of replacing */
+.tableLoading {
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
 }
 
-.div_token_info_stats_item_data_value {
-    display: inline;
-    margin-right: 2px;
-    font-size: 1rem;
+.numCell {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
 }
 
-.div_token_info_stats_item_data_value_address {
-    font-size: 0.87rem;
-    display: inline;
-    margin-right: 2px;
+.dimCell {
+    color: var(--text-tertiary);
+    font-size: 11px;
+    white-space: nowrap;
+    font-family: var(--font-mono);
 }
 
-.div_underlined {
-    display: inline;
-    font-size: 14px;
+.progressFull {
+    color: var(--accent-green-hover);
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 12px;
 }
 
-.staker_detail_header {
-    text-align: left;
-    padding-bottom: 10px;
-    display: flex;
+.progressPartial {
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 12px;
 }
 
-.staker_detail_header h3 a {
-    font-weight: bold;
-    color: rgb(10, 8, 6);
+.tableEmpty {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    font-size: 13px;
 }
 
-.staker_detail_header span {
-    color: gray;
-    font-size: 1rem;
-}
-
-.staker_detail_header_address {
-    display: flex;
-    flex-direction: column;
-    align-self: flex-start;
-    flex: 1 1 0%;
-}
-
-.staker_detail_header_address h3 {
-    font-weight: bold;
-}
-
-.staker_detail_header_value {
-    display: flex;
-    flex-direction: row;
-}
-
-.staker_detail_header_value_item {
-    font-size: 30px;
-    color: rgb(10, 8, 6);
-    font-feature-settings: "zero";
-    margin-right: 40px;
-}
-
-.staker_detail_header_value_item_lable {
-    font-size: 16px;
-}
-
-.staker_detail_header_value_item_lable_sub {
-    font-size: 14px;
-}
-
-.staker_detail_header_value_item_percent {
-    font-size: 20px;
-    color: gray;
-}
-
-.staker_detail {
-    box-shadow: rgb(20 20 20 / 20%) 0px 4px 8px;
-    box-sizing: border-box;
-    text-indent: initial;
-    border-spacing: 2px;
-    border-color: grey;
-    background: rgb(255, 255, 255);
+/* Status badges */
+.statusBadge {
+    display: inline-block;
+    padding: 2px 8px;
     border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    white-space: nowrap;
+    font-family: var(--font-mono);
 }
 
-.staker_detail_overview {
+.status_successful {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--accent-green-hover);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.status_active {
+    background: rgba(74, 222, 128, 0.12);
+    color: var(--status-active);
+    border-color: rgba(74, 222, 128, 0.35);
+}
+
+.status_awaiting {
+    background: rgba(91, 154, 213, 0.12);
+    color: #5b9bd5;
+    border-color: rgba(91, 154, 213, 0.35);
+}
+
+.status_expired {
+    background: rgba(212, 145, 90, 0.1);
+    color: #d4915a;
+    border-color: rgba(212, 145, 90, 0.3);
+}
+
+.status_timeout {
+    background: rgba(220, 38, 38, 0.08);
+    color: #dc2626;
+    border-color: rgba(220, 38, 38, 0.25);
+}
+
+.hbBadge {
+    display: inline-block;
+    background: rgba(107, 114, 128, 0.08);
+    color: var(--text-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+/* ── Row badges (fee model, access controller) ────────────────────────────── */
+.rowBadges {
     display: flex;
-    flex-direction: row;
+    gap: 4px;
+    margin-top: 3px;
+    flex-wrap: wrap;
+    min-height: 16px;
 }
 
-.staker_detail_overview_table {
-    color: rgb(10, 8, 6);
+.rowBadge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid currentColor;
+    text-transform: uppercase;
+    opacity: 0.85;
+    white-space: nowrap;
+    font-family: var(--font-mono);
 }
 
-.staker_detail_overview_table a {
-    color: #ae96e1;
-    font-size: 0.875rem;
+.badgeFee {
+    color: #d4915a;
 }
 
-.staker_detail_overview_table td, .staker_detail_overview_table th {
-    font-weight: normal;
-    padding: 5px;
-    text-align: left;
-    vertical-align: top;
-    font-size: 1rem;
+.badgeAc {
+    color: #5b9bd5;
 }
 
-.staker_detail_overview_table td {
-    padding-left: 60px;
+.badgeSlots {
+    color: #10b981;
+}
+
+/* ── Heartbeat heatmap ────────────────────────────────────────────────────── */
+.heatmapSection {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+}
+
+.heatmapHeader {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
 }
 
-.staker_detail_overview_table tbody.staker_detail_overview_table_tbody th:first-child {
-    padding-left: 20px;
+.heatmapTitle {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--text-secondary);
 }
 
-.staker_detail_overview_table_td {
-    color: gray;
-    font-size: 0.8em;
-}
-
-.log_item:not(:last-child) {
-    margin-bottom: 20px;
-    border-bottom: 1px dotted silver;
-    padding-bottom: 20px;
-}
-
-.log_item_lable {
-    font-size: 0.875em;
-    margin-bottom: 0.4em;
-    color: gray;
-}
-
-.beacon_groups_table {
+.heatmapSvgWrap {
     width: 100%;
-    margin-top: 20px;
+    overflow: hidden;
 }
 
-.beacon_groups_table th {
+.heatmapLegend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: var(--text-tertiary);
+}
+
+.legendRight {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    margin-left: 4px;
+}
+
+/* ── Heartbeat groups table ───────────────────────────────────────────────── */
+.tableSection {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.tableHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-primary);
+}
+
+.tableInfo {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.activityTable {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.activityTable thead {
+    background: var(--bg-primary);
+}
+
+.activityTable th {
+    padding: 6px 10px;
     text-align: left;
-    font-size: 1.15rem;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
 }
 
-.beacon_groups_table td {
-    border-bottom: 1px solid rgb(245, 245, 245);
-    text-align: left;
-    min-width: 100px;
+.activityTable tbody tr {
+    border-bottom: 1px solid var(--border-light);
+    transition: background 0.2s ease;
 }
 
-.numbers {
-    font-family: Helvetica Neue;
+.activityTable tbody tr:hover {
+    background: var(--bg-primary);
 }
 
-.span_t_token {
-    font-size: 20px;
+.activityTable tbody tr:last-child {
+    border-bottom: none;
+}
+
+.activityTable td {
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--text-primary);
+    font-family: var(--font-mono, 'Space Mono', monospace);
+    vertical-align: middle;
+}
+
+.eventType {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    font-family: var(--font-mono);
+}
+
+.ritualLink {
+    color: var(--accent-green-hover);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.ritualLink:hover {
+    text-decoration: underline;
 }

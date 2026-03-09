@@ -2,55 +2,31 @@ import React, { useMemo } from "react";
 import { useTable } from "react-table";
 import Loader from "../loader";
 import styles from "./styles.module.css";
-import { ReactComponent as Copy } from "../../assets/copy.svg";
-import Tooltip from "@mui/material/Tooltip";
-import Button from "@mui/material/Button";
-import ReportOutlinedIcon from "@mui/icons-material/ReportOutlined";
+import CopyButton from "../CopyButton";
 import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Paper from "@mui/material/Paper";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import Collapse from "@mui/material/Collapse";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Link from "@mui/material/Link";
-import { ReactComponent as ShareLink } from "../../assets/link.svg";
+import {
+  Tooltip,
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  Paper,
+  Link
+} from "../ui";
+import { Link as RouterLink } from "react-router-dom";
 import * as Data from "../../pages/data";
-import * as Const from "../../utils/Cons";
 import * as Utils from "../../utils/utils";
-import {getColorByStatus} from "./view_utils"
-import TransactionTimeline from "./timeline";
+import { getColorByStatus } from "./view_utils";
 
 const formatAddresses = ({ addresses }) => {
-  if (addresses.length <= 3) {
-    return addresses.map((address, index) => (
-      <div key={index}>
-        <Link
-          underline="hover"
-          href={Utils.getDomain() + "?staker=" + address}
-          className={styles.link}
-        >
-          {Data.formatString(address)}
-        </Link>
-        <Copy
-          style={{ cursor: "pointer" }}
-          onClick={(e) => copyToClipBoard(address)}
-        />
-      </div>
-    ));
-  }
-
-  const displayedAddresses = addresses.slice(0, 3).map((address, index) => (
+  if (addresses.length === 0) return "-";
+  
+  return addresses.map((address, index) => (
     <div key={index}>
       <Link
         target="_blank"
@@ -58,23 +34,13 @@ const formatAddresses = ({ addresses }) => {
         href={Utils.getPolygonScanAddressLink() + address}
         className={styles.link}
       >
-        {Data.formatString(address)}
+        {address}
       </Link>
-      <Copy
-        style={{ cursor: "pointer" }}
+      <CopyButton
         onClick={(e) => copyToClipBoard(address)}
       />
     </div>
   ));
-
-  return (
-    <>
-      {displayedAddresses}
-      <Tooltip title={addresses.join(", ")}>
-        <span>more...</span>
-      </Tooltip>
-    </>
-  );
 };
 
 export const RitualTable = ({ columns, data, isLoading, network }) => {
@@ -130,23 +96,31 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
     return (
       <TableHead>
         <TableRow>
-          <TableCell />
           {columns.map((headCell) => (
             <TableCell
               className={styles.th}
               key={headCell.accessor}
               align={"left"}
               sortDirection={orderBy === headCell.accessor ? order : false}
+              style={{
+                fontWeight: 600,
+                fontSize: "0.75rem",
+                letterSpacing: "0.5px",
+                color: "#666",
+                padding: "6px 8px",
+                whiteSpace: "nowrap"
+              }}
             >
               {headCell.accessor == "id" ||
               headCell.accessor == "updateTime" ||
               headCell.accessor == "totalPostedAggregations" ||
-              headCell.accessor == "totalTranscripts" ||
+              headCell.accessor == "totalPostedTranscripts" ||
               headCell.accessor == "totalParticipants" ||
               headCell.accessor == "status" ? (
                 <TableSortLabel
                   direction={orderBy === headCell.accessor ? order : "desc"}
                   onClick={createSortHandler(headCell.accessor)}
+                  style={{ fontWeight: 600 }}
                 >
                   {headCell.header}
                 </TableSortLabel>
@@ -194,182 +168,70 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
 
   function Row(props) {
     const { row } = props;
-    const [open, setOpen] = React.useState(false);
+
     return (
-      <React.Fragment>
-        <TableRow
-          hover
-          tabIndex={-1}
-          key={row.name}
-          className={open ? styles.rowSeleted : null}
-          onClick={() => setOpen(!open)}
-        >
-          <TableCell className={styles.td_selected}>
-            <IconButton
-              aria-label="expand row"
-              size="small"
-              onClick={() => setOpen(!open)}
-            >
-              {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-            </IconButton>
-          </TableCell>
-          <TableCell align="left" style={{ width: "10%" }}>
+      <TableRow
+        hover
+        tabIndex={-1}
+        key={row.name}
+        style={{ cursor: 'pointer' }}
+        onClick={() => window.location.href = `/rituals/${row.id}`}
+      >
+        <TableCell align="left" style={{ padding: "8px" }}>
+          <RouterLink
+            to={`/rituals/${row.id}`}
+            className={styles.link}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <span className={styles.numbers}>{row.id}</span>
-          </TableCell>
-          <TableCell align="left" style={{ width: "10%" }}>
-            <Tooltip title={Data.formatDate(row.updateTime)}>
-              <span>{Data.calculateTimeMoment(row.updateTime)}</span>
-            </Tooltip>
-          </TableCell>
-          <TableCell align="left">
-            <Link
-              underline="hover"
-              href={Utils.getDomain() + "?user=" + row.authority}
-              className={styles.link}
-            >
-              {Data.formatString(row.authority)}
-            </Link>
-            <Tooltip title="Copied">
-              <Copy
-                style={{ cursor: "pointer" }}
-                onClick={(e) => copyToClipBoard(row.authority)}
-              />
-            </Tooltip>
-          </TableCell>
-          <TableCell align="left">
-            <span className={styles.numbers} >{row.totalParticipants}</span>
-          </TableCell>
-          <TableCell align="left">
-            <span className={styles.numbers} >{row.totalPostedTranscripts}</span>
-          </TableCell>
-          <TableCell align="left">
-            <span className={styles.numbers}>{row.totalPostedAggregations}</span>
-          </TableCell>
-          <TableCell align="left" sx={{ color:getColorByStatus(row.status) }}>
-            {row.status}
-          </TableCell>
-        </TableRow>
-        <TableRow className={styles.container_detail}>
-          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
-            <Collapse in={open} timeout="auto" unmountOnExit>
-              <Box sx={{ margin: 1 }}>
-                <div className={styles.detail_item}>
-                  <div style={{ flex: "1 1 0%" }}>
-                    <TransactionTimeline
-                      className={styles.timeline}
-                      transactions={row.transactions}
-                      network={network}
-                    />
-                  </div>
-                  <div style={{ flex: "1 1 0%" }}>
-                    <TableContainer className={styles.timeline}>
-                      <Table
-                        className={styles.table_detail}
-                        sx={{ minWidth: 750 }}
-                        aria-labelledby="tableTitle"
-                        size={"small"}
-                      >
-                        <TableBody>
-                          <TableRow>
-                            <TableCell>DKG Id</TableCell>
-                            <TableCell>
-                              {row.id}
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Public key</TableCell>
-                            <TableCell>
-                              {Data.formatString(row.publicKey)}
-                              <Copy
-                                style={{ cursor: "pointer" }}
-                                onClick={(e) => copyToClipBoard(row.publicKey)}
-                              />
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Threshold</TableCell>
-                            <TableCell>
-                              {row.threshold}
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>DKG Size</TableCell>
-                            <TableCell>
-                              {row.dkgSize}
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Initiator</TableCell>
-                            <TableCell>
-                              <Link
-                                target="_blank"
-                                underline="hover"
-                                href={Utils.getPolygonScanAddressLink() + row.initiator}
-                                className={styles.link}
-                              >
-                                {Data.formatString(row.initiator)}
-                                <ShareLink />
-                              </Link>
-                              <Copy
-                                style={{ cursor: "pointer" }}
-                                onClick={(e) => copyToClipBoard(row.initiator)}
-                              />
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell style={{ verticalAlign: "top" }}>Participants</TableCell>
-                            <TableCell>{
-                              row.participants.length == 0 
-                                ? "-" 
-                                : formatAddresses({addresses: row.participants})
-                              }</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell style={{ verticalAlign: "top" }}>Transcripts</TableCell>
-                            <TableCell>{
-                              row.transcripts.length == 0 
-                                ? "-" 
-                                : formatAddresses({addresses: row.transcripts})
-                              }</TableCell>
-                          </TableRow>
-                          {row.pendingTranscripts.length > 0 &&
-                            <TableRow>
-                              <TableCell style={{ verticalAlign: "top" }}>Pending Transcripts</TableCell>
-                              <TableCell>
-                                {
-                                  formatAddresses({addresses: row.pendingTranscripts})
-                                }
-                              </TableCell>
-                            </TableRow>
-                          }
-                          <TableRow>
-                            <TableCell style={{ verticalAlign: "top" }}>Aggregations</TableCell>
-                            <TableCell>{
-                              row.aggregations.length == 0 
-                                ? "-" 
-                                : formatAddresses({addresses: row.aggregations})
-                              }</TableCell>
-                          </TableRow>
-                          {row.pendingAggregations.length > 0 &&
-                            <TableRow>
-                              <TableCell style={{ verticalAlign: "top" }}>Pending Aggregations</TableCell>
-                              <TableCell>
-                                {
-                                  formatAddresses({addresses: row.pendingAggregations})
-                                }
-                              </TableCell>
-                            </TableRow>
-                          }
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </div>
-                </div>
-              </Box>
-            </Collapse>
-          </TableCell>
-        </TableRow>
-      </React.Fragment>
+            {row.isHeartbeat && (
+              <span style={{
+                background: 'rgba(107, 114, 128, 0.1)',
+                color: 'var(--text-secondary)',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontSize: '11px',
+                fontWeight: 500,
+                fontFamily: 'var(--font-mono)',
+                letterSpacing: '0.025em'
+              }}>
+                Heartbeat
+              </span>
+            )}
+          </RouterLink>
+        </TableCell>
+        <TableCell align="left" style={{ padding: "8px", whiteSpace: "nowrap" }}>
+          <Tooltip title={Data.formatDate(row.updateTime)}>
+            <span>{Data.calculateTimeMoment(row.updateTime)}</span>
+          </Tooltip>
+        </TableCell>
+        <TableCell align="left" style={{ padding: "8px" }}>
+          <Link
+            underline="hover"
+            href={Utils.getDomain() + "?user=" + row.authority}
+            className={styles.link}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {Data.formatString(row.authority)}
+          </Link>
+          <Tooltip title="Copied">
+            <CopyButton onClick={(e) => { e.stopPropagation(); copyToClipBoard(row.authority); }} />
+          </Tooltip>
+        </TableCell>
+        <TableCell align="left" style={{ padding: "8px" }}>
+          <span className={styles.numbers}>{row.totalParticipants}</span>
+        </TableCell>
+        <TableCell align="left" style={{ padding: "8px" }}>
+          <span className={styles.numbers}>{row.totalPostedTranscripts}</span>
+        </TableCell>
+        <TableCell align="left" style={{ padding: "8px" }}>
+          <span className={styles.numbers}>{row.totalPostedAggregations}</span>
+        </TableCell>
+        <TableCell align="left" style={{ color: getColorByStatus(row.status), padding: "8px" }}>
+          {row.status}
+        </TableCell>
+      </TableRow>
     );
   }
 
@@ -384,7 +246,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
               <TableContainer>
                 <Table
                   className={styles.table}
-                  sx={{ minWidth: 750 }}
+                  style={{ minWidth: 750 }}
                   aria-labelledby="tableTitle"
                   size={"small"}
                 >
@@ -409,7 +271,7 @@ export const RitualTable = ({ columns, data, isLoading, network }) => {
                           height: 35 * emptyRows,
                         }}
                       >
-                        <TableCell colSpan={8} />
+                        <TableCell colSpan={7} />
                       </TableRow>
                     )}
                   </TableBody>

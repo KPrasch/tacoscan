@@ -3,18 +3,18 @@ export function getColorByStatus(status) {
     status === "DKG AWAITING TRANSCRIPTS" ||
     status === "Start Ritual"
   ) {
-    return "#3498db";
+    return "#3B82F6"; // Blue for pending
   } else if (status === "DKG AWAITING AGGREGATIONS" || status === "Posted Transcripts") {
-    return "#f1c40f";
+    return "#96FF5E"; // TACo green for in-progress
   } else if (
     status === "SUCCESSFUL" || status === "Posted Aggregations"
   ) {
-    return "#2ecc71";
+    return "#10B981"; // Success green
   } else if (
     status === "UNSUCCESSFUL" 
   ) {
-    return "#f10f0f";
+    return "#EF4444"; // Error red
   } else {
-    return "#95a5a6";
+    return "#6B7280"; // Gray for default
   }
 }
