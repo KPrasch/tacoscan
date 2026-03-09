@@ -1,17 +1,79 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;700;900&family=Work+Sans:wght@400;500;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
 
-body {
-  margin: 0;
-  font-family: "Work Sans",sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: rgb(244, 244, 244);
-}
+/* Legacy color variables removed - using unified App.css variables */
+
+/* Body styling now controlled by App.css for consistency */
 
 button:focus {
-  outline: none;
+    outline: none;
 }
 
 code {
-  font-family: "Work Sans",sans-serif;
+    font-family: var(--font-mono);
+}
+
+/* Typography Scale */
+.headline {
+    font-family: var(--font-mono);
+    font-weight: 700;
+}
+
+/* Desktop sizes */
+@media (min-width: 1024px) {
+    .text-hero {
+        font-size: 5rem;
+        line-height: 4.8rem;
+        letter-spacing: -0.15rem;
+    }
+
+    .text-section {
+        font-size: 1.6rem;
+        line-height: 1.8rem;
+        letter-spacing: -0.03rem;
+    }
+
+    .text-body {
+        font-size: 0.938rem;
+        line-height: 1rem;
+    }
+}
+
+/* Mobile sizes */
+@media (max-width: 1023px) {
+    .text-hero {
+        font-size: 2.2rem;
+        line-height: 2.1rem;
+        letter-spacing: -0.02rem;
+    }
+
+    .text-section {
+        font-size: 1.25rem;
+        line-height: 1.4rem;
+        letter-spacing: -0.02rem;
+    }
+
+    .text-body {
+        font-size: 0.938rem;
+    }
+}
+
+/* Fade animations */
+.fade-element {
+    opacity: 0;
+    transform: translateY(50px);
+    transition:
+        opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-in {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* Highlight effect */
+.highlight {
+    color: var(--color-primary-accent);
+    transition: color 0.8s ease-in-out;
+    transition-delay: 0.4s;
 }

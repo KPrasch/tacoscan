@@ -1,0 +1,59 @@
+.iconButton {
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  padding: 8px;
+}
+
+.iconButton:hover:not(.disabled) {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.small {
+  padding: 4px;
+  font-size: 18px;
+}
+
+.medium {
+  padding: 8px;
+  font-size: 24px;
+}
+
+.large {
+  padding: 12px;
+  font-size: 28px;
+}
+
+.default {
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.primary {
+  color: var(--accent-green);
+}
+
+.primary:hover:not(.disabled) {
+  background-color: rgba(74, 222, 128, 0.04);
+}
+
+.secondary {
+  color: #ef4444;
+}
+
+.secondary:hover:not(.disabled) {
+  background-color: rgba(220, 0, 78, 0.04);
+}
+
+.inherit {
+  color: inherit;
+}
+
+.disabled {
+  color: rgba(0, 0, 0, 0.26);
+  cursor: not-allowed;
+}

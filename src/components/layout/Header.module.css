@@ -1,0 +1,274 @@
+.header {
+  width: 100%;
+  background: #0A0A0A;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid #1F1F1F;
+}
+
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.mainHeader {
+  padding: 10px 0;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logoSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logoLink:hover {
+  opacity: 0.9;
+}
+
+.logoText {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 700;
+  color: #E5E7EB;
+  letter-spacing: 0.15em;
+  margin-left: 10px;
+  line-height: 1;
+}
+
+.mainNav {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.navLink {
+  color: #9CA3AF;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.navLink:hover {
+  background: rgba(74, 222, 128, 0.1);
+  color: #FFFFFF;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 10px;
+  display: none;
+}
+
+.dropdown:hover::before {
+  display: block;
+}
+
+.dropdownArrow {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.dropdown:hover .dropdownArrow {
+  transform: rotate(180deg);
+}
+
+.dropdownContent {
+  display: none;
+  position: absolute;
+  background: #141414;
+  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  border: 1px solid #2A2A2A;
+  z-index: 1001;
+  top: calc(100% - 4px);
+  padding-top: 4px;
+}
+
+.dropdown:hover .dropdownContent {
+  display: block;
+}
+
+.dropdownContent a {
+  color: #9CA3AF;
+  padding: 8px 14px;
+  text-decoration: none;
+  display: block;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.dropdownContent a:first-child {
+  border-radius: 6px 6px 0 0;
+  padding-top: 8px;
+}
+
+.dropdownContent a:last-child {
+  border-radius: 0 0 6px 6px;
+  padding-bottom: 8px;
+}
+
+.dropdownContent a:hover {
+  background: rgba(74, 222, 128, 0.1);
+  color: #FFFFFF;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.connectButton {
+  background: #FFFFFF;
+  color: #0A0A0A;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 5px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.connectButton:hover {
+  background: #E5E7EB;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.searchSection {
+  background: #0A0A0A;
+  padding: 12px 0;
+  border-top: 1px solid #1F1F1F;
+  border-bottom: 1px solid #1F1F1F;
+}
+
+.searchForm {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.searchBar.focused {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1);
+}
+
+.searchInput {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  font-size: 13px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  background: transparent;
+  color: #0A0A0A;
+}
+
+.searchInput:focus {
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: #9CA3AF;
+}
+
+.searchButton {
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid #E5E7EB;
+  cursor: pointer;
+  color: #6B7280;
+  transition: all 0.2s ease;
+}
+
+.searchButton:hover {
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--accent-green-hover);
+}
+
+.searchButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.searchHint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6B7280;
+  text-align: center;
+}
+
+.exampleLink {
+  color: var(--accent-green-hover);
+  text-decoration: none;
+  margin: 0 4px;
+}
+
+.exampleLink:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mainNav {
+    display: none;
+  }
+  
+  .headerContent {
+    padding: 12px 0;
+  }
+  
+  .logoText {
+    font-size: 22px;
+  }
+  
+  .searchSection {
+    padding: 16px 0;
+  }
+}

@@ -1,0 +1,172 @@
+/* ── Shimmer animation ───────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-tertiary) 25%,
+    var(--border-color) 50%,
+    var(--bg-tertiary) 75%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ── SkeletonRows ─────────────────────────────────────────────────────────── */
+.skRow td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.skRow:last-child td {
+  border-bottom: none;
+}
+
+/* ── PageSkeleton ─────────────────────────────────────────────────────────── */
+/* Self-contained — mirrors the detail page layout values */
+.page {
+  background: var(--bg-primary);
+  min-height: 100vh;
+  padding-bottom: 32px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px 20px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.headerMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.infoCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.cardTitle {
+  height: 10px;
+  width: 60px;
+  margin-bottom: 10px;
+}
+
+.kv {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.kv:last-child { border-bottom: none; }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.tabBody {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  padding: 12px;
+}
+
+/* ── ListSkeleton ─────────────────────────────────────────────────────────── */
+/* For early-return list pages */
+.listPage {
+  background: var(--bg-primary);
+  min-height: 100vh;
+  padding-bottom: 32px;
+}
+
+.listContainer {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 16px 20px;
+}
+
+.listHeader {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.listHeaderLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.listHeaderStats {
+  display: flex;
+  gap: 24px;
+}
+
+.statBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tableWrap {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.tableHead {
+  background: var(--bg-primary);
+  border-bottom: 2px solid var(--border-color);
+  display: flex;
+  gap: 0;
+}
+
+.tableHeadCell {
+  flex: 1;
+  padding: 8px 10px;
+}
+
+@media (max-width: 900px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+}

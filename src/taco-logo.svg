@@ -1,0 +1,31 @@
+<svg width="250" height="65" viewBox="0 0 250 65" xmlns="http://www.w3.org/2000/svg">
+  <!-- TACo Official Logo -->
+  <g transform="scale(1.5)">
+    <g clip-path="url(#clip0_taco)">
+      <path d="M1.34594 3.43201H0V24.568H1.34594V3.43201Z" fill="currentColor"/>
+      <path d="M28.0073 3.43201H26.6614V24.568H28.0073V3.43201Z" fill="currentColor"/>
+      <path d="M54.673 3.43201H53.327V24.568H54.673V3.43201Z" fill="currentColor"/>
+      <path d="M81.3344 3.43201H79.9884V24.568H81.3344V3.43201Z" fill="currentColor"/>
+      <path d="M108 3.43201H106.654V24.568H108V3.43201Z" fill="currentColor"/>
+      <path d="M24.5771 0H3.43447V1.34498H24.5771V0Z" fill="currentColor"/>
+      <path d="M51.2385 0H30.0959V1.34498H51.2385V0Z" fill="currentColor"/>
+      <path d="M77.9041 0H56.7615V1.34498H77.9041V0Z" fill="currentColor"/>
+      <path d="M104.566 0H83.4229V1.34498H104.566V0Z" fill="currentColor"/>
+      <path d="M24.5771 26.655H3.43447V28H24.5771V26.655Z" fill="currentColor"/>
+      <path d="M51.2385 26.655H30.0959V28H51.2385V26.655Z" fill="currentColor"/>
+      <path d="M77.9041 26.655H56.7615V28H77.9041V26.655Z" fill="currentColor"/>
+      <path d="M104.566 26.655H83.4229V28H104.566V26.655Z" fill="currentColor"/>
+    </g>
+    <defs>
+      <clipPath id="clip0_taco">
+        <rect width="108" height="28" fill="white"/>
+      </clipPath>
+    </defs>
+  </g>
+  
+  <!-- TACo Text -->
+  <text x="13" y="35" font-family="monospace" font-size="20" font-weight="600" fill="currentColor" letter-spacing="14">TACo</text>
+  
+  <!-- Scan Text -->
+  <text x="180" y="35" font-family="Arial, sans-serif" font-size="24" font-weight="normal" fill="#666">Scan</text>
+</svg>

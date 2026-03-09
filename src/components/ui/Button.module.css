@@ -1,0 +1,145 @@
+/* TACo Style Guide - Light Theme Button Styles */
+.button {
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-weight: 500;
+  border: none;
+  border-radius: 0.75rem; /* rounded-xl */
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.button:hover:not(.disabled) {
+  transition: all 0.3s ease;
+}
+
+.button:active:not(.disabled) {
+  transform: scale(0.98);
+}
+
+.small {
+  padding: 2px 8px;
+  font-size: 11px;
+}
+
+.medium {
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+.large {
+  padding: 7px 16px;
+  font-size: 13px;
+}
+
+/* Primary button style - lime green background */
+.contained {
+  background-color: #0A0A0A;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.contained:hover:not(.disabled) {
+  background-color: #222222;
+}
+
+.contained:active:not(.disabled) {
+  background-color: #222222;
+}
+
+.contained.primary {
+  background-color: #0A0A0A;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.contained.primary:hover:not(.disabled) {
+  background-color: #222222;
+}
+
+.contained.primary:active:not(.disabled) {
+  background-color: #222222;
+}
+
+/* Secondary button style - light gray background */
+.contained.secondary {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.contained.secondary:hover:not(.disabled) {
+  background-color: #E5E7EB;
+  border: 1px solid #4ADE80;
+}
+
+/* Outlined/Ghost button style */
+.outlined {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.outlined:hover:not(.disabled) {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--accent-green);
+}
+
+.outlined.primary {
+  border-color: var(--accent-green);
+  color: var(--text-primary);
+}
+
+.outlined.primary:hover:not(.disabled) {
+  background-color: rgba(74, 222, 128, 0.1);
+  border-color: #7ACC47;
+}
+
+.outlined.secondary {
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+.outlined.secondary:hover:not(.disabled) {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Text button style */
+.text {
+  background-color: transparent;
+  color: var(--text-secondary);
+  padding: 6px 8px;
+}
+
+.text:hover:not(.disabled) {
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+}
+
+/* Disabled state */
+.disabled {
+  background-color: var(--bg-tertiary) !important;
+  color: #909090 !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+  border-color: var(--border-color) !important;
+}
+
+.startIcon,
+.endIcon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.startIcon {
+  margin-right: 8px;
+}
+
+.endIcon {
+  margin-left: 8px;
+}

@@ -1,0 +1,50 @@
+.alert {
+  padding: 12px 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.message {
+  flex: 1;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 16px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.closeButton:hover {
+  opacity: 1;
+}
+
+.info {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+}
+
+.success {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+}
+
+.warning {
+  background-color: var(--bg-surface)3e0;
+  color: #e65100;
+}
+
+.error {
+  background-color: #ffebee;
+  color: #b71c1c;
+}
